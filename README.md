@@ -1,42 +1,17 @@
-# Javacord Utilities
+# Javacord Utilities [![Build Status](https://travis-ci.com/burdoto/javacord-utilities.svg?branch=master)](https://travis-ci.com/burdoto/javacord-utilities) [![Maven Central Release](https://maven-badges.herokuapp.com/maven-central/de.kaleidox/javacord-utilities/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.kaleidox/javacord-utilities) [![Development Release](https://jitpack.io/v/burdoto/javacord-utilities.svg)](https://jitpack.io/#burdoto/javacord-utilities)
+#### Please note that this is a third party project and not officially created by the Javacord team.
+Helpful classes and structures for Javacord
 
-This is a library used together with Javacord, providing lots of potentially useful extra objects and helper classes!
-[![](https://jitpack.io/v/Kaleidox00/JavacordBotUtilities.svg)](https://jitpack.io/#Kaleidox00/JavacordBotUtilities)
 
-## How to use:
-### Maven:
-```xml
-	<repositories>
-		<repository>
-		    <id>jitpack.io</id>
-		    <url>https://jitpack.io</url>
-		</repository>
-	</repositories>
-	<dependency>
-	    <groupId>com.github.Kaleidox00</groupId>
-	    <artifactId>JavacordBotUtilities</artifactId>
-	    <version>master-SNAPSHOT</version>
-	</dependency>
-```
-
-### Gradle:
+## Importing
+### Gradle
+For importing this project using Gradle, you need to add the following to your `build.gradle`:
 ```groovy
-	allprojects {
-		repositories {
-			...
-			maven { url 'https://jitpack.io' }
-		}
-	}
-	dependencies {
-	        implementation 'com.github.Kaleidox00:JavacordBotUtilities:master-SNAPSHOT'
-	}
-```
+repositories {
+    maven { url 'https://jitpack.io' }
+}
 
-### Using the library:
-Currently the library requires you to register a DiscordAPI using the following method:
-```java
-Registerer.initUtils(api)
+dependencies {
+    implementation 'com.github.burdoto:javacord-utilities:4be0fb56f5'
+}
 ```
-
-## MultiShardHelper
-The class [MultiShardHelper.java](https://kaleidox00.github.io/JavacordBotUtilities/de/kaleidox/util/MultiShardHelper.html) and [MultiShardBuilder.java](https://kaleidox00.github.io/JavacordBotUtilities/de/kaleidox/util/MultiShardBuilder.html) can be treated like Javacord's default `DiscordApiBuilder` and `DiscordApi`, as the `MultiShardHelper` implements the `DiscordApi` object.
