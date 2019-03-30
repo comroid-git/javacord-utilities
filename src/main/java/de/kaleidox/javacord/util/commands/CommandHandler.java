@@ -10,11 +10,12 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
+import de.kaleidox.javacord.util.embed.DefaultEmbedFactory;
+import de.kaleidox.javacord.util.server.properties.PropertyGroup;
 import de.kaleidox.javacord.util.ui.messages.InformationMessage;
 import de.kaleidox.javacord.util.ui.messages.PagedEmbed;
 import de.kaleidox.javacord.util.ui.messages.PagedMessage;
 import de.kaleidox.javacord.util.ui.messages.RefreshableMessage;
-import de.kaleidox.javacord.util.embed.DefaultEmbedFactory;
 
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.channel.Channel;
@@ -28,6 +29,7 @@ import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.event.message.MessageDeleteEvent;
 import org.javacord.api.event.message.MessageEditEvent;
 import org.javacord.api.util.logging.ExceptionLogger;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public final class CommandHandler {
@@ -38,12 +40,16 @@ public final class CommandHandler {
     public String[] prefixes;
     public boolean autoDeleteResponseOnCommandDeletion;
     private Supplier<EmbedBuilder> embedSupplier = null;
+    @Nullable private PropertyGroup customPrefixProperty;
+    private boolean exclusiveCustomPrefix;
 
     public CommandHandler(DiscordApi api) {
         this.api = api;
 
         prefixes = new String[]{"!"};
         autoDeleteResponseOnCommandDeletion = true;
+        customPrefixProperty = null;
+        exclusiveCustomPrefix = false;
 
         api.addMessageCreateListener(this::handleMessageCreate);
         api.addMessageEditListener(this::handleMessageEdit);
@@ -61,6 +67,11 @@ public final class CommandHandler {
     public void useDefaultHelp(@Nullable Supplier<EmbedBuilder> embedSupplier) {
         this.embedSupplier = (embedSupplier == null ? DefaultEmbedFactory.INSTANCE : embedSupplier);
         registerCommands(this);
+    }
+
+    public void useCustomPrefixes(@NotNull PropertyGroup propertyGroup, boolean exclusiveCustomPrefix) {
+        this.customPrefixProperty = propertyGroup;
+        this.exclusiveCustomPrefix = exclusiveCustomPrefix;
     }
 
     public void registerCommands(Object register) {
@@ -166,18 +177,34 @@ public final class CommandHandler {
         String content = message.getContent();
         int usedPrefix = -1;
 
-        switch (prefixes.length) {
-            case 1:
-                if (content.indexOf(prefixes[0]) == 0)
-                    usedPrefix = 0;
-                break;
-            default:
+        if (!message.isPrivateMessage() && customPrefixProperty != null) {
+            Server server = message.getServer().get();
+            if (exclusiveCustomPrefix) {
+                if (content.indexOf(customPrefixProperty.getValue(server.getId()).asString()) == 0)
+                    usedPrefix = Integer.MAX_VALUE;
+            } else {
+                String[] pref = new String[prefixes.length + 1];
+                System.arraycopy(prefixes, 0, pref, 0, prefixes.length);
+                pref[pref.length - 1] = customPrefixProperty.getValue(server.getId()).asString();
+
                 for (int i = 0; i < prefixes.length; i++)
                     if (content.indexOf(prefixes[i]) == 0)
                         usedPrefix = i;
-                break;
-            case 0:
-                return;
+            }
+        } else {
+            switch (prefixes.length) {
+                case 1:
+                    if (content.indexOf(prefixes[0]) == 0)
+                        usedPrefix = 0;
+                    break;
+                default:
+                    for (int i = 0; i < prefixes.length; i++)
+                        if (content.indexOf(prefixes[i]) == 0)
+                            usedPrefix = i;
+                    break;
+                case 0:
+                    return;
+            }
         }
 
         if (usedPrefix == -1) return;
