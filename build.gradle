@@ -1,0 +1,51 @@
+buildscript {
+    repositories.gradlePluginPortal()
+    dependencies.classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.20.0"
+}
+
+apply plugin: 'java-library'
+apply plugin: 'groovy'
+
+group 'de.kaleidox'
+version '2.0.0-SNAPSHOT'
+
+apply from: 'gradle/vars.gradle'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+task wrapper(type: Wrapper) {
+  gradleVersion = '4.10.2'
+  distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allJava
+    classifier = "sources"
+}
+
+task javadocJar(type: Jar) {
+    javadoc
+    from javadoc.destinationDir
+    classifier = "javadoc"
+}
+
+compileJava.options.encoding = 'UTF-8'
+javadoc.options.encoding = 'UTF-8'
+repositories.jcenter()
+
+dependencies {
+    implementation 'de.kaleidox:kalutils:0.4.1'
+    compileOnly 'org.javacord:javacord:3.0.+'
+    compileOnly 'org.jetbrains:annotations:17.0.0'
+
+    testImplementation 'junit:junit:4.12'
+    testCompile 'org.codehaus.groovy:groovy-all:2.4.14'
+}
+
+sourceSets {
+    main.java.srcDirs = ["src\\main\\java"]
+    test.groovy.srcDirs = ["src\\test\\groovy"]
+}
+
+apply from: 'gradle/publishing.gradle'
