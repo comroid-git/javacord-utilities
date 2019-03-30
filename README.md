@@ -12,6 +12,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.burdoto:javacord-utilities:4be0fb56f5'
+    // NOTE: This exact line imports the latest available commit, which might not work correctly.
+    implementation 'com.github.burdoto:javacord-utilities:master-SNAPSHOT'
 }
 ```
