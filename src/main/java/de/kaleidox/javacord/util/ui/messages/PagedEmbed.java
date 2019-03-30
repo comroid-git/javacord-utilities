@@ -1,4 +1,4 @@
-package de.kaleidox.javacord.util.discord.messages;
+package de.kaleidox.javacord.util.ui.messages;
 
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.Messageable;
@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
-import de.kaleidox.javacord.util.discord.EmbedFieldRepresentative;
+import de.kaleidox.javacord.util.embed.EmbedFieldRepresentative;
 import de.kaleidox.javacord.util.embed.DefaultEmbedFactory;
 
 public class PagedEmbed {

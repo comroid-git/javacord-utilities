@@ -1,4 +1,4 @@
-package de.kaleidox.javacord.util.discord.util;
+package de.kaleidox.javacord.util.ui.util;
 
 import com.vdurmont.emoji.EmojiParser;
 import org.javacord.api.entity.message.Message;

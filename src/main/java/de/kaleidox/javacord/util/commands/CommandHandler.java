@@ -10,10 +10,10 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
-import de.kaleidox.javacord.util.discord.messages.InformationMessage;
-import de.kaleidox.javacord.util.discord.messages.PagedEmbed;
-import de.kaleidox.javacord.util.discord.messages.PagedMessage;
-import de.kaleidox.javacord.util.discord.messages.RefreshableMessage;
+import de.kaleidox.javacord.util.ui.messages.InformationMessage;
+import de.kaleidox.javacord.util.ui.messages.PagedEmbed;
+import de.kaleidox.javacord.util.ui.messages.PagedMessage;
+import de.kaleidox.javacord.util.ui.messages.RefreshableMessage;
 import de.kaleidox.javacord.util.embed.DefaultEmbedFactory;
 
 import org.javacord.api.DiscordApi;

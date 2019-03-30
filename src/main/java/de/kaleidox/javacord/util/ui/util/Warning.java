@@ -1,4 +1,4 @@
-package de.kaleidox.javacord.util.discord.util;
+package de.kaleidox.javacord.util.ui.util;
 
 import org.javacord.api.entity.message.Messageable;
 import org.javacord.api.entity.message.embed.EmbedBuilder;

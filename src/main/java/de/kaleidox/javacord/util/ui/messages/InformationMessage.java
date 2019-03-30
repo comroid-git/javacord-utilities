@@ -1,4 +1,4 @@
-package de.kaleidox.javacord.util.discord.messages;
+package de.kaleidox.javacord.util.ui.messages;
 
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.Messageable;
@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
-import de.kaleidox.javacord.util.discord.EmbedFieldRepresentative;
+import de.kaleidox.javacord.util.embed.EmbedFieldRepresentative;
 import de.kaleidox.util.helpers.ListHelper;
 
 @SuppressWarnings("WeakerAccess")

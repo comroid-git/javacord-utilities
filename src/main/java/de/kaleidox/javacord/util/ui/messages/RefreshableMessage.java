@@ -1,4 +1,4 @@
-package de.kaleidox.javacord.util.discord.messages;
+package de.kaleidox.javacord.util.ui.messages;
 
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.Messageable;

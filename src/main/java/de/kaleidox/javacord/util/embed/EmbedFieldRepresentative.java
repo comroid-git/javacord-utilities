@@ -1,4 +1,4 @@
-package de.kaleidox.javacord.util.discord;
+package de.kaleidox.javacord.util.embed;
 
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.message.embed.EmbedField;
