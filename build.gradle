@@ -30,8 +30,13 @@ task javadocJar(type: Jar) {
     classifier = "javadoc"
 }
 
+javadoc {
+    source = sourceSets.main.java
+    options.encoding = 'UTF-8'
+    options.destinationDirectory(file("./docs/"))
+}
+
 compileJava.options.encoding = 'UTF-8'
-javadoc.options.encoding = 'UTF-8'
 repositories.jcenter()
 
 dependencies {
