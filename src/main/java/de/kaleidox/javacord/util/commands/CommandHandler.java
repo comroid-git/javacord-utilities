@@ -197,6 +197,16 @@ public final class CommandHandler {
         if (commandRep == null) return;
         commandParams.args = args;
 
+        if (!message.getUserAuthor() // get the user author
+                .map(usr -> message.getChannel() // get the message channel
+                        .asServerTextChannel()   // as servertextchannel
+                        .map(stc -> commandRep.annotation.requiredDiscordPermission() // get required permission for cmd
+                                .isSet(stc.getEffectivePermissions(usr) // is set in effective channel permissions
+                                        .getAllowedBitmask())) // bitmask
+                        .orElse(true)) // if channel != servertextchannel, private channel -> allow
+                .orElse(false)) // if author != user -> deny
+            return;
+
         Object reply;
         try {
             Class<?>[] parameterTypes = commandRep.method.getParameterTypes();
