@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 import de.kaleidox.javacord.util.discord.EmbedFieldRepresentative;
+import de.kaleidox.javacord.util.embed.DefaultEmbedFactory;
 
 public class PagedEmbed {
     private final Messageable messageable;
@@ -24,6 +25,15 @@ public class PagedEmbed {
     private List<Field> fields = new ArrayList<>();
     private int page;
     private AtomicReference<Message> sentMessage = new AtomicReference<>();
+
+    /**
+     * Creates a new PagedEmbed object.
+     *  @param messageable   The Messageable in which the embed should be sent.
+     *
+     */
+    public PagedEmbed(Messageable messageable) {
+        this(messageable, DefaultEmbedFactory.INSTANCE);
+    }
 
     /**
      * Creates a new PagedEmbed object.

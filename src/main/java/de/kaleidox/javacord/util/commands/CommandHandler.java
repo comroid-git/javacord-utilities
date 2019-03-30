@@ -14,6 +14,7 @@ import de.kaleidox.javacord.util.discord.messages.InformationMessage;
 import de.kaleidox.javacord.util.discord.messages.PagedEmbed;
 import de.kaleidox.javacord.util.discord.messages.PagedMessage;
 import de.kaleidox.javacord.util.discord.messages.RefreshableMessage;
+import de.kaleidox.javacord.util.embed.DefaultEmbedFactory;
 
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.channel.Channel;
@@ -57,8 +58,8 @@ public final class CommandHandler {
         return reps;
     }
 
-    public void useDefaultHelp(Supplier<EmbedBuilder> embedSupplier) {
-        this.embedSupplier = embedSupplier;
+    public void useDefaultHelp(@Nullable Supplier<EmbedBuilder> embedSupplier) {
+        this.embedSupplier = (embedSupplier == null ? DefaultEmbedFactory.INSTANCE : embedSupplier);
         registerCommands(this);
     }
 
@@ -82,7 +83,7 @@ public final class CommandHandler {
 
             return embed;
         } else if (param.getArguments().length >= 1) {
-            EmbedBuilder embed = embedSupplier.get().removeAllFields();
+            EmbedBuilder embed = embedSupplier.get();
 
             Optional<Command> command = getCommands().stream()
                     .map(rep -> rep.annotation)
