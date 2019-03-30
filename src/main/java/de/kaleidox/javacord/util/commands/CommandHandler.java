@@ -131,8 +131,8 @@ public final class CommandHandler {
                 event.getServer().orElse(null),
                 event.getChannel(),
                 event.getMessage(),
-                event.getMessageAuthor(),
-                null);
+                event.getMessageAuthor()
+        );
 
         handleCommand(params.message, event.getChannel(), params);
     }
@@ -145,8 +145,8 @@ public final class CommandHandler {
                 event.getServer().orElse(null),
                 event.getChannel(),
                 event.getMessage().orElseGet(() -> event.requestMessage().join()),
-                event.getMessageAuthor().orElse(null),
-                null);
+                event.getMessageAuthor().orElse(null)
+        );
 
         handleCommand(params.message, event.getChannel(), params);
     }
@@ -187,11 +187,11 @@ public final class CommandHandler {
         String[] args;
         if (prefixes[usedPrefix].matches("^(.*\\s.*)+$")) {
             commandRep = commands.get(split[1]);
-            args = new String[split.length-2];
+            args = new String[split.length - 2];
             System.arraycopy(split, 2, args, 0, args.length);
         } else {
             commandRep = commands.get(split[0].substring(prefixes[usedPrefix].length()));
-            args = new String[split.length-1];
+            args = new String[split.length - 1];
             System.arraycopy(split, 1, args, 0, args.length);
         }
 
@@ -253,9 +253,9 @@ public final class CommandHandler {
     public class CommandRep {
         public final Method method;
         public final Command annotation;
-        public final Object invocationTarget;
+        @Nullable public final Object invocationTarget;
 
-        private CommandRep(Method method, Command annotation, Object invocationTarget) {
+        private CommandRep(Method method, Command annotation, @Nullable Object invocationTarget) {
             this.method = method;
             this.annotation = annotation;
             this.invocationTarget = invocationTarget;
@@ -274,12 +274,12 @@ public final class CommandHandler {
 
         private Params(
                 DiscordApi discord,
-                MessageCreateEvent createEvent,
-                MessageEditEvent editEvent, Server server,
+                @Nullable MessageCreateEvent createEvent,
+                @Nullable MessageEditEvent editEvent,
+                @Nullable Server server,
                 TextChannel textChannel,
                 Message message,
-                MessageAuthor author,
-                String[] args
+                @Nullable MessageAuthor author
         ) {
             this.discord = discord;
             this.createEvent = createEvent;
@@ -288,7 +288,6 @@ public final class CommandHandler {
             this.textChannel = textChannel;
             this.message = message;
             this.author = author;
-            this.args = args;
         }
 
         @Override
