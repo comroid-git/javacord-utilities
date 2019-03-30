@@ -82,14 +82,14 @@ public final class CommandHandler {
         else extractCommandRep(register, register.getClass().getMethods());
     }
 
-    @Command(aliases = "help")
+    @Command(aliases = "help", usage = "help [command]", description = "Shows a list of commands and what they do.")
     public Object defaultHelpCommand(Command.Parameters param) {
         if (param.getArguments().length == 0) {
             PagedEmbed embed = new PagedEmbed(param.getTextChannel(), embedSupplier);
 
             getCommands().forEach(commandRep -> {
                 Command cmd = commandRep.annotation;
-                embed.addField("__" + cmd.aliases()[0] + "__: _" + cmd.usage() + "_", cmd.description());
+                embed.addField("__" + cmd.aliases()[0] + "__: _" + prefixes[0] + cmd.usage() + "_", cmd.description());
             });
 
             return embed;
@@ -107,7 +107,7 @@ public final class CommandHandler {
 
             if (command.isPresent()) {
                 Command cmd = command.get();
-                embed.addField("__" + cmd.aliases()[0] + "__: _" + cmd.usage() + "_", cmd.description());
+                embed.addField("__" + cmd.aliases()[0] + "__: _" + prefixes[0] + cmd.usage() + "_", cmd.description());
             } else embed.addField(
                     "__Unknown Command__: _" + param.getArguments()[0] + "_",
                     "Type _\"" + prefixes[0] + "help\"_ for a list of commands."
