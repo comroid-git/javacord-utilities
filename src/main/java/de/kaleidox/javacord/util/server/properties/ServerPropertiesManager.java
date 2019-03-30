@@ -18,6 +18,7 @@ public final class ServerPropertiesManager implements Initializable, Terminatabl
     private final File propertiesFile;
 
     public ServerPropertiesManager(File propertiesFile) throws IOException {
+        if (!propertiesFile.exists()) propertiesFile.createNewFile();
         this.propertiesFile = propertiesFile;
 
         properties = new ConcurrentHashMap<>();
