@@ -1,9 +1,9 @@
 package de.kaleidox.javacord.util.ui.util;
 
+import java.util.concurrent.CompletableFuture;
+
 import org.javacord.api.entity.emoji.Emoji;
 import org.javacord.api.entity.message.Message;
-
-import java.util.concurrent.CompletableFuture;
 
 public class Wastebasket {
     public static void add(Message msg) {

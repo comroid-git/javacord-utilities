@@ -1,11 +1,5 @@
 package de.kaleidox.javacord.util.ui.messages;
 
-import org.javacord.api.entity.message.Message;
-import org.javacord.api.entity.message.Messageable;
-import org.javacord.api.entity.message.embed.EmbedBuilder;
-import org.javacord.api.event.message.reaction.SingleReactionEvent;
-import org.javacord.api.util.logging.ExceptionLogger;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -14,8 +8,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
-import de.kaleidox.javacord.util.embed.EmbedFieldRepresentative;
 import de.kaleidox.javacord.util.embed.DefaultEmbedFactory;
+import de.kaleidox.javacord.util.embed.EmbedFieldRepresentative;
+
+import org.javacord.api.entity.message.Message;
+import org.javacord.api.entity.message.Messageable;
+import org.javacord.api.entity.message.embed.EmbedBuilder;
+import org.javacord.api.event.message.reaction.SingleReactionEvent;
+import org.javacord.api.util.logging.ExceptionLogger;
 
 public class PagedEmbed {
     private final Messageable messageable;
@@ -28,8 +28,8 @@ public class PagedEmbed {
 
     /**
      * Creates a new PagedEmbed object.
-     *  @param messageable   The Messageable in which the embed should be sent.
      *
+     * @param messageable The Messageable in which the embed should be sent.
      */
     public PagedEmbed(Messageable messageable) {
         this(messageable, DefaultEmbedFactory.INSTANCE);
@@ -51,6 +51,7 @@ public class PagedEmbed {
      *
      * @param title The title of the field.
      * @param text  The text of the field.
+     *
      * @return The new, modified PagedEmbed object.
      */
     public PagedEmbed addField(String title, String text) {
@@ -63,6 +64,7 @@ public class PagedEmbed {
      * @param title  The title of the field.
      * @param text   The text of the field.
      * @param inline If the field should be inline.
+     *
      * @return The new, modified PageEmbed object.
      */
     public PagedEmbed addField(String title, String text, boolean inline) {
@@ -111,6 +113,14 @@ public class PagedEmbed {
         }).exceptionally(ExceptionLogger.get());
 
         return future;
+    }
+
+    public EmbedBuilder getRawEmbed() {
+        return embedsupplier.get();
+    }
+
+    public Supplier<EmbedBuilder> getEmbedsupplier() {
+        return embedsupplier;
     }
 
     /**
@@ -187,14 +197,6 @@ public class PagedEmbed {
                 }
             }
         });
-    }
-
-    public EmbedBuilder getRawEmbed() {
-        return embedsupplier.get();
-    }
-
-    public Supplier<EmbedBuilder> getEmbedsupplier() {
-        return embedsupplier;
     }
 
     /**

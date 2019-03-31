@@ -1,11 +1,5 @@
 package de.kaleidox.javacord.util.ui.messages;
 
-import org.javacord.api.entity.message.Message;
-import org.javacord.api.entity.message.Messageable;
-import org.javacord.api.entity.message.embed.EmbedBuilder;
-import org.javacord.api.util.logging.ExceptionLogger;
-import org.jetbrains.annotations.Nullable;
-
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,6 +7,12 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import de.kaleidox.javacord.util.embed.EmbedFieldRepresentative;
 import de.kaleidox.util.helpers.ListHelper;
+
+import org.javacord.api.entity.message.Message;
+import org.javacord.api.entity.message.Messageable;
+import org.javacord.api.entity.message.embed.EmbedBuilder;
+import org.javacord.api.util.logging.ExceptionLogger;
+import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("WeakerAccess")
 public class InformationMessage {
@@ -26,11 +26,6 @@ public class InformationMessage {
         this.messageable = messageable;
 
         selfMap.putIfAbsent(messageable, this);
-    }
-
-    @SuppressWarnings("FinalStaticMethod")
-    public final static InformationMessage get(Messageable messageable) {
-        return selfMap.getOrDefault(messageable, new InformationMessage(messageable));
     }
 
     public InformationMessage addField(String name, String title, String text) {
@@ -114,6 +109,11 @@ public class InformationMessage {
                     .thenAcceptAsync(msg -> myMessage.set(msg))
                     .exceptionally(ExceptionLogger.get());
         }
+    }
+
+    @SuppressWarnings("FinalStaticMethod")
+    public final static InformationMessage get(Messageable messageable) {
+        return selfMap.getOrDefault(messageable, new InformationMessage(messageable));
     }
 
     class InformationField extends EmbedFieldRepresentative {

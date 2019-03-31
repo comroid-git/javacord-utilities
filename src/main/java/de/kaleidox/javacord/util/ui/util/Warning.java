@@ -1,10 +1,10 @@
 package de.kaleidox.javacord.util.ui.util;
 
-import org.javacord.api.entity.message.Messageable;
-import org.javacord.api.entity.message.embed.EmbedBuilder;
-
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+
+import org.javacord.api.entity.message.Messageable;
+import org.javacord.api.entity.message.embed.EmbedBuilder;
 
 public class Warning {
     private static final ConcurrentHashMap<Messageable, Long> timeoutMap = new ConcurrentHashMap<>();

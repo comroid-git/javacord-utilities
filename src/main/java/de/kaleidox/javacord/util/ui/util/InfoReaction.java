@@ -1,5 +1,8 @@
 package de.kaleidox.javacord.util.ui.util;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
+
 import com.vdurmont.emoji.EmojiParser;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
@@ -7,9 +10,6 @@ import org.javacord.api.listener.message.MessageDeleteListener;
 import org.javacord.api.listener.message.reaction.ReactionAddListener;
 import org.javacord.api.listener.message.reaction.ReactionRemoveListener;
 import org.javacord.api.util.logging.ExceptionLogger;
-
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class InfoReaction {
     public static void add(Message message, String emojiTag, Boolean deleteAfterSend, EmbedBuilder infoEmbed) {

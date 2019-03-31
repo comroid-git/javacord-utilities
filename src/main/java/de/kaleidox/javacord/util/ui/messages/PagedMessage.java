@@ -1,9 +1,5 @@
 package de.kaleidox.javacord.util.ui.messages;
 
-import org.javacord.api.entity.message.Message;
-import org.javacord.api.entity.message.Messageable;
-import org.javacord.api.event.message.reaction.SingleReactionEvent;
-
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -13,6 +9,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
+
+import org.javacord.api.entity.message.Message;
+import org.javacord.api.entity.message.Messageable;
+import org.javacord.api.event.message.reaction.SingleReactionEvent;
 
 public class PagedMessage {
     private final static ConcurrentHashMap<Messageable, PagedMessage> selfMap = new ConcurrentHashMap<>();
@@ -35,51 +35,6 @@ public class PagedMessage {
         this.page = 0;
 
         resend();
-    }
-
-    public final static PagedMessage get(Messageable forParent, Supplier<String> defaultHead, Supplier<String> defaultBody) {
-        if (selfMap.containsKey(forParent)) {
-            PagedMessage val = selfMap.get(forParent);
-            val.resend();
-
-            return val;
-        } else {
-            return selfMap.put(forParent,
-                    new PagedMessage(
-                            forParent,
-                            defaultHead,
-                            defaultBody
-                    )
-            );
-        }
-    }
-
-    public final static Optional<PagedMessage> get(Messageable forParent) {
-        if (selfMap.containsKey(forParent)) {
-            PagedMessage val = selfMap.get(forParent);
-            val.resend();
-
-            return Optional.of(val);
-        } else return Optional.empty();
-    }
-
-    private void onPageClick(SingleReactionEvent event) {
-        if (!event.getUser().isYourself()) {
-            switch (event.getEmoji().asUnicodeEmoji().orElse("")) {
-                case PREV_PAGE_EMOJI:
-                    if (page > 0)
-                        page--;
-
-                    this.refreshPage();
-                    break;
-                case NEXT_PAGE_EMOJI:
-                    if (page < pages.size() - 1)
-                        page++;
-
-                    this.refreshPage();
-                    break;
-            }
-        }
     }
 
     public void refresh() {
@@ -114,6 +69,25 @@ public class PagedMessage {
             msg.addReaction(PREV_PAGE_EMOJI);
             msg.addReaction(NEXT_PAGE_EMOJI);
         });
+    }
+
+    private void onPageClick(SingleReactionEvent event) {
+        if (!event.getUser().isYourself()) {
+            switch (event.getEmoji().asUnicodeEmoji().orElse("")) {
+                case PREV_PAGE_EMOJI:
+                    if (page > 0)
+                        page--;
+
+                    this.refreshPage();
+                    break;
+                case NEXT_PAGE_EMOJI:
+                    if (page < pages.size() - 1)
+                        page++;
+
+                    this.refreshPage();
+                    break;
+            }
+        }
     }
 
     private String getPageContent() {
@@ -157,5 +131,31 @@ public class PagedMessage {
                 }
             }
         }
+    }
+
+    public final static PagedMessage get(Messageable forParent, Supplier<String> defaultHead, Supplier<String> defaultBody) {
+        if (selfMap.containsKey(forParent)) {
+            PagedMessage val = selfMap.get(forParent);
+            val.resend();
+
+            return val;
+        } else {
+            return selfMap.put(forParent,
+                    new PagedMessage(
+                            forParent,
+                            defaultHead,
+                            defaultBody
+                    )
+            );
+        }
+    }
+
+    public final static Optional<PagedMessage> get(Messageable forParent) {
+        if (selfMap.containsKey(forParent)) {
+            PagedMessage val = selfMap.get(forParent);
+            val.resend();
+
+            return Optional.of(val);
+        } else return Optional.empty();
     }
 }
