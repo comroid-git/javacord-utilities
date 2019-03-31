@@ -16,25 +16,31 @@ public class ServerPropertiesManagerTest {
 
     @Before
     public void setup() throws IOException {
-        manager = new ServerPropertiesManager(new File("props/serverProperties.sav"));
+        manager = new ServerPropertiesManager(new File("props/serverProperties.json"));
 
         manager.register("bot.traits", 419).setValue(100).toInt(420);
         manager.getProperty("bot.traits").getValue(200);
 
         manager.register("bot.name", "William").setValue(100).toString("Alfred");
         manager.getProperty("bot.name").getValue(200);
+
+        manager.register("bot.emoji", "\uD83C\uDF61").setValue(100).toString("\uD83D\uDD12");
+        manager.getProperty("bot.emoji").getValue(200);
     }
 
-    @Test
+    @Test(timeout = 3000)
     public void testSerialization() throws IOException {
         manager.storeData();
 
-        ServerPropertiesManager deserializer = new ServerPropertiesManager(new File("props/serverProperties.sav"));
+        ServerPropertiesManager deserializer = new ServerPropertiesManager(new File("props/serverProperties.json"));
 
         assertEquals(420, deserializer.getProperty("bot.traits").getValue(100).asInt());
         assertEquals(419, deserializer.getProperty("bot.traits").getValue(200).asInt());
 
         assertEquals("Alfred", deserializer.getProperty("bot.name").getValue(100).asString());
-        assertEquals("William", deserializer.getProperty("bot.name"). getValue(200).asString());
+        assertEquals("William", deserializer.getProperty("bot.name").getValue(200).asString());
+
+        assertEquals("\uD83D\uDD12", deserializer.getProperty("bot.emoji").getValue(100).asString());
+        assertEquals("\uD83C\uDF61", deserializer.getProperty("bot.emoji").getValue(200).asString());
     }
 }
