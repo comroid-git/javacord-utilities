@@ -41,6 +41,7 @@ repositories.jcenter()
 dependencies {
     implementation 'de.kaleidox:kalutils:0.4.1'
     implementation 'org.javacord:javacord:3.0.+'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.3'
     compileOnly 'org.jetbrains:annotations:17.0.0'
 
     testImplementation 'junit:junit:4.12'
