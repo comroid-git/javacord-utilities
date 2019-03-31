@@ -130,7 +130,9 @@ public final class CommandHandler {
                 throw new AbstractMethodError("Command annotated method cannot be abstract!");
 
             CommandRep commandRep = new CommandRep(method, annotation, invocationTarget);
-            for (String alias : annotation.aliases()) commands.put(alias, commandRep);
+            if (annotation.aliases().length > 0)
+                for (String alias : annotation.aliases()) commands.put(alias, commandRep);
+            else commands.put(method.getName(), commandRep);
         }
     }
 

@@ -28,7 +28,7 @@ public @interface Command {
      *
      * @return The aliases of the command.
      */
-    String[] aliases();
+    String[] aliases() default {};
 
     /**
      * Defines the description that is shown in the default help command.
