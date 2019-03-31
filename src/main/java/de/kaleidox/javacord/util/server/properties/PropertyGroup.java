@@ -4,6 +4,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import de.kaleidox.util.markers.Value;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import static de.kaleidox.util.helpers.JsonHelper.nodeOf;
+
 public final class PropertyGroup {
     private final String name;
     private final Object defaultValue;
@@ -36,19 +41,13 @@ public final class PropertyGroup {
     }
 
     // [id:"123";val:"abc";type:java.lang.String];[id:"234";val:"def";type:java.lang.Short]
-    void serialize(StringBuilder sb) {
-        values.forEach((id, value) -> sb.append("[id:\"")
-                .append(id)
-                .append("\";val:\"")
-                .append(value.asString()
-                        .replace("\\", "/")
-                        .replace(")", "#")
-                        .replace("]", "#")
-                        .replace("}", "#")
-                        .replace("\"", "\\\""))
-                .append("\";type:\"")
-                .append((value.getValue() != null ? value.getValue() : "").getClass().getName())
-                .append("\"];"));
-        sb.delete(sb.length(), sb.length());
+    void serialize(ArrayNode node) {
+        values.forEach((id, value) -> {
+            ObjectNode object = node.addObject();
+
+            object.set("id", nodeOf(id));
+            object.set("val", nodeOf(value.asString()));
+            object.set("type", nodeOf((value.getValue() != null ? value.getValue() : "").getClass().getName()));
+        });
     }
 }

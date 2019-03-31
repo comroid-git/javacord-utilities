@@ -10,8 +10,16 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import de.kaleidox.util.interfaces.Initializable;
 import de.kaleidox.util.interfaces.Terminatable;
+import de.kaleidox.util.markers.Value;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static de.kaleidox.util.helpers.JsonHelper.nodeOf;
+import static de.kaleidox.util.helpers.JsonHelper.objectNode;
 
 public final class ServerPropertiesManager implements Initializable, Terminatable {
     private final Map<String, PropertyGroup> properties;
@@ -61,155 +69,50 @@ public final class ServerPropertiesManager implements Initializable, Terminatabl
         storeData();
     }
 
-    // (name:"bot.pref";default:"xyz";items:{[id:"123";val:"abc";type:"java.lang.String"];[id:"234";val:"234";type:"java.lang.Short"]})
     public void storeData() throws IOException {
-        StringBuilder sb = new StringBuilder();
+        ObjectNode node = objectNode();
+        ArrayNode array = node.putArray("entries");
 
         properties.forEach((name, group) -> {
-            sb.append("(name:\"")
-                    .append(name
-                            .replace("\\", "/")
-                            .replace(")", "#")
-                            .replace("]", "#")
-                            .replace("}", "#")
-                            .replace("\"", "\\\""))
-                    .append("\";default:\"")
-                    .append(group.getDefaultValue()
-                            .toString()
-                            .replace("\\", "/")
-                            .replace(")", "#")
-                            .replace("]", "#")
-                            .replace("}", "#")
-                            .replace("\"", "\\\""))
-                    .append("\";items:{");
-            group.serialize(sb);
-            sb.append("});");
+            ObjectNode data = array.addObject();
+            data.set("name", nodeOf(name));
+            data.set("default", nodeOf(group.getDefaultValue().toString()));
+            group.serialize(data.putArray("items"));
         });
-        sb.delete(sb.length() - 1, sb.length());
-        byte[] encode = sb.toString().getBytes(UTF_8);
+
         if (propertiesFile.exists()) propertiesFile.delete();
         propertiesFile.createNewFile();
         FileOutputStream stream = new FileOutputStream(propertiesFile);
-        stream.write(encode);
+        stream.write(node.toString().getBytes(UTF_8));
         stream.close();
     }
 
-    // (name:"bot.pref";default:"xyz";items:{[id:"123";val:"abc";type:"java.lang.String"];[id:"234";val:"234";type:"java.lang.Short"]})
     private void readData() throws IOException {
-        FileInputStream stream = new FileInputStream(propertiesFile);
-        int r;
-        StringBuilder sb = new StringBuilder();
-        while ((r = stream.read()) != -1) sb.append((char) r);
-        char[] decode = sb.toString().toCharArray();
+        int c = 0;
+        JsonNode node = new ObjectMapper().readTree(new FileInputStream(propertiesFile));
 
-        r = 0;
-        sb = new StringBuilder();
-        char reading = '?';
-        String name = null, def = null, itemVal = null, itemType = null;
-        long itemId = -1;
-        while (r < decode.length) {
-            if (Character.isAlphabetic(decode[r])
-                    || Character.isDigit(decode[r])
-                    || decode[r] == '.'
-                    || decode[r] == '_'
-                    || decode[r] == '-')
-                sb.append(decode[r]);
-            else {
-                switch (sb.toString()) {
-                    case "name":
-                        name = null;
-                        reading = 'n';
-                        sb = new StringBuilder();
-                        break;
-                    case "default":
-                        def = null;
-                        reading = 'f';
-                        sb = new StringBuilder();
-                        break;
-                    case "items":
-                        reading = 'i';
-                        sb = new StringBuilder();
-                        break;
-                    case "id":
-                        itemId = -1;
-                        reading = 'd';
-                        sb = new StringBuilder();
-                        break;
-                    case "val":
-                        itemVal = null;
-                        reading = 'v';
-                        sb = new StringBuilder();
-                        break;
-                    case "type":
-                        itemType = null;
-                        reading = 't';
-                        sb = new StringBuilder();
-                        break;
-                    default:
-                        switch (reading) {
-                            case 'n': // name
-                                if (decode[r - 1] != '\\' && decode[r - 1] != ':' && decode[r] == '"') { // name ended
-                                    name = sb.toString();
-                                    sb = new StringBuilder();
-                                }
-                                break;
-                            case 'f': // default
-                                if (decode[r - 1] != '\\' && decode[r - 1] != ':' && decode[r] == '"') { // default ended
-                                    def = sb.toString();
-                                    sb = new StringBuilder();
-                                }
-                                break;
-                            case 'i': // array of items
-                                if (decode[r - 1] != '\\' && decode[r] == '}') { // array ended
-                                    sb = new StringBuilder();
-                                }
-                                break;
-                            case 'd': // item server id
-                                if (decode[r - 1] != '\\' && decode[r - 1] != ':' && decode[r] == '"') { // id ended
-                                    itemId = Long.parseLong(sb.toString());
-                                    sb = new StringBuilder();
-                                }
-                                break;
-                            case 'v': // item value
-                                if (decode[r - 1] != '\\' && decode[r - 1] != ':' && decode[r] == '"') { // value ended
-                                    itemVal = sb.toString();
-                                    sb = new StringBuilder();
-                                }
-                                break;
-                            case 't': // item type
-                                if (decode[r - 1] != '\\' && decode[r - 1] != ':' && decode[r] == '"') { // type ended
-                                    itemType = sb.toString();
-                                    sb = new StringBuilder();
-                                }
-                                break;
-                        }
+        if (node != null && node.size() != 0) {
+            for (JsonNode entry : node.get("entries")) {
+                PropertyGroup group = register(entry.get("name").asText(), entry.get("default").asText());
+
+                for (JsonNode item : entry.get("items")) {
+                    String typeVal = item.get("type").asText();
+                    try {
+                        Class<?> type = Class.forName(typeVal);
+                        Value.Setter setValue = group.setValue(item.get("id").asLong());
+                        String val = item.get("val").asText();
+
+                        if (type == String.class) setValue.toString(val);
+                        else setValue.toObject(type.getMethod("valueOf", String.class).invoke(null, val));
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        throw new AssertionError("Illegal structure for " + typeVal + "#valueOf", e);
+                    } catch (NoSuchMethodException e) {
+                        throw new AssertionError("Wrong class forName: " + typeVal + "; method valueOf not found", e);
+                    } catch (ClassNotFoundException e) {
+                        throw new AssertionError("Wrong class forName: " + typeVal + "; class not found", e);
+                    }
                 }
             }
-
-            if (name != null && def != null) {
-                register(name, def);
-                def = null;
-            }
-            if (name != null && itemId != -1 && itemVal != null && itemType != null) {
-                Object valueOf;
-                try {
-                    Class<?> forName = Class.forName(itemType);
-                    if (forName == String.class) valueOf = itemVal;
-                    else valueOf = forName.getMethod("valueOf", String.class).invoke(null, itemVal);
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    throw new AssertionError("Illegal structure for " + itemType + "#valueOf", e);
-                } catch (NoSuchMethodException e) {
-                    throw new AssertionError("Wrong class forName: " + itemType + "; method valueOf not found", e);
-                } catch (ClassNotFoundException e) {
-                    throw new AssertionError("Wrong class forName: " + itemType + "; class not found", e);
-                }
-                getProperty(name).setValue(itemId).toObject(valueOf);
-                itemId = -1;
-                itemVal = null;
-                itemType = null;
-            }
-
-            r++;
         }
     }
 }
