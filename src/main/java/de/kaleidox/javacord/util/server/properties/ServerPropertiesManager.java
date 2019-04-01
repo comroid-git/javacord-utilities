@@ -1,5 +1,6 @@
 package de.kaleidox.javacord.util.server.properties;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -7,7 +8,12 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
+import de.kaleidox.javacord.util.commands.Command;
+import de.kaleidox.javacord.util.commands.CommandHandler;
+import de.kaleidox.javacord.util.embed.DefaultEmbedFactory;
+import de.kaleidox.javacord.util.ui.messages.PagedEmbed;
 import de.kaleidox.util.interfaces.Initializable;
 import de.kaleidox.util.interfaces.Terminatable;
 import de.kaleidox.util.markers.Value;
@@ -16,6 +22,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.javacord.api.entity.message.MessageAuthor;
+import org.javacord.api.entity.message.embed.EmbedBuilder;
+import org.javacord.api.entity.server.Server;
+import org.javacord.api.entity.user.User;
 import org.jetbrains.annotations.Nullable;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -25,6 +35,7 @@ import static de.kaleidox.util.helpers.JsonHelper.objectNode;
 public final class ServerPropertiesManager implements Initializable, Terminatable {
     private final Map<String, PropertyGroup> properties;
     private final File propertiesFile;
+    private Supplier<EmbedBuilder> embedSupplier;
 
     public ServerPropertiesManager(File propertiesFile) throws IOException {
         if (!propertiesFile.exists()) propertiesFile.createNewFile();
@@ -65,6 +76,75 @@ public final class ServerPropertiesManager implements Initializable, Terminatabl
     @Nullable
     public PropertyGroup getProperty(String name) {
         return properties.get(name);
+    }
+
+    public void usePropertyCommand(
+            @Nullable Supplier<EmbedBuilder> embedSupplier,
+            CommandHandler commandHandler
+    ) {
+        this.embedSupplier = (embedSupplier == null ? DefaultEmbedFactory.INSTANCE : embedSupplier);
+
+        commandHandler.registerCommands(this);
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Command(aliases = "property",
+            usage = "property [<Property Name> [New Value]]",
+            description = "Change or read the value of properties",
+            enablePrivateChat = false)
+    public Object propertyCommand(Command.Parameters param) {
+        Server server = param.getServer().orElseThrow(AssertionError::new);
+        User user = param.getCommandExecutor().flatMap(MessageAuthor::asUser).orElse(null);
+        String[] args = param.getArguments();
+
+        if (user == null)
+            return null;
+
+        switch (args.length) {
+            case 0: // list all props
+                PagedEmbed pagedEmbed = new PagedEmbed(param.getTextChannel(), embedSupplier);
+
+                properties.forEach((propName, propGroup) -> pagedEmbed.addField(
+                        propGroup.getDisplayName(),
+                        "`" + propName + "` -> `" + propGroup.getValue(server).asString() + "`" +
+                                "\n\t" + propGroup.getDescription() +
+                                "\n")
+                );
+
+                return pagedEmbed;
+            case 1: // print one property value
+                PropertyGroup propertyGet = getProperty(args[0]);
+
+                if (propertyGet == null) return embedSupplier.get()
+                        .setColor(Color.RED)
+                        .setDescription("Unknown property: `" + args[0] + "`");
+
+                return embedSupplier.get()
+                        .addField(
+                                propertyGet.getDisplayName(),
+                                "`" + args[0] + "` -> `" + propertyGet.getValue(server).asString() + "`" +
+                                        "\n\t" + propertyGet.getDescription()
+                        );
+            case 2: // change one property
+                PropertyGroup propertySet = getProperty(args[0]);
+                Value value = propertySet.getValue(server);
+
+                if (propertySet == null) return embedSupplier.get()
+                        .setColor(Color.RED)
+                        .setDescription("Unknown property: `" + args[0] + "`");
+
+                value.setter().toString(args[1]);
+
+                return embedSupplier.get()
+                        .setDescription("Changed property `" + args[0] + "` to new value: `" + value.asString())
+                        .addField(
+                                propertySet.getDisplayName(),
+                                "`" + args[0] + "` -> `" + propertySet.getValue(server).asString() + "`" +
+                                        "\n\t" + propertySet.getDescription()
+                        );
+        }
+
+        throw new AssertionError();
     }
 
     @Override
