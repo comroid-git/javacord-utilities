@@ -12,7 +12,6 @@ public class Value {
         setter = new Setter();
     }
 
-    @Nullable
     public Object getValue() {
         return value;
     }
