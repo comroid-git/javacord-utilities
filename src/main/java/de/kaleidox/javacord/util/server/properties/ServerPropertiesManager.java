@@ -136,7 +136,7 @@ public final class ServerPropertiesManager implements Initializable, Terminatabl
                 value.setter().toString(args[1]);
 
                 return embedSupplier.get()
-                        .setDescription("Changed property `" + args[0] + "` to new value: `" + value.asString())
+                        .setDescription("Changed property `" + args[0] + "` to new value: `" + value.asString() + "`")
                         .addField(
                                 propertySet.getDisplayName(),
                                 "`" + args[0] + "` -> `" + propertySet.getValue(server).asString() + "`" +
