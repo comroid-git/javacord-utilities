@@ -103,7 +103,8 @@ public final class ServerPropertiesManager implements Initializable, Terminatabl
             case 0: // list all props
                 PagedEmbed pagedEmbed = new PagedEmbed(
                         param.getTextChannel(),
-                        () -> embedSupplier.get().setDescription("Set a property to `#default#` to revert it back to its default value.")
+                        () -> embedSupplier.get()
+                                .setDescription("Set a property to `#default#` to revert it back to its default value.")
                 );
 
                 properties.forEach((propName, propGroup) -> pagedEmbed.addField(
