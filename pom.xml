@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>de.kaleidox</groupId>
   <artifactId>javacord-utilities</artifactId>
-  <version>2.0.0-SNAPSHOT</version>
+  <version>0.1.0</version>
   <name>Javacord Utilities</name>
   <description>Helpful classes and structures for Javacord</description>
   <inceptionYear>2019</inceptionYear>
@@ -31,7 +31,7 @@
     <dependency>
       <groupId>org.javacord</groupId>
       <artifactId>javacord</artifactId>
-      <version>3.0.+</version>
+      <version>3.0.3</version>
       <scope>runtime</scope>
     </dependency>
     <dependency>
