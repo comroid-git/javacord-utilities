@@ -1,5 +1,6 @@
 package de.kaleidox.javacord.util.commands;
 
+import java.awt.Color;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -239,8 +240,13 @@ public final class CommandHandler {
                                 .isSet(stc.getEffectivePermissions(usr) // is set in effective channel permissions
                                         .getAllowedBitmask())) // bitmask
                         .orElse(true)) // if channel != servertextchannel, private channel -> allow
-                .orElse(false)) // if author != user -> deny
+                .orElse(false)) { // if author != user -> deny
+            channel.sendMessage(DefaultEmbedFactory.create()
+                    .setColor(Color.RED)
+                    .setDescription("You are missing the required permission: "
+                            + commandRep.annotation.requiredDiscordPermission().name()));
             return;
+        }
 
         Object reply;
         try {
