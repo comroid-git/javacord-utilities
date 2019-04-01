@@ -1,4 +1,6 @@
 de.kaleidox.javacord.util.commands
-de.kaleidox.javacord.util.discord
-de.kaleidox.javacord.util.discord.messages
-de.kaleidox.javacord.util.discord.util
+de.kaleidox.javacord.util.embed
+de.kaleidox.javacord.util.server.properties
+de.kaleidox.javacord.util.ui.messages
+de.kaleidox.util.interfaces
+de.kaleidox.util.markers
