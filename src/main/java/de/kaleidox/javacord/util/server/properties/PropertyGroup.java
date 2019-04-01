@@ -6,6 +6,7 @@ import de.kaleidox.util.markers.Value;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.javacord.api.entity.server.Server;
 
 import static de.kaleidox.util.helpers.JsonHelper.nodeOf;
 
@@ -29,8 +30,16 @@ public final class PropertyGroup {
         return defaultValue;
     }
 
+    public Value.Setter setValue(Server server) {
+        return setValue(server.getId());
+    }
+
     public Value.Setter setValue(long serverId) {
         return getValue(serverId).setter();
+    }
+
+    public Value getValue(Server server) {
+        return getValue(server.getId());
     }
 
     public Value getValue(long serverId) {
