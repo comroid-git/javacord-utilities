@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.javacord.api.entity.message.MessageAuthor;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
+import org.javacord.api.entity.permission.PermissionType;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
 import org.jetbrains.annotations.Nullable;
@@ -90,6 +91,7 @@ public final class ServerPropertiesManager implements Initializable, Terminatabl
     @Command(aliases = "property",
             usage = "property [<Property Name> [New Value]]",
             description = "Change or read the value of properties",
+            requiredDiscordPermission = PermissionType.MANAGE_SERVER,
             enablePrivateChat = false)
     public Object propertyCommand(Command.Parameters param) {
         Server server = param.getServer().orElseThrow(AssertionError::new);
