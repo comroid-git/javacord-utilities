@@ -6,8 +6,8 @@ public class Value {
     protected final Setter setter;
     protected Object value;
 
-        this.value = value;
     public Value(Object value) {
+        this.value = (value instanceof Value ? ((Value) value).getValue() : value);
 
         setter = new Setter();
     }
