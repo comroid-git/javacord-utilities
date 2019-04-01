@@ -102,7 +102,10 @@ public final class ServerPropertiesManager implements Initializable, Terminatabl
 
         switch (args.length) {
             case 0: // list all props
-                PagedEmbed pagedEmbed = new PagedEmbed(param.getTextChannel(), embedSupplier);
+                PagedEmbed pagedEmbed = new PagedEmbed(
+                        param.getTextChannel(),
+                        () -> embedSupplier.get().setDescription("Set a property to `#default#` to revert it back to its default value.")
+                );
 
                 properties.forEach((propName, propGroup) -> pagedEmbed.addField(
                         propGroup.getDisplayName(),
@@ -132,6 +135,9 @@ public final class ServerPropertiesManager implements Initializable, Terminatabl
                 if (propertySet == null) return embedSupplier.get()
                         .setColor(Color.RED)
                         .setDescription("Unknown property: `" + args[0] + "`");
+
+                if (args[1].equalsIgnoreCase("#default#"))
+                    args[1] = String.valueOf(propertySet.getDefaultValue());
 
                 value.setter().toString(args[1]);
 
