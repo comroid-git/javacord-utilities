@@ -14,12 +14,34 @@ public final class PropertyGroup {
     private final String name;
     private final Object defaultValue;
     private final ConcurrentHashMap<Long, Value> values;
+    private String displayName;
+    private String description;
 
-    public PropertyGroup(String name, Object defaultValue) {
+    public PropertyGroup(String name, Object defaultValue, String displayName, String description) {
         this.name = name;
         this.defaultValue = defaultValue;
+        this.displayName = displayName;
+        this.description = description;
 
         values = new ConcurrentHashMap<>();
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public PropertyGroup setDisplayName(String displayName) {
+        this.displayName = displayName;
+        return this;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public PropertyGroup setDescription(String description) {
+        this.description = description;
+        return this;
     }
 
     public String getName() {
