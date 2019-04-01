@@ -178,19 +178,20 @@ public final class CommandHandler {
     private void handleCommand(Message message, TextChannel channel, Params commandParams) {
         String content = message.getContent();
         int usedPrefix = -1;
+        String[] pref = null;
 
         if (!message.isPrivateMessage() && customPrefixProperty != null) {
-            Server server = message.getServer().get();
+            @SuppressWarnings("OptionalGetWithoutIsPresent") Server server = message.getServer().get();
             if (exclusiveCustomPrefix) {
                 if (content.indexOf(customPrefixProperty.getValue(server.getId()).asString()) == 0)
                     usedPrefix = Integer.MAX_VALUE;
             } else {
-                String[] pref = new String[prefixes.length + 1];
+                pref = new String[prefixes.length + 1];
                 System.arraycopy(prefixes, 0, pref, 0, prefixes.length);
                 pref[pref.length - 1] = customPrefixProperty.getValue(server.getId()).asString();
 
-                for (int i = 0; i < prefixes.length; i++)
-                    if (content.indexOf(prefixes[i]) == 0)
+                for (int i = 0; i < pref.length; i++)
+                    if (content.indexOf(pref[i]) == 0)
                         usedPrefix = i;
             }
         } else {
@@ -209,17 +210,18 @@ public final class CommandHandler {
             }
         }
 
-        if (usedPrefix == -1) return;
+        if (pref == null && usedPrefix < prefixes.length) pref = prefixes;
+        if (usedPrefix == -1 || pref == null) return;
 
         CommandRep commandRep;
         String[] split = content.split("[\\s&&[^\\n]]++");
         String[] args;
-        if (prefixes[usedPrefix].matches("^(.*\\s.*)+$")) {
+        if (pref[usedPrefix].matches("^(.*\\s.*)+$")) {
             commandRep = commands.get(split[1]);
             args = new String[split.length - 2];
             System.arraycopy(split, 2, args, 0, args.length);
         } else {
-            commandRep = commands.get(split[0].substring(prefixes[usedPrefix].length()));
+            commandRep = commands.get(split[0].substring(pref[usedPrefix].length()));
             args = new String[split.length - 1];
             System.arraycopy(split, 1, args, 0, args.length);
         }
