@@ -62,7 +62,7 @@ public final class ServerPropertiesManager implements Initializable, Terminatabl
     public PropertyGroup register(String name, Object defaultValue, String displayName, String description) {
         properties.compute(name, (k, v) -> {
             if (v == null) return new PropertyGroup(name, defaultValue, displayName, description);
-            else if (!v.getDefaultValue().equals(defaultValue) && name.equals(v.getName()))
+            else if (!v.getDefaultValue().getValue().equals(defaultValue) && name.equals(v.getName()))
                 v = new PropertyGroup(v.getName(), defaultValue, displayName, description);
             return v;
         });
@@ -137,7 +137,7 @@ public final class ServerPropertiesManager implements Initializable, Terminatabl
                         .setDescription("Unknown property: `" + args[0] + "`");
 
                 if (args[1].equalsIgnoreCase("#default#"))
-                    args[1] = String.valueOf(propertySet.getDefaultValue());
+                    args[1] = String.valueOf(propertySet.getDefaultValue().getValue());
 
                 value.setter().toString(args[1]);
 
@@ -170,7 +170,9 @@ public final class ServerPropertiesManager implements Initializable, Terminatabl
         properties.forEach((name, group) -> {
             ObjectNode data = array.addObject();
             data.set("name", nodeOf(name));
-            data.set("default", nodeOf(group.getDefaultValue().toString()));
+            data.set("default", nodeOf(group.getDefaultValue().asString()));
+            data.set("displayName", nodeOf(group.getDisplayName()));
+            data.set("description", nodeOf(group.getDescription()));
             group.serialize(data.putArray("items"));
         });
 
@@ -187,7 +189,12 @@ public final class ServerPropertiesManager implements Initializable, Terminatabl
 
         if (node != null && node.size() != 0) {
             for (JsonNode entry : node.get("entries")) {
-                PropertyGroup group = register(entry.get("name").asText(), entry.get("default").asText());
+                PropertyGroup group = register(
+                        entry.get("name").asText(),
+                        entry.get("default").asText(),
+                        entry.path("displayName").asText(entry.get("name").asText()),
+                        entry.path("description").asText("No description provided.")
+                );
 
                 for (JsonNode item : entry.get("items")) {
                     String typeVal = item.get("type").asText();

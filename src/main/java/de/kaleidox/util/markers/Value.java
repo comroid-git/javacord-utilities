@@ -61,7 +61,8 @@ public class Value {
     }
 
     public class Setter {
-        private Setter() {}
+        private Setter() {
+        }
 
         public void toObject(Object o) {
             value = o;

@@ -12,14 +12,14 @@ import static de.kaleidox.util.helpers.JsonHelper.nodeOf;
 
 public final class PropertyGroup {
     private final String name;
-    private final Object defaultValue;
+    private final Value defaultValue;
     private final ConcurrentHashMap<Long, Value> values;
     private String displayName;
     private String description;
 
     public PropertyGroup(String name, Object defaultValue, String displayName, String description) {
         this.name = name;
-        this.defaultValue = defaultValue;
+        this.defaultValue = new Value(defaultValue);
         this.displayName = displayName;
         this.description = description;
 
@@ -48,7 +48,7 @@ public final class PropertyGroup {
         return name;
     }
 
-    public Object getDefaultValue() {
+    public Value getDefaultValue() {
         return defaultValue;
     }
 
