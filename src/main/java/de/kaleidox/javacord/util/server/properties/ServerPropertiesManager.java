@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.jetbrains.annotations.Nullable;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static de.kaleidox.util.helpers.JsonHelper.nodeOf;
@@ -55,14 +56,15 @@ public final class ServerPropertiesManager implements Initializable, Terminatabl
             return v;
         });
 
-        return getProperty(name);
+        PropertyGroup property = getProperty(name);
+        assert property != null;
+
+        return property;
     }
 
+    @Nullable
     public PropertyGroup getProperty(String name) {
-        return properties.compute(name, (k, v) -> {
-            if (v == null) return register(name, name);
-            return v;
-        });
+        return properties.get(name);
     }
 
     @Override
