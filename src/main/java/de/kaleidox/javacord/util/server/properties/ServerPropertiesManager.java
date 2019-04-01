@@ -144,7 +144,7 @@ public final class ServerPropertiesManager implements Initializable, Terminatabl
                         );
         }
 
-        throw new AssertionError();
+        return null;
     }
 
     @Override
