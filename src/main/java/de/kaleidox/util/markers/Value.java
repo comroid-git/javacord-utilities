@@ -2,14 +2,12 @@ package de.kaleidox.util.markers;
 
 import java.util.Objects;
 
-import org.jetbrains.annotations.Nullable;
-
 public class Value {
-    @Nullable protected Object value;
     protected final Setter setter;
+    protected Object value;
 
-    public Value(@Nullable Object value) {
         this.value = value;
+    public Value(Object value) {
 
         setter = new Setter();
     }
