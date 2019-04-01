@@ -73,7 +73,6 @@ public final class ServerPropertiesManager implements Initializable, Terminatabl
         return property;
     }
 
-    @Nullable
     public PropertyGroup getProperty(String name) {
         return properties.get(name);
     }
