@@ -13,16 +13,16 @@ public enum DefaultEmbedFactory implements Supplier<EmbedBuilder> {
         this.embedSupplier = EmbedBuilder::new;
     }
 
+    @Override
+    public EmbedBuilder get() {
+        return embedSupplier.get().removeAllFields();
+    }
+
     public static void setEmbedSupplier(Supplier<EmbedBuilder> embedSupplier) {
         INSTANCE.embedSupplier = embedSupplier;
     }
 
     public static EmbedBuilder create() {
         return INSTANCE.get();
-    }
-
-    @Override
-    public EmbedBuilder get() {
-        return embedSupplier.get().removeAllFields();
     }
 }
