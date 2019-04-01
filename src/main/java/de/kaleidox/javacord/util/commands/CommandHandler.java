@@ -89,25 +89,28 @@ public final class CommandHandler {
 
             getCommands().forEach(commandRep -> {
                 Command cmd = commandRep.annotation;
-                embed.addField("__" + cmd.aliases()[0] + "__: _" + prefixes[0] + cmd.usage() + "_", cmd.description());
+                String[] aliases = cmd.aliases();
+                if (aliases.length == 0) aliases = new String[]{commandRep.method.getName()};
+                embed.addField("__" + aliases[0] + "__: _" + prefixes[0] + cmd.usage() + "_", cmd.description());
             });
 
             return embed;
         } else if (param.getArguments().length >= 1) {
             EmbedBuilder embed = embedSupplier.get();
 
-            Optional<Command> command = getCommands().stream()
-                    .map(rep -> rep.annotation)
+            Optional<CommandRep> command = getCommands().stream()
                     .filter(cmd -> {
-                        for (String alias : cmd.aliases())
+                        for (String alias : cmd.annotation.aliases())
                             if (alias.equalsIgnoreCase(param.getArguments()[0]))
                                 return true;
                         return false;
                     }).findAny();
 
             if (command.isPresent()) {
-                Command cmd = command.get();
-                embed.addField("__" + cmd.aliases()[0] + "__: _" + prefixes[0] + cmd.usage() + "_", cmd.description());
+                Command cmd = command.get().annotation;
+                String[] aliases = cmd.aliases();
+                if (aliases.length == 0) aliases = new String[]{command.get().method.getName()};
+                embed.addField("__" + aliases[0] + "__: _" + prefixes[0] + cmd.usage() + "_", cmd.description());
             } else embed.addField(
                     "__Unknown Command__: _" + param.getArguments()[0] + "_",
                     "Type _\"" + prefixes[0] + "help\"_ for a list of commands."
