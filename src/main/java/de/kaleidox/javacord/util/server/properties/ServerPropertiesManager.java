@@ -46,6 +46,8 @@ public final class ServerPropertiesManager implements Initializable, Terminatabl
     public PropertyGroup register(String name, Object defaultValue) {
         properties.compute(name, (k, v) -> {
             if (v == null) return new PropertyGroup(name, defaultValue);
+            else if (!v.getDefaultValue().equals(defaultValue) && name.equals(v.getName()))
+                v = new PropertyGroup(v.getName(), defaultValue);
             return v;
         });
 
