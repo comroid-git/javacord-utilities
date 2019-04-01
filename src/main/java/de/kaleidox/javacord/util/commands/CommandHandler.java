@@ -276,7 +276,12 @@ public final class CommandHandler {
             else if (reply instanceof InformationMessage)
                 ((InformationMessage) reply).refresh();
             else if (reply instanceof PagedEmbed)
-                ((PagedEmbed) reply).build();
+                ((PagedEmbed) reply).build()
+                        .exceptionally(ExceptionLogger.get())
+                        .thenAcceptAsync(msg -> {
+                            if (autoDeleteResponseOnCommandDeletion)
+                                responseMap.put(message.getId(), new long[]{msg.getId(), channel.getId()});
+                        });
             else if (reply instanceof PagedMessage)
                 ((PagedMessage) reply).refresh();
             else if (reply instanceof RefreshableMessage)
