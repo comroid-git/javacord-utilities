@@ -93,8 +93,6 @@ public class PagedEmbed {
         future.thenAcceptAsync(message -> {
             sentMessage.set(message);
             if (pages.size() != 1) {
-                message.addReaction(Variables.PREV_PAGE_EMOJI);
-                message.addReaction(Variables.NEXT_PAGE_EMOJI);
                 message.addReactionAddListener(this::onReactionClick);
                 message.addReactionRemoveListener(this::onReactionClick);
             }
@@ -132,6 +130,7 @@ public class PagedEmbed {
      */
     private void refreshPages() {
         int fieldCount = 0, pageChars = 0, totalChars = 0, thisPage = 1;
+        int prevSize = pages.size();
         pages.clear();
 
         for (Field field : fields) {
@@ -172,8 +171,15 @@ public class PagedEmbed {
 
         // Edit sent message
         if (sentMessage.get() != null) {
-            sentMessage.get()
-                    .edit(embed);
+            sentMessage.get().edit(embed);
+
+            if (pages.size() == 1 && prevSize > 1) {
+                sentMessage.get().removeOwnReactionByEmoji(Variables.NEXT_PAGE_EMOJI);
+                sentMessage.get().removeOwnReactionByEmoji(Variables.PREV_PAGE_EMOJI);
+            } else if (pages.size() > 1 && prevSize == 1) {
+                sentMessage.get().addReaction(Variables.PREV_PAGE_EMOJI);
+                sentMessage.get().addReaction(Variables.NEXT_PAGE_EMOJI);
+            }
         }
     }
 
