@@ -25,6 +25,7 @@ import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageAuthor;
 import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
+import org.javacord.api.entity.permission.PermissionType;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.event.message.MessageDeleteEvent;
@@ -238,7 +239,8 @@ public final class CommandHandler {
                         .asServerTextChannel()   // as servertextchannel
                         .map(stc -> commandRep.annotation.requiredDiscordPermission() // get required permission for cmd
                                 .isSet(stc.getEffectivePermissions(usr) // is set in effective channel permissions
-                                        .getAllowedBitmask())) // bitmask
+                                        .getAllowedBitmask()) // bitmask
+                                || stc.hasPermission(usr, PermissionType.ADMINISTRATOR)) // or administrator
                         .orElse(true)) // if channel != servertextchannel, private channel -> allow
                 .orElse(false)) { // if author != user -> deny
             channel.sendMessage(DefaultEmbedFactory.create()
