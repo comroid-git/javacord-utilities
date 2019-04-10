@@ -236,23 +236,14 @@ public final class CommandHandler {
 
         if (commandRep == null) return;
         commandParams.args = args;
+        Set<String> problems = new HashSet<>();
 
-        if (message.isPrivateMessage() && !commandRep.annotation.enablePrivateChat()) {
-            applyResponseDeletion(message.getId(), channel.sendMessage(DefaultEmbedFactory.create()
-                    .setColor(Color.RED)
-                    .setDescription("This command can only be run in a server channel!"))
-                    .exceptionally(ExceptionLogger.get()));
-            return;
-        }
+        if (message.isPrivateMessage() && !commandRep.annotation.enablePrivateChat())
+            problems.add("This command can only be run in a server channel!");
+        else if (!message.isPrivateMessage() && !commandRep.annotation.enableServerChat())
+            problems.add("This command can only be run in a private channel!");
 
-        if (!message.isPrivateMessage() && !commandRep.annotation.enableServerChat()) {
-            applyResponseDeletion(message.getId(), channel.sendMessage(DefaultEmbedFactory.create()
-                    .setColor(Color.RED)
-                    .setDescription("This command can only be run in a private channel!"))
-                    .exceptionally(ExceptionLogger.get()));
-            return;
-        }
-
+        // if author != user -> deny
         if (!message.getUserAuthor() // get the user author
                 .map(usr -> message.getChannel() // get the message channel
                         .asServerTextChannel()   // as servertextchannel
@@ -260,42 +251,27 @@ public final class CommandHandler {
                                 PermissionType.ADMINISTRATOR, // administrator?
                                 commandRep.annotation.requiredDiscordPermission())) // command required permission?
                         .orElse(true)) // if channel != servertextchannel, private channel -> allow
-                .orElse(false)) { // if author != user -> deny
-            applyResponseDeletion(message.getId(), channel.sendMessage(DefaultEmbedFactory.create()
-                    .setColor(Color.RED)
-                    .setDescription("You are missing the required permission: "
-                            + commandRep.annotation.requiredDiscordPermission().name() + "!"))
-                    .exceptionally(ExceptionLogger.get()));
-            return;
-        }
+                .orElse(false))
+            problems.add("You are missing the required permission: "
+                    + commandRep.annotation.requiredDiscordPermission().name() + "!");
 
         int reqChlMent = commandRep.annotation.requiredChannelMentions();
-        if (message.getMentionedChannels().size() < reqChlMent) {
-            applyResponseDeletion(message.getId(), channel.sendMessage(DefaultEmbedFactory.create()
-                    .setColor(Color.RED)
-                    .setDescription("This command requires at least "
-                            + reqChlMent + " channel mention" + pluralize("s", reqChlMent) + "!"))
-                    .exceptionally(ExceptionLogger.get()));
-            return;
-        }
+        if (message.getMentionedChannels().size() < reqChlMent) problems.add("This command requires at least "
+                + reqChlMent + " channel mention" + pluralize("s", reqChlMent) + "!");
 
         int reqUsrMent = commandRep.annotation.requiredUserMentions();
-        if (message.getMentionedUsers().size() < reqUsrMent) {
-            applyResponseDeletion(message.getId(), channel.sendMessage(DefaultEmbedFactory.create()
-                    .setColor(Color.RED)
-                    .setDescription("This command requires at least "
-                            + reqUsrMent + " user mention" + pluralize("s", reqUsrMent) + "!"))
-                    .exceptionally(ExceptionLogger.get()));
-            return;
-        }
+        if (message.getMentionedUsers().size() < reqUsrMent) problems.add("This command requires at least "
+                + reqUsrMent + " user mention" + pluralize("s", reqUsrMent) + "!");
 
         int reqRleMent = commandRep.annotation.requiredRoleMentions();
-        if (message.getMentionedRoles().size() < reqRleMent) {
+        if (message.getMentionedRoles().size() < reqRleMent) problems.add("This command requires at least "
+                + reqRleMent + " role mention" + pluralize("s", reqRleMent) + "!");
+
+        if (problems.size() > 0) {
             applyResponseDeletion(message.getId(), channel.sendMessage(DefaultEmbedFactory.create()
                     .setColor(Color.RED)
-                    .setDescription("This command requires at least "
-                            + reqRleMent + " role mention" + pluralize("s", reqRleMent) + "!"))
-                    .exceptionally(ExceptionLogger.get()));
+                    .setDescription(String.join("\n", problems)))
+                    .exceptionally(get()));
             return;
         }
 
