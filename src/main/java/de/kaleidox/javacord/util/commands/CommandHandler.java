@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
@@ -262,38 +263,26 @@ public final class CommandHandler {
         }
 
         if (reply != null) {
-            if (reply instanceof EmbedBuilder) channel.sendMessage((EmbedBuilder) reply)
-                    .exceptionally(ExceptionLogger.get())
-                    .thenAcceptAsync(msg -> {
-                        if (autoDeleteResponseOnCommandDeletion)
-                            responseMap.put(message.getId(), new long[]{msg.getId(), channel.getId()});
-                    });
-            else if (reply instanceof MessageBuilder) ((MessageBuilder) reply).send(channel)
-                    .exceptionally(ExceptionLogger.get())
-                    .thenAcceptAsync(msg -> {
-                        if (autoDeleteResponseOnCommandDeletion)
-                            responseMap.put(message.getId(), new long[]{msg.getId(), channel.getId()});
-                    });
-            else if (reply instanceof InformationMessage)
-                ((InformationMessage) reply).refresh();
-            else if (reply instanceof PagedEmbed)
-                ((PagedEmbed) reply).build()
-                        .exceptionally(ExceptionLogger.get())
-                        .thenAcceptAsync(msg -> {
-                            if (autoDeleteResponseOnCommandDeletion)
-                                responseMap.put(message.getId(), new long[]{msg.getId(), channel.getId()});
-                        });
-            else if (reply instanceof PagedMessage)
-                ((PagedMessage) reply).refresh();
-            else if (reply instanceof RefreshableMessage)
-                ((RefreshableMessage) reply).refresh();
-            else channel.sendMessage(String.valueOf(reply))
-                        .exceptionally(ExceptionLogger.get())
-                        .thenAcceptAsync(msg -> {
-                            if (autoDeleteResponseOnCommandDeletion)
-                                responseMap.put(message.getId(), new long[]{msg.getId(), channel.getId()});
-                        });
+            CompletableFuture<Message> msgFut = null;
+
+            if (reply instanceof EmbedBuilder) msgFut = channel.sendMessage((EmbedBuilder) reply);
+            else if (reply instanceof MessageBuilder) msgFut = ((MessageBuilder) reply).send(channel);
+            else if (reply instanceof InformationMessage) ((InformationMessage) reply).refresh();
+            else if (reply instanceof PagedEmbed) msgFut = ((PagedEmbed) reply).build();
+            else if (reply instanceof PagedMessage) ((PagedMessage) reply).refresh();
+            else if (reply instanceof RefreshableMessage) ((RefreshableMessage) reply).refresh();
+            else msgFut = channel.sendMessage(String.valueOf(reply));
+
+            if (msgFut != null)
+                applyResponseDeletion(message.getId(), msgFut.exceptionally(ExceptionLogger.get()));
         }
+    }
+
+    private void applyResponseDeletion(long cmdMsgId, CompletableFuture<Message> message) {
+        message.thenAcceptAsync(msg -> {
+            if (autoDeleteResponseOnCommandDeletion)
+                responseMap.put(cmdMsgId, new long[]{msg.getId(), msg.getChannel().getId()});
+        });
     }
 
     public class CommandRep {
