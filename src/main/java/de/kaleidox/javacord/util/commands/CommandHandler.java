@@ -31,11 +31,11 @@ import org.javacord.api.entity.server.Server;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.event.message.MessageDeleteEvent;
 import org.javacord.api.event.message.MessageEditEvent;
-import org.javacord.api.util.logging.ExceptionLogger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import static de.kaleidox.util.helpers.NumberHelper.pluralize;
+import static org.javacord.api.util.logging.ExceptionLogger.get;
 
 public final class CommandHandler {
     private final DiscordApi api;
@@ -179,7 +179,7 @@ public final class CommandHandler {
                     ids[0],
                     api.getChannelById(ids[1]).flatMap(Channel::asTextChannel).orElseThrow(AssertionError::new))
                     .thenCompose(Message::delete)
-                    .exceptionally(ExceptionLogger.get());
+                    .exceptionally(get());
         }
     }
 
@@ -323,7 +323,7 @@ public final class CommandHandler {
             else msgFut = channel.sendMessage(String.valueOf(reply));
 
             if (msgFut != null)
-                applyResponseDeletion(message.getId(), msgFut.exceptionally(ExceptionLogger.get()));
+                applyResponseDeletion(message.getId(), msgFut.exceptionally(get()));
         }
     }
 
