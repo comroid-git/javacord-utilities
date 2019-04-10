@@ -181,7 +181,7 @@ public final class CommandHandler {
         }
     }
 
-    private void handleCommand(Message message, TextChannel channel, Params commandParams) {
+    private void handleCommand(final Message message, final TextChannel channel, final Params commandParams) {
         String content = message.getContent();
         int usedPrefix = -1;
         String[] pref = null;
