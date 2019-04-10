@@ -35,6 +35,8 @@ import org.javacord.api.util.logging.ExceptionLogger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import static de.kaleidox.util.helpers.NumberHelper.pluralize;
+
 public final class CommandHandler {
     private final DiscordApi api;
     private final ConcurrentHashMap<String, CommandRep> commands = new ConcurrentHashMap<>();
@@ -263,6 +265,36 @@ public final class CommandHandler {
                     .setColor(Color.RED)
                     .setDescription("You are missing the required permission: "
                             + commandRep.annotation.requiredDiscordPermission().name() + "!"))
+                    .exceptionally(ExceptionLogger.get()));
+            return;
+        }
+
+        int reqChlMent = commandRep.annotation.requiredChannelMentions();
+        if (message.getMentionedChannels().size() < reqChlMent) {
+            applyResponseDeletion(message.getId(), channel.sendMessage(DefaultEmbedFactory.create()
+                    .setColor(Color.RED)
+                    .setDescription("This command requires at least "
+                            + reqChlMent + " channel mention" + pluralize("s", reqChlMent) + "!"))
+                    .exceptionally(ExceptionLogger.get()));
+            return;
+        }
+
+        int reqUsrMent = commandRep.annotation.requiredUserMentions();
+        if (message.getMentionedUsers().size() < reqUsrMent) {
+            applyResponseDeletion(message.getId(), channel.sendMessage(DefaultEmbedFactory.create()
+                    .setColor(Color.RED)
+                    .setDescription("This command requires at least "
+                            + reqUsrMent + " user mention" + pluralize("s", reqUsrMent) + "!"))
+                    .exceptionally(ExceptionLogger.get()));
+            return;
+        }
+
+        int reqRleMent = commandRep.annotation.requiredRoleMentions();
+        if (message.getMentionedRoles().size() < reqRleMent) {
+            applyResponseDeletion(message.getId(), channel.sendMessage(DefaultEmbedFactory.create()
+                    .setColor(Color.RED)
+                    .setDescription("This command requires at least "
+                            + reqRleMent + " role mention" + pluralize("s", reqRleMent) + "!"))
                     .exceptionally(ExceptionLogger.get()));
             return;
         }
