@@ -285,7 +285,7 @@ public final class CommandHandler {
         } catch (IllegalAccessException e) {
             throw new RuntimeException("Cannot access command method!", e);
         } catch (InvocationTargetException e) {
-            throw new RuntimeException("Invalid InvocationTarget!", e);
+            throw new RuntimeException("Command method threw an Exception!", e);
         }
 
         if (reply != null) {
