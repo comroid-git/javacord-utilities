@@ -259,10 +259,11 @@ public final class CommandHandler {
                                 commandRep.annotation.requiredDiscordPermission())) // command required permission?
                         .orElse(true)) // if channel != servertextchannel, private channel -> allow
                 .orElse(false)) { // if author != user -> deny
-            channel.sendMessage(DefaultEmbedFactory.create()
+            applyResponseDeletion(message.getId(), channel.sendMessage(DefaultEmbedFactory.create()
                     .setColor(Color.RED)
                     .setDescription("You are missing the required permission: "
-                            + commandRep.annotation.requiredDiscordPermission().name()));
+                            + commandRep.annotation.requiredDiscordPermission().name() + "!"))
+                    .exceptionally(ExceptionLogger.get()));
             return;
         }
 
