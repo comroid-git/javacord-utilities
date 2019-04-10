@@ -73,21 +73,21 @@ public @interface Command {
      *
      * @return The minimum required amount of channel mentions.
      */
-    int requireChannelMentions() default 0;
+    int requiredChannelMentions() default 0;
 
     /**
      * Defines the minimum amount of user mentions required for the command to run. Default value is {@code 0}.
      *
      * @return The minimum required amount of user mentions.
      */
-    int requireUserMentions() default 0;
+    int requiredUserMentions() default 0;
 
     /**
      * Defines the minimum amount of role mentions required for the command to run. Default value is {@code 0}.
      *
      * @return The minimum required amount of role mentions.
      */
-    int requireRoleMentions() default 0;
+    int requiredRoleMentions() default 0;
 
     /**
      * Command parameter structure
