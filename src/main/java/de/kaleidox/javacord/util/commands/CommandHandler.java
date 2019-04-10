@@ -34,7 +34,6 @@ import org.javacord.api.event.message.MessageEditEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static de.kaleidox.util.helpers.NumberHelper.pluralize;
 import static org.javacord.api.util.logging.ExceptionLogger.get;
 
 public final class CommandHandler {
@@ -257,15 +256,15 @@ public final class CommandHandler {
 
         int reqChlMent = commandRep.annotation.requiredChannelMentions();
         if (message.getMentionedChannels().size() < reqChlMent) problems.add("This command requires at least "
-                + reqChlMent + " channel mention" + pluralize("s", reqChlMent) + "!");
+                + reqChlMent + " channel mention" + (reqChlMent == 1 ? "" : "s") + "!");
 
         int reqUsrMent = commandRep.annotation.requiredUserMentions();
         if (message.getMentionedUsers().size() < reqUsrMent) problems.add("This command requires at least "
-                + reqUsrMent + " user mention" + pluralize("s", reqUsrMent) + "!");
+                + reqUsrMent + " user mention" + (reqUsrMent == 1 ? "" : "s") + "!");
 
         int reqRleMent = commandRep.annotation.requiredRoleMentions();
         if (message.getMentionedRoles().size() < reqRleMent) problems.add("This command requires at least "
-                + reqRleMent + " role mention" + pluralize("s", reqRleMent) + "!");
+                + reqRleMent + " role mention" + (reqRleMent == 1 ? "" : "s") + "!");
 
         if (problems.size() > 0) {
             applyResponseDeletion(message.getId(), channel.sendMessage(DefaultEmbedFactory.create()
