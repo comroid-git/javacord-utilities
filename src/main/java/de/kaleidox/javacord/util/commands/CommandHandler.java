@@ -235,6 +235,22 @@ public final class CommandHandler {
         if (commandRep == null) return;
         commandParams.args = args;
 
+        if (message.isPrivateMessage() && !commandRep.annotation.enablePrivateChat()) {
+            applyResponseDeletion(message.getId(), channel.sendMessage(DefaultEmbedFactory.create()
+                    .setColor(Color.RED)
+                    .setDescription("This command can only be run in a server channel!"))
+                    .exceptionally(ExceptionLogger.get()));
+            return;
+        }
+
+        if (!message.isPrivateMessage() && !commandRep.annotation.enableServerChat()) {
+            applyResponseDeletion(message.getId(), channel.sendMessage(DefaultEmbedFactory.create()
+                    .setColor(Color.RED)
+                    .setDescription("This command can only be run in a private channel!"))
+                    .exceptionally(ExceptionLogger.get()));
+            return;
+        }
+
         if (!message.getUserAuthor() // get the user author
                 .map(usr -> message.getChannel() // get the message channel
                         .asServerTextChannel()   // as servertextchannel
