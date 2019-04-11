@@ -21,6 +21,7 @@ import de.kaleidox.javacord.util.ui.messages.PagedEmbed;
 import de.kaleidox.javacord.util.ui.messages.PagedMessage;
 import de.kaleidox.javacord.util.ui.messages.RefreshableMessage;
 
+import org.apache.logging.log4j.Logger;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.channel.Channel;
 import org.javacord.api.entity.channel.TextChannel;
@@ -33,12 +34,15 @@ import org.javacord.api.entity.server.Server;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.event.message.MessageDeleteEvent;
 import org.javacord.api.event.message.MessageEditEvent;
+import org.javacord.core.util.logging.LoggerUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import static org.javacord.api.util.logging.ExceptionLogger.get;
 
 public final class CommandHandler {
+    private static final Logger logger = LoggerUtil.getLogger(CommandHandler.class);
+
     private final DiscordApi api;
     private final ConcurrentHashMap<String, CommandRep> commands = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<Long, long[]> responseMap = new ConcurrentHashMap<>();
