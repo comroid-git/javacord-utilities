@@ -40,9 +40,11 @@ repositories.jcenter()
 
 dependencies {
     implementation 'de.kaleidox:kalutils:0.4.1'
-    implementation('org.javacord:javacord:3.0.3') {
-        exclude group: 'com.fasterxml.jackson.core'
-    }
+    implementation('org.javacord:javacord-api:3.0.4') 
+            { exclude group: 'com.fasterxml.jackson.core' }
+    implementation('org.javacord:javacord-core:3.0.4') 
+            { exclude group: 'com.fasterxml.jackson.core' }
+    implementation 'org.apache.logging.log4j:log4j-api:2.11.0'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.8'
     compileOnly 'org.jetbrains:annotations:17.0.0'
 
