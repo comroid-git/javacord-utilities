@@ -144,12 +144,16 @@ public final class CommandHandler {
 
 
             if (!annotation.enableServerChat()
-                    && annotation.requiredDiscordPermission() != PermissionType.SEND_MESSAGES)
+                    && annotation.requiredDiscordPermission() != PermissionType.SEND_MESSAGES) {
                 logger.error("Command [" + method.getName()
                         + "]: Conflicting command properties; private-only commands cannot require permissions!");
-            if (!annotation.enableServerChat() && !annotation.enableServerChat())
+                continue;
+            }
+            if (!annotation.enableServerChat() && !annotation.enableServerChat()) {
                 logger.error("Command [" + method.getName()
                         + "]: Conflicting command properties; command cannot disallow both private and server chat!");
+                continue;
+            }
 
             CommandRep commandRep = new CommandRep(method, annotation, invocationTarget);
             if (annotation.aliases().length > 0)
