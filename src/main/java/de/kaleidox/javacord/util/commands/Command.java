@@ -7,7 +7,6 @@ import java.lang.annotation.Target;
 import java.util.List;
 import java.util.Optional;
 
-import org.intellij.lang.annotations.MagicConstant;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.channel.PrivateChannel;
 import org.javacord.api.entity.channel.ServerTextChannel;
