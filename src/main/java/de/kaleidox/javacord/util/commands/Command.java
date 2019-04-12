@@ -69,9 +69,6 @@ public @interface Command {
      */
     PermissionType requiredDiscordPermission() default PermissionType.SEND_MESSAGES;
 
-    @MagicConstant(valuesFromClass = AuthenticationMethods.class)
-    int authenticationMethod() default AuthenticationMethods.USE_DISCORD_PERMISSION;
-
     /**
      * Defines the minimum amount of channel mentions required for the command to run. Default value is {@code 0}.
      *
@@ -136,10 +133,5 @@ public @interface Command {
         Optional<MessageAuthor> getCommandExecutor();
 
         String[] getArguments();
-    }
-
-    class AuthenticationMethods {
-        public static final int ALLOW_ALL = -1;
-        public static final int USE_DISCORD_PERMISSION = 0;
     }
 }

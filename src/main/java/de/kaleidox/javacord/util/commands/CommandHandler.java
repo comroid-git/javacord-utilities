@@ -51,6 +51,7 @@ public final class CommandHandler {
 
     public String[] prefixes;
     public boolean autoDeleteResponseOnCommandDeletion;
+    private PropertyGroup authMethodProperty = null;
     private Supplier<EmbedBuilder> embedSupplier = null;
     @Nullable private PropertyGroup customPrefixProperty;
     private boolean exclusiveCustomPrefix;
@@ -92,6 +93,10 @@ public final class CommandHandler {
         else if (register instanceof Method)
             extractCommandRep(null, (Method) register);
         else extractCommandRep(register, register.getClass().getMethods());
+    }
+
+    public void useAuthManager(PropertyGroup authMethodProperty) {
+        this.authMethodProperty = authMethodProperty;
     }
 
     @Command(aliases = "help", usage = "help [command]", description = "Shows a list of commands and what they do.")
@@ -269,10 +274,12 @@ public final class CommandHandler {
         else if (!message.isPrivateMessage() && !commandRep.annotation.enableServerChat())
             problems.add("This command can only be run in a private channel!");
 
-        switch (commandRep.annotation.authenticationMethod()) {
-            case Command.AuthenticationMethods.ALLOW_ALL:
+        switch (commandParams.getServer()
+                .map(server -> authMethodProperty.getValue(server).asString())
+                .orElse("discord_permission")) {
+            case "allow_all":
                 break;
-            case Command.AuthenticationMethods.USE_DISCORD_PERMISSION:
+            case "discord_permission":
                 if (!message.getUserAuthor()
                         .map(usr -> message.getChannel()
                                 .asServerTextChannel()
@@ -285,8 +292,7 @@ public final class CommandHandler {
                             + commandRep.annotation.requiredDiscordPermission().name() + "!");
                 break;
             default:
-                logger.error("Unknown AuthenticationMethod: " + commandRep.annotation.authenticationMethod());
-                return;
+                throw new AssertionError("Unreachable statement reached");
         }
 
         int reqChlMent = commandRep.annotation.requiredChannelMentions();
