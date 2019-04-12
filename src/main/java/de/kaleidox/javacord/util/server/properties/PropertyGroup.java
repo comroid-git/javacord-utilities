@@ -71,14 +71,15 @@ public final class PropertyGroup {
         });
     }
 
-    // [id:"123";val:"abc";type:java.lang.String];[id:"234";val:"def";type:java.lang.Short]
     void serialize(ArrayNode node) {
         values.forEach((id, value) -> {
-            ObjectNode object = node.addObject();
+            if (!value.asString().equals(defaultValue.asString())) {
+                ObjectNode object = node.addObject();
 
-            object.set("id", nodeOf(id));
-            object.set("val", nodeOf(value.asString()));
-            object.set("type", nodeOf((value.getValue() != null ? value.getValue() : "").getClass().getName()));
+                object.set("id", nodeOf(id));
+                object.set("val", nodeOf(value.asString()));
+                object.set("type", nodeOf((value.getValue() != null ? value.getValue() : "").getClass().getName()));
+            }
         });
     }
 }
