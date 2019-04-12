@@ -5,6 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -13,6 +14,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import de.kaleidox.javacord.util.embed.DefaultEmbedFactory;
 import de.kaleidox.javacord.util.server.properties.PropertyGroup;
@@ -142,16 +144,19 @@ public final class CommandHandler {
             if (Modifier.isAbstract(method.getModifiers()))
                 throw new AbstractMethodError("Command annotated method cannot be abstract!");
 
-
             if (!annotation.enableServerChat()
                     && annotation.requiredDiscordPermission() != PermissionType.SEND_MESSAGES) {
-                logger.error("Command [" + method.getName()
-                        + "]: Conflicting command properties; private-only commands cannot require permissions!");
+                logger.error("Command " + method.getName() + "(" + Arrays.stream(method.getParameterTypes())
+                        .map(Class::getSimpleName)
+                        .collect(Collectors.joining(", ")) + ")"
+                        + ": Conflicting command properties; private-only commands cannot require permissions!");
                 continue;
             }
             if (!annotation.enableServerChat() && !annotation.enableServerChat()) {
-                logger.error("Command [" + method.getName()
-                        + "]: Conflicting command properties; command cannot disallow both private and server chat!");
+                logger.error("Command " + method.getName() + "(" + Arrays.stream(method.getParameterTypes())
+                        .map(Class::getSimpleName)
+                        .collect(Collectors.joining(", ")) + ")"
+                        + ": Conflicting command properties; command cannot disallow both private and server chat!");
                 continue;
             }
 
