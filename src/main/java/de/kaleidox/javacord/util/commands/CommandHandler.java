@@ -269,17 +269,25 @@ public final class CommandHandler {
         else if (!message.isPrivateMessage() && !commandRep.annotation.enableServerChat())
             problems.add("This command can only be run in a private channel!");
 
-        // if author != user -> deny
-        if (!message.getUserAuthor() // get the user author
-                .map(usr -> message.getChannel() // get the message channel
-                        .asServerTextChannel()   // as servertextchannel
-                        .map(stc -> stc.hasAnyPermission(usr, // user has any permission in channel of
-                                PermissionType.ADMINISTRATOR, // administrator?
-                                commandRep.annotation.requiredDiscordPermission())) // command required permission?
-                        .orElse(true)) // if channel != servertextchannel, private channel -> allow
-                .orElse(false))
-            problems.add("You are missing the required permission: "
-                    + commandRep.annotation.requiredDiscordPermission().name() + "!");
+        switch (commandRep.annotation.authenticationMethod()) {
+            case Command.AuthenticationMethods.ALLOW_ALL:
+                break;
+            case Command.AuthenticationMethods.USE_DISCORD_PERMISSION:
+                if (!message.getUserAuthor()
+                        .map(usr -> message.getChannel()
+                                .asServerTextChannel()
+                                .map(stc -> stc.hasAnyPermission(usr,
+                                        PermissionType.ADMINISTRATOR,
+                                        commandRep.annotation.requiredDiscordPermission()))
+                                .orElse(true))
+                        .orElse(false))
+                    problems.add("You are missing the required permission: "
+                            + commandRep.annotation.requiredDiscordPermission().name() + "!");
+                break;
+            default:
+                logger.error("Unknown AuthenticationMethod: " + commandRep.annotation.authenticationMethod());
+                return;
+        }
 
         int reqChlMent = commandRep.annotation.requiredChannelMentions();
         if (message.getMentionedChannels().size() < reqChlMent) problems.add("This command requires at least "
