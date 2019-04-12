@@ -144,21 +144,24 @@ public final class CommandHandler {
             if (Modifier.isAbstract(method.getModifiers()))
                 throw new AbstractMethodError("Command annotated method cannot be abstract!");
 
+            boolean hasErrored = false;
             if (!annotation.enableServerChat()
                     && annotation.requiredDiscordPermission() != PermissionType.SEND_MESSAGES) {
                 logger.error("Command " + method.getName() + "(" + Arrays.stream(method.getParameterTypes())
                         .map(Class::getSimpleName)
                         .collect(Collectors.joining(", ")) + ")"
                         + ": Conflicting command properties; private-only commands cannot require permissions!");
-                continue;
+                hasErrored = true;
             }
             if (!annotation.enableServerChat() && !annotation.enableServerChat()) {
                 logger.error("Command " + method.getName() + "(" + Arrays.stream(method.getParameterTypes())
                         .map(Class::getSimpleName)
                         .collect(Collectors.joining(", ")) + ")"
                         + ": Conflicting command properties; command cannot disallow both private and server chat!");
-                continue;
+                hasErrored = true;
             }
+
+            if (hasErrored) continue;
 
             CommandRep commandRep = new CommandRep(method, annotation, invocationTarget);
             if (annotation.aliases().length > 0)
