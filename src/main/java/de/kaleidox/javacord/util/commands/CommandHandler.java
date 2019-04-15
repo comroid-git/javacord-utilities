@@ -274,8 +274,8 @@ public final class CommandHandler {
         else if (!message.isPrivateMessage() && !commandRep.annotation.enableServerChat())
             problems.add("This command can only be run in a private channel!");
 
-        switch (commandParams.getServer()
-                .map(server -> authMethodProperty.getValue(server).asString()) // FIXME: 15.04.2019 NPE because authMethodProperty might not be set
+        switch (authMethodProperty == null ? "discord_permission" : commandParams.getServer()
+                .map(server -> authMethodProperty.getValue(server).asString())
                 .orElse("discord_permission")) {
             case "allow_all":
                 break;
