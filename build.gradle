@@ -20,13 +20,13 @@ wrapper {
 
 task sourcesJar(type: Jar) {
     from sourceSets.main.allJava
-    classifier = "sources"
+    archiveClassifier.set("sources")
 }
 
 task javadocJar(type: Jar) {
-    javadoc
+    //javadoc
     from javadoc.destinationDir
-    classifier = "javadoc"
+    archiveClassifier.set("javadoc")
 }
 
 javadoc {
