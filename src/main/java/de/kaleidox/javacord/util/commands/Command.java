@@ -113,6 +113,12 @@ import org.javacord.api.event.message.MessageEditEvent;
  * <td></td>
  * </tr>
  * <tr>
+ * <td>{@link User}</td>
+ * <td>The user that authored the command message.</td>
+ * <td>{@code null} if there is no {@link User}. See {@link MessageEditEvent#getMessageAuthor()} for more
+ * information.</td>
+ * </tr>
+ * <tr>
  * <td>{@link MessageAuthor}</td>
  * <td>The author of the command message.</td>
  * <td>{@code null} if there is no {@link MessageAuthor}. See {@link MessageEditEvent#getMessageAuthor()} for more
@@ -260,6 +266,10 @@ public @interface Command {
         }
 
         Optional<MessageAuthor> getCommandExecutor();
+
+        default Optional<User> getUser() {
+            return getCommandExecutor().flatMap(MessageAuthor::asUser);
+        }
 
         String[] getArguments();
     }

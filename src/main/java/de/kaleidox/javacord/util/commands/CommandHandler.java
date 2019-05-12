@@ -35,6 +35,7 @@ import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.permission.PermissionType;
 import org.javacord.api.entity.server.Server;
+import org.javacord.api.entity.user.User;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.event.message.MessageDeleteEvent;
 import org.javacord.api.event.message.MessageEditEvent;
@@ -379,6 +380,8 @@ public final class CommandHandler {
                 else args[i] = param.textChannel;
             } else if (Message.class.isAssignableFrom(klasse))
                 args[i] = param.message;
+            else if (User.class.isAssignableFrom(klasse))
+                args[i] = param.author.asUser().orElse(null);
             else if (MessageAuthor.class.isAssignableFrom(klasse))
                 args[i] = param.author;
             else if (String[].class.isAssignableFrom(klasse))
