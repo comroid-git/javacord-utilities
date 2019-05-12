@@ -39,7 +39,7 @@ compileJava.options.encoding = 'UTF-8'
 repositories.jcenter()
 
 dependencies {
-    implementation 'de.kaleidox:kalutils:0.4.1'
+    implementation 'de.kaleidox:kalutils:0.4.2'
     implementation('org.javacord:javacord-api:3.0.4') 
             { exclude group: 'com.fasterxml.jackson.core' }
     implementation('org.javacord:javacord-core:3.0.4') 
