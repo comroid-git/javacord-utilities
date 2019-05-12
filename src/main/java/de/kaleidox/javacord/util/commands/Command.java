@@ -7,12 +7,19 @@ import java.lang.annotation.Target;
 import java.util.List;
 import java.util.Optional;
 
+import de.kaleidox.javacord.util.ui.messages.InformationMessage;
+import de.kaleidox.javacord.util.ui.messages.PagedEmbed;
+import de.kaleidox.javacord.util.ui.messages.PagedMessage;
+import de.kaleidox.javacord.util.ui.messages.RefreshableMessage;
+
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.channel.PrivateChannel;
 import org.javacord.api.entity.channel.ServerTextChannel;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageAuthor;
+import org.javacord.api.entity.message.MessageBuilder;
+import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.permission.PermissionType;
 import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.server.Server;
@@ -20,6 +27,109 @@ import org.javacord.api.entity.user.User;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.event.message.MessageEditEvent;
 
+/**
+ * Marks a method as a command.
+ * <p>
+ * The return value of such a command method is used as the response to the actual command.
+ * The response is deleted when the command message is deleted.
+ * Command methods can return one of the following:
+ * <table summary="All possible return values.">
+ * <tr>
+ * <th>{@link String}</th>
+ * </tr>
+ * <tr>
+ * <td>{@link EmbedBuilder}</td>
+ * </tr>
+ * <tr>
+ * <td>{@link MessageBuilder}</td>
+ * </tr>
+ * <tr>
+ * <td>{@link InformationMessage}</td>
+ * </tr>
+ * <tr>
+ * <td>{@link PagedEmbed}</td>
+ * </tr>
+ * <tr>
+ * <td>{@link PagedMessage}</td>
+ * </tr>
+ * <tr>
+ * <td>{@link RefreshableMessage}</td>
+ * </tr>
+ * </table>
+ * Anything not listed here will be converted to a string using {@link String#valueOf(Object)}.
+ * <p>
+ * A command method can have different types of parameters, any of which will be set to their respective value:
+ * <table summary="A command method can have different types of parameters, any of which will be set to their
+ * respective
+ * value.">
+ * <tr>
+ * <th>Class<br></th>
+ * <th>Respective value<br></th>
+ * <th>Notes</th>
+ * </tr>
+ * <tr>
+ * <td>{@link DiscordApi}</td>
+ * <td>The API that caught the command message's event.</td>
+ * <td></td>
+ * </tr>
+ * <tr>
+ * <td>{@link MessageCreateEvent}<br></td>
+ * <td>The MessageCreateEvent that triggered the command.</td>
+ * <td>{@code null} if the command was triggered by a {@link MessageEditEvent}.</td>
+ * </tr>
+ * <tr>
+ * <td>{@link MessageEditEvent}<br></td>
+ * <td>The MessageEditEvent that triggered the command.</td>
+ * <td>{@code null} if the command was triggered by a {@link MessageCreateEvent}.</td>
+ * </tr>
+ * <tr>
+ * <td>{@link Server}</td>
+ * <td>The server that the command was sent in.</td>
+ * <td>{@code null} if the command was sent in a {@link PrivateChannel}.</td>
+ * </tr>
+ * <tr>
+ * <td>{@link Boolean}<br></td>
+ * <td>Whether the command was sent in a private chat.</td>
+ * <td></td>
+ * </tr>
+ * <tr>
+ * <td>{@link TextChannel}</td>
+ * <td>The {@link TextChannel} that the command was sent in.</td>
+ * <td></td>
+ * </tr>
+ * <tr>
+ * <td>{@link ServerTextChannel}</td>
+ * <td>The ServerTextChannel that the command was sent in.</td>
+ * <td>{@code null} if the command was sent in a {@link PrivateChannel}.</td>
+ * </tr>
+ * <tr>
+ * <td>{@link PrivateChannel}<br></td>
+ * <td>The PrivateChannel that the command was sent in.</td>
+ * <td>{@code null} if the command was sent in a {@link ServerTextChannel}.</td>
+ * </tr>
+ * <tr>
+ * <td>{@link Message}</td>
+ * <td>The command message.</td>
+ * <td></td>
+ * </tr>
+ * <tr>
+ * <td>{@link MessageAuthor}</td>
+ * <td>The author of the command message.</td>
+ * <td>{@code null} if there is no {@link MessageAuthor}. See {@link MessageEditEvent#getMessageAuthor()} for more
+ * information.</td>
+ * </tr>
+ * <tr>
+ * <td>{@code String[]}</td>
+ * <td>The arguments of the command.</td>
+ * <td></td>
+ * </tr>
+ * <tr>
+ * <td>{@link Command.Parameters}</td>
+ * <td>A parameter object that carries all command parameters.</td>
+ * <td></td>
+ * </tr>
+ * </table>
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Command {
@@ -31,12 +141,17 @@ public @interface Command {
     String[] aliases() default {};
 
     /**
-     * Defines the description that is shown in the default help command.
+     * Defines the description that is shown in a help command.
      *
      * @return The description of the command.
      */
     String description() default "No description provided.";
 
+    /**
+     * Defines the usage that is shown in a help command.
+     *
+     * @return The usage of the command.
+     */
     String usage() default "No usage provided.";
 
     /**
