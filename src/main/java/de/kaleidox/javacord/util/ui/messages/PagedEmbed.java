@@ -95,8 +95,8 @@ public class PagedEmbed {
             if (pages.size() != 1) {
                 message.addReactionAddListener(this::onReactionClick);
                 message.addReactionRemoveListener(this::onReactionClick);
-                message.addReaction(Variables.NEXT_PAGE_EMOJI);
                 message.addReaction(Variables.PREV_PAGE_EMOJI);
+                message.addReaction(Variables.NEXT_PAGE_EMOJI);
             }
 
             message.addMessageDeleteListener(delete -> message.getMessageAttachableListeners()
