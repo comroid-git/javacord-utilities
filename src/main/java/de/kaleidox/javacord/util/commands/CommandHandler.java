@@ -60,6 +60,10 @@ public final class CommandHandler {
     private boolean exclusiveCustomPrefix;
 
     public CommandHandler(DiscordApi api) {
+        this(api, false);
+    }
+
+    public CommandHandler(DiscordApi api, boolean handleMessageEdit) {
         this.api = api;
 
         prefixes = new String[]{"!"};
@@ -68,7 +72,8 @@ public final class CommandHandler {
         exclusiveCustomPrefix = false;
 
         api.addMessageCreateListener(this::handleMessageCreate);
-        api.addMessageEditListener(this::handleMessageEdit);
+        if (handleMessageEdit)
+            api.addMessageEditListener(this::handleMessageEdit);
         api.addMessageDeleteListener(this::handleMessageDelete);
     }
 
