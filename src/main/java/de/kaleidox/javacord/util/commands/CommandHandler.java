@@ -322,6 +322,13 @@ public final class CommandHandler {
             return;
         }
 
+        if (commandRep.annotation.async()) api.getThreadPool()
+                .getExecutorService()
+                .submit(() -> doInvoke(commandRep, commandParams, channel, message));
+        else doInvoke(commandRep, commandParams, channel, message);
+    }
+
+    private void doInvoke(CommandRep commandRep, Params commandParams, TextChannel channel, Message message) {
         Object reply;
         try {
             reply = invoke(commandRep.method, commandParams, commandRep.invocationTarget);

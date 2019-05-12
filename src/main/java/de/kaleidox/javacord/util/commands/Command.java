@@ -97,6 +97,13 @@ public @interface Command {
     boolean runInNSFWChannelOnly() default false;
 
     /**
+     * Defines whether a command should be executed async.
+     *
+     * @return Whether to run the command method async.
+     */
+    boolean async() default false;
+
+    /**
      * Command parameter structure
      */
     interface Parameters {
