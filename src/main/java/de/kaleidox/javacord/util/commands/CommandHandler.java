@@ -383,6 +383,8 @@ public final class CommandHandler {
                 args[i] = param.author;
             else if (String[].class.isAssignableFrom(klasse))
                 args[i] = param.args;
+            else if (Command.Parameters.class.isAssignableFrom(klasse))
+                args[i] = param;
             else args[i] = null;
         }
 
