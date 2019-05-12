@@ -1,3 +1,5 @@
+import java.util.function.BiConsumer
+
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
 apply plugin: "io.codearte.nexus-staging"
@@ -60,6 +62,13 @@ task generateGithubPom(type: GenerateMavenPom) {
     destination = file("$projectDir/pom.xml")
     pom = publishing.publications.mavenJava.pom
 }
+
+System.getenv().forEach(new BiConsumer<String, String>() {
+    @Override
+    void accept(String s, String s2) {
+        System.out.println(s)
+    }
+})
 
 signing {
     useGpgCmd()
