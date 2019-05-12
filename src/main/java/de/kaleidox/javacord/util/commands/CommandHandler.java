@@ -109,9 +109,8 @@ public final class CommandHandler {
 
     @Command(aliases = "help", usage = "help [command]", description = "Shows a list of commands and what they do.")
     public Object defaultHelpCommand(Command.Parameters param) {
+        PagedEmbed embed = new PagedEmbed(param.getTextChannel(), embedSupplier);
         if (param.getArguments().length == 0) {
-            PagedEmbed embed = new PagedEmbed(param.getTextChannel(), embedSupplier);
-
             getCommands().forEach(commandRep -> {
                 Command cmd = commandRep.annotation;
                 String[] aliases = cmd.aliases();
@@ -121,8 +120,6 @@ public final class CommandHandler {
 
             return embed;
         } else if (param.getArguments().length >= 1) {
-            EmbedBuilder embed = embedSupplier.get();
-
             Optional<CommandRep> command = getCommands().stream()
                     .filter(cmd -> {
                         for (String alias : cmd.annotation.aliases())
