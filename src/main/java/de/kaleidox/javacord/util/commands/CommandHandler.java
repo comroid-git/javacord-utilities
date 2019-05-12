@@ -22,10 +22,12 @@ import de.kaleidox.javacord.util.ui.messages.InformationMessage;
 import de.kaleidox.javacord.util.ui.messages.PagedEmbed;
 import de.kaleidox.javacord.util.ui.messages.PagedMessage;
 import de.kaleidox.javacord.util.ui.messages.RefreshableMessage;
+import de.kaleidox.util.functional.Switch;
 
 import org.apache.logging.log4j.Logger;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.channel.Channel;
+import org.javacord.api.entity.channel.PrivateChannel;
 import org.javacord.api.entity.channel.ServerTextChannel;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.Message;
@@ -322,10 +324,7 @@ public final class CommandHandler {
 
         Object reply;
         try {
-            Class<?>[] parameterTypes = commandRep.method.getParameterTypes();
-            if (parameterTypes.length == 1 && Command.Parameters.class.isAssignableFrom(parameterTypes[0]))
-                reply = commandRep.method.invoke(commandRep.invocationTarget, commandParams);
-            else reply = commandRep.method.invoke(null);
+            reply = invoke(commandRep.method, commandParams, commandRep.invocationTarget);
         } catch (IllegalAccessException e) {
             throw new RuntimeException("Cannot access command method!", e);
         } catch (InvocationTargetException e) {
@@ -346,6 +345,34 @@ public final class CommandHandler {
             if (msgFut != null)
                 applyResponseDeletion(message.getId(), msgFut.exceptionally(get()));
         }
+    }
+
+    private Object invoke(Method method, Params param, @Nullable Object invocationTarget)
+            throws InvocationTargetException, IllegalAccessException {
+        Class<?>[] parameterTypes = method.getParameterTypes();
+        Object[] args = new Object[parameterTypes.length];
+
+        int[] ind = new int[]{-1};
+
+        // inversed isAssignable call because the switch object does it wrong
+        Switch<Class<?>> classSwitch = new Switch<Class<?>>((a, b) -> b.isAssignableFrom(a))
+                .defaultCase(klass -> args[ind[0]] = null)
+                .addCase(DiscordApi.class, klass -> args[ind[0]] = param.discord)
+                .addCase(MessageCreateEvent.class, klass -> args[ind[0]] = param.createEvent)
+                .addCase(MessageEditEvent.class, klass -> args[ind[0]] = param.editEvent)
+                .addCase(Server.class, klass -> args[ind[0]] = param.server)
+                .addCase(Boolean.class, klass -> args[ind[0]] = param.message.isPrivateMessage())
+                .addCase(TextChannel.class, klass -> args[ind[0]] = param.textChannel)
+                .addCase(ServerTextChannel.class, klass -> args[ind[0]] = param.textChannel.asServerTextChannel()
+                        .orElse(null))
+                .addCase(PrivateChannel.class, klass -> args[ind[0]] = param.textChannel.asPrivateChannel()
+                        .orElse(null))
+                .addCase(Message.class, klass -> args[ind[0]] = param.message)
+                .addCase(MessageAuthor.class, klass -> args[ind[0]] = param.author)
+                .addCase(String[].class, klass -> args[ind[0]] = param.args);
+        for (ind[0] = 0; ind[0] < parameterTypes.length; ind[0]++) classSwitch.test(parameterTypes[ind[0]]);
+
+        return method.invoke(invocationTarget, args);
     }
 
     private void applyResponseDeletion(long cmdMsgId, CompletableFuture<Message> message) {
@@ -369,9 +396,9 @@ public final class CommandHandler {
 
     private class Params implements Command.Parameters {
         private final DiscordApi discord;
-        private final MessageCreateEvent createEvent;
-        private final MessageEditEvent editEvent;
-        private final Server server;
+        @Nullable private final MessageCreateEvent createEvent;
+        @Nullable private final MessageEditEvent editEvent;
+        @Nullable private final Server server;
         private final TextChannel textChannel;
         private final Message message;
         private final MessageAuthor author;
