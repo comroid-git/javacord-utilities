@@ -90,6 +90,13 @@ public @interface Command {
     int requiredRoleMentions() default 0;
 
     /**
+     * Defines whether a command should only be usable in an NSFW channel.
+     *
+     * @return Whether to run this command in NSFW channels only.
+     */
+    boolean runInNSFWChannelOnly() default false;
+
+    /**
      * Command parameter structure
      */
     interface Parameters {

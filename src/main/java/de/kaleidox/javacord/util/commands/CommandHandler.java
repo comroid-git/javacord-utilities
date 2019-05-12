@@ -26,6 +26,7 @@ import de.kaleidox.javacord.util.ui.messages.RefreshableMessage;
 import org.apache.logging.log4j.Logger;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.channel.Channel;
+import org.javacord.api.entity.channel.ServerTextChannel;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageAuthor;
@@ -306,6 +307,10 @@ public final class CommandHandler {
         int reqRleMent = commandRep.annotation.requiredRoleMentions();
         if (message.getMentionedRoles().size() < reqRleMent) problems.add("This command requires at least "
                 + reqRleMent + " role mention" + (reqRleMent == 1 ? "" : "s") + "!");
+
+        if (commandRep.annotation.runInNSFWChannelOnly()
+                && !channel.asServerTextChannel().map(ServerTextChannel::isNsfw).orElse(true))
+            problems.add("This command can only run in an NSFW marked channel!");
 
         if (problems.size() > 0) {
             applyResponseDeletion(message.getId(), channel.sendMessage(DefaultEmbedFactory.create()
