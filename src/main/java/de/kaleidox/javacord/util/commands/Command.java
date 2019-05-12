@@ -129,6 +129,7 @@ import org.javacord.api.event.message.MessageEditEvent;
  * <td></td>
  * </tr>
  * </table>
+ * Any type that is not listed here will get {@code null} as a parameter.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
