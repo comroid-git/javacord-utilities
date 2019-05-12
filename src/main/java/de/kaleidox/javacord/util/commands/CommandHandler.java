@@ -376,7 +376,7 @@ public final class CommandHandler {
                     args[i] = param.textChannel.asServerTextChannel().orElse(null);
                 else if (PrivateChannel.class.isAssignableFrom(klasse))
                     args[i] = param.textChannel.asPrivateChannel().orElse(null);
-                else throw new AssertionError("Unexpected parameter type: " + klasse.getName());
+                else args[i] = param.textChannel;
             } else if (Message.class.isAssignableFrom(klasse))
                 args[i] = param.message;
             else if (MessageAuthor.class.isAssignableFrom(klasse))
