@@ -22,7 +22,6 @@ import de.kaleidox.javacord.util.ui.messages.InformationMessage;
 import de.kaleidox.javacord.util.ui.messages.PagedEmbed;
 import de.kaleidox.javacord.util.ui.messages.PagedMessage;
 import de.kaleidox.javacord.util.ui.messages.RefreshableMessage;
-import de.kaleidox.util.functional.Switch;
 
 import org.apache.logging.log4j.Logger;
 import org.javacord.api.DiscordApi;
@@ -359,25 +358,33 @@ public final class CommandHandler {
         Class<?>[] parameterTypes = method.getParameterTypes();
         Object[] args = new Object[parameterTypes.length];
 
-        int[] ind = new int[]{-1};
+        for (int i = 0; i < parameterTypes.length; i++) {
+            Class<?> klasse = parameterTypes[i];
 
-        // inversed isAssignable call because the switch object does it wrong
-        Switch<Class<?>> classSwitch = new Switch<Class<?>>((a, b) -> b.isAssignableFrom(a))
-                .defaultCase(klass -> args[ind[0]] = null)
-                .addCase(DiscordApi.class, klass -> args[ind[0]] = param.discord)
-                .addCase(MessageCreateEvent.class, klass -> args[ind[0]] = param.createEvent)
-                .addCase(MessageEditEvent.class, klass -> args[ind[0]] = param.editEvent)
-                .addCase(Server.class, klass -> args[ind[0]] = param.server)
-                .addCase(Boolean.class, klass -> args[ind[0]] = param.message.isPrivateMessage())
-                .addCase(TextChannel.class, klass -> args[ind[0]] = param.textChannel)
-                .addCase(ServerTextChannel.class, klass -> args[ind[0]] = param.textChannel.asServerTextChannel()
-                        .orElse(null))
-                .addCase(PrivateChannel.class, klass -> args[ind[0]] = param.textChannel.asPrivateChannel()
-                        .orElse(null))
-                .addCase(Message.class, klass -> args[ind[0]] = param.message)
-                .addCase(MessageAuthor.class, klass -> args[ind[0]] = param.author)
-                .addCase(String[].class, klass -> args[ind[0]] = param.args);
-        for (ind[0] = 0; ind[0] < parameterTypes.length; ind[0]++) classSwitch.test(parameterTypes[ind[0]]);
+            if (DiscordApi.class.isAssignableFrom(klasse))
+                args[i] = param.discord;
+            else if (MessageCreateEvent.class.isAssignableFrom(klasse))
+                args[i] = param.createEvent;
+            else if (MessageEditEvent.class.isAssignableFrom(klasse))
+                args[i] = param.editEvent;
+            else if (Server.class.isAssignableFrom(klasse))
+                args[i] = param.server;
+            else if (Boolean.class.isAssignableFrom(klasse))
+                args[i] = param.message.isPrivateMessage();
+            else if (TextChannel.class.isAssignableFrom(klasse)) {
+                if (ServerTextChannel.class.isAssignableFrom(klasse))
+                    args[i] = param.textChannel.asServerTextChannel().orElse(null);
+                else if (PrivateChannel.class.isAssignableFrom(klasse))
+                    args[i] = param.textChannel.asPrivateChannel().orElse(null);
+                else throw new AssertionError("Unexpected parameter type: " + klasse.getName());
+            } else if (Message.class.isAssignableFrom(klasse))
+                args[i] = param.message;
+            else if (MessageAuthor.class.isAssignableFrom(klasse))
+                args[i] = param.author;
+            else if (String[].class.isAssignableFrom(klasse))
+                args[i] = param.args;
+            else args[i] = null;
+        }
 
         return method.invoke(invocationTarget, args);
     }
