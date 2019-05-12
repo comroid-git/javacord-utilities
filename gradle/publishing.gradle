@@ -29,6 +29,7 @@ publishing {
                 name = projectName
                 description = projectDescription
                 inceptionYear = '2019'
+                url = 'https://github.com/burdoto/javacord-utilities'
 
                 licenses {
                     license {
@@ -44,6 +45,12 @@ publishing {
                         email = "burdoto@outlook.com"
                     }
                 }
+
+                scm {
+                    connection = 'scm:git:git://github.com/burdoto/javacord-utilities.git'
+                    developerConnection = 'scm:git:ssh://github.com/burdoto/javacord-utilities.git'
+                    url = 'https://github.com/burdoto/javacord-utilities'
+                }
             }
         }
     }
@@ -53,12 +60,12 @@ task generateGithubPom(type: GenerateMavenPom) {
     destination = file("$projectDir/pom.xml")
     pom = publishing.publications.mavenJava.pom
 }
-/*
+
 signing {
     useGpgCmd()
     sign publishing.publications.mavenJava
 }
-*/
+
 tasks.removeAll([promoteRepository, closeAndPromoteRepository, getStagingProfile])
 
 nexusStaging {
