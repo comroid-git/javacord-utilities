@@ -61,7 +61,7 @@ task generateGithubPom(type: GenerateMavenPom) {
     pom = publishing.publications.mavenJava.pom
 }
 
-if (System.getenv('JITPACK') == null) {
+if (!System.getenv().containsKey('JITPACK')) {
     signing {
         useGpgCmd()
         sign publishing.publications.mavenJava
