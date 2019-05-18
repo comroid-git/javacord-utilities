@@ -114,7 +114,7 @@ public final class CommandHandler {
         PagedEmbed embed = new PagedEmbed(param.getTextChannel(), embedSupplier);
         if (param.getArguments().length == 0) {
             getCommands().forEach(commandRep -> {
-                Command cmd = commandRep.annotation;
+                Command cmd = commandRep.cmd;
                 String[] aliases = cmd.aliases();
                 if (aliases.length == 0) aliases = new String[]{commandRep.method.getName()};
                 embed.addField("__" + aliases[0] + "__: _" + prefixes[0] + cmd.usage() + "_", cmd.description());
@@ -124,14 +124,14 @@ public final class CommandHandler {
         } else if (param.getArguments().length >= 1) {
             Optional<CommandRepresentation> command = getCommands().stream()
                     .filter(cmd -> {
-                        for (String alias : cmd.annotation.aliases())
+                        for (String alias : cmd.cmd.aliases())
                             if (alias.equalsIgnoreCase(param.getArguments()[0]))
                                 return true;
                         return false;
                     }).findAny();
 
             if (command.isPresent()) {
-                Command cmd = command.get().annotation;
+                Command cmd = command.get().cmd;
                 String[] aliases = cmd.aliases();
                 if (aliases.length == 0) aliases = new String[]{command.get().method.getName()};
                 embed.addField("__" + aliases[0] + "__: _" + prefixes[0] + cmd.usage() + "_", cmd.description());
@@ -148,8 +148,24 @@ public final class CommandHandler {
 
     private void extractCommandRep(@Nullable Object invocationTarget, Method... methods) {
         for (Method method : methods) {
-            Command annotation = method.getAnnotation(Command.class);
-            if (annotation == null) continue;
+            Command cmd = method.getAnnotation(Command.class);
+            if (cmd == null) continue;
+
+            CommandGroup group;
+            if ((group = method.getAnnotation(CommandGroup.class)) == null) {
+                Class<?> declaring = method.getDeclaringClass();
+                if ((group = declaring.getAnnotation(CommandGroup.class)) == null) {
+                    Class<?>[] supers = new Class[declaring.getInterfaces().length
+                            + (declaring.getSuperclass() == Object.class ? 0 : 1)];
+                    for (int i = 0; i < declaring.getInterfaces().length; i++) supers[i] = declaring.getInterfaces()[i];
+                    if (declaring.getSuperclass() != Object.class)
+                        supers[supers.length - 1] = declaring.getSuperclass();
+
+                    int i = 0;
+                    while (i < supers.length && (group = supers[i].getAnnotation(CommandGroup.class)) == null)
+                        i++;
+                }
+            }
 
             if (!Modifier.isStatic(method.getModifiers()) && Objects.isNull(invocationTarget))
                 throw new IllegalArgumentException("Invocation Target cannot be null on non-static methods!");
@@ -157,15 +173,15 @@ public final class CommandHandler {
                 throw new AbstractMethodError("Command annotated method cannot be abstract!");
 
             boolean hasErrored = false;
-            if (!annotation.enableServerChat()
-                    && annotation.requiredDiscordPermission() != PermissionType.SEND_MESSAGES) {
+            if (!cmd.enableServerChat()
+                    && cmd.requiredDiscordPermission() != PermissionType.SEND_MESSAGES) {
                 logger.error("Command " + method.getName() + "(" + Arrays.stream(method.getParameterTypes())
                         .map(Class::getSimpleName)
                         .collect(Collectors.joining(", ")) + ")"
                         + ": Conflicting command properties; private-only commands cannot require permissions!");
                 hasErrored = true;
             }
-            if (!annotation.enableServerChat() && !annotation.enableServerChat()) {
+            if (!cmd.enableServerChat() && !cmd.enableServerChat()) {
                 logger.error("Command " + method.getName() + "(" + Arrays.stream(method.getParameterTypes())
                         .map(Class::getSimpleName)
                         .collect(Collectors.joining(", ")) + ")"
@@ -175,9 +191,12 @@ public final class CommandHandler {
 
             if (hasErrored) continue;
 
-            CommandRepresentation commandRep = new CommandRepresentation(method, annotation, invocationTarget);
-            if (annotation.aliases().length > 0)
-                for (String alias : annotation.aliases()) commands.put(alias, commandRep);
+            CommandRepresentation commandRep = new CommandRepresentation(method, cmd, group, invocationTarget);
+            if (cmd.aliases().length > 0)
+                for (String alias : cmd.aliases()) commands.put(alias, commandRep);
+            if (group == null)
+                logger.info("Command " + (cmd.aliases().length == 0 ? method.getName() : cmd.aliases()[0])
+                        + " was registered without a CommandGroup annotation!");
             else commands.put(method.getName(), commandRep);
         }
     }
@@ -276,9 +295,9 @@ public final class CommandHandler {
         commandParams.args = args;
         List<String> problems = new ArrayList<>();
 
-        if (message.isPrivateMessage() && !commandRep.annotation.enablePrivateChat())
+        if (message.isPrivateMessage() && !commandRep.cmd.enablePrivateChat())
             problems.add("This command can only be run in a server channel!");
-        else if (!message.isPrivateMessage() && !commandRep.annotation.enableServerChat())
+        else if (!message.isPrivateMessage() && !commandRep.cmd.enableServerChat())
             problems.add("This command can only be run in a private channel!");
 
         switch (authMethodProperty == null ? "discord_permission" : commandParams.getServer()
@@ -292,29 +311,29 @@ public final class CommandHandler {
                                 .asServerTextChannel()
                                 .map(stc -> stc.hasAnyPermission(usr,
                                         PermissionType.ADMINISTRATOR,
-                                        commandRep.annotation.requiredDiscordPermission()))
+                                        commandRep.cmd.requiredDiscordPermission()))
                                 .orElse(true))
                         .orElse(false))
                     problems.add("You are missing the required permission: "
-                            + commandRep.annotation.requiredDiscordPermission().name() + "!");
+                            + commandRep.cmd.requiredDiscordPermission().name() + "!");
                 break;
             default:
                 throw new AssertionError("Unreachable statement reached");
         }
 
-        int reqChlMent = commandRep.annotation.requiredChannelMentions();
+        int reqChlMent = commandRep.cmd.requiredChannelMentions();
         if (message.getMentionedChannels().size() < reqChlMent) problems.add("This command requires at least "
                 + reqChlMent + " channel mention" + (reqChlMent == 1 ? "" : "s") + "!");
 
-        int reqUsrMent = commandRep.annotation.requiredUserMentions();
+        int reqUsrMent = commandRep.cmd.requiredUserMentions();
         if (message.getMentionedUsers().size() < reqUsrMent) problems.add("This command requires at least "
                 + reqUsrMent + " user mention" + (reqUsrMent == 1 ? "" : "s") + "!");
 
-        int reqRleMent = commandRep.annotation.requiredRoleMentions();
+        int reqRleMent = commandRep.cmd.requiredRoleMentions();
         if (message.getMentionedRoles().size() < reqRleMent) problems.add("This command requires at least "
                 + reqRleMent + " role mention" + (reqRleMent == 1 ? "" : "s") + "!");
 
-        if (commandRep.annotation.runInNSFWChannelOnly()
+        if (commandRep.cmd.runInNSFWChannelOnly()
                 && !channel.asServerTextChannel().map(ServerTextChannel::isNsfw).orElse(true))
             problems.add("This command can only run in an NSFW marked channel!");
 
@@ -326,7 +345,7 @@ public final class CommandHandler {
             return;
         }
 
-        if (commandRep.annotation.async()) api.getThreadPool()
+        if (commandRep.cmd.async()) api.getThreadPool()
                 .getExecutorService()
                 .submit(() -> doInvoke(commandRep, commandParams, channel, message));
         else doInvoke(commandRep, commandParams, channel, message);
