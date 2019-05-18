@@ -47,6 +47,7 @@ import static org.javacord.api.util.logging.ExceptionLogger.get;
 
 public final class CommandHandler {
     private static final Logger logger = LoggerUtil.getLogger(CommandHandler.class);
+    static final String NO_GROUP = "@NoGroup#";
 
     private final DiscordApi api;
     private final ConcurrentHashMap<String, CommandRep> commands = new ConcurrentHashMap<>();
