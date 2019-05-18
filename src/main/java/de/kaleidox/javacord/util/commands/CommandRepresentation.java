@@ -6,12 +6,19 @@ import org.jetbrains.annotations.Nullable;
 
 public class CommandRepresentation {
     public final Method method;
-    public final Command annotation;
-    @Nullable public final Object invocationTarget;
+    public final Command cmd;
+    public @Nullable final CommandGroup group;
+    public @Nullable final Object invocationTarget;
 
-    CommandRepresentation(Method method, Command annotation, @Nullable Object invocationTarget) {
+    CommandRepresentation(
+            Method method,
+            Command cmd,
+            @Nullable CommandGroup group,
+            @Nullable Object invocationTarget
+    ) {
         this.method = method;
-        this.annotation = annotation;
+        this.cmd = cmd;
+        this.group = group;
         this.invocationTarget = invocationTarget;
     }
 }
