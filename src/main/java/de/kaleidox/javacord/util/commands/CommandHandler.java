@@ -87,6 +87,14 @@ public final class CommandHandler {
         return reps;
     }
 
+    public void registerCommands(Object register) {
+        if (register instanceof Class)
+            extractCommandRep(null, ((Class) register).getMethods());
+        else if (register instanceof Method)
+            extractCommandRep(null, (Method) register);
+        else extractCommandRep(register, register.getClass().getMethods());
+    }
+
     public void useDefaultHelp(@Nullable Supplier<EmbedBuilder> embedSupplier) {
         this.embedSupplier = (embedSupplier == null ? DefaultEmbedFactory.INSTANCE : embedSupplier);
         registerCommands(this);
@@ -95,14 +103,6 @@ public final class CommandHandler {
     public void useCustomPrefixes(@NotNull PropertyGroup propertyGroup, boolean exclusiveCustomPrefix) {
         this.customPrefixProperty = propertyGroup;
         this.exclusiveCustomPrefix = exclusiveCustomPrefix;
-    }
-
-    public void registerCommands(Object register) {
-        if (register instanceof Class)
-            extractCommandRep(null, ((Class) register).getMethods());
-        else if (register instanceof Method)
-            extractCommandRep(null, (Method) register);
-        else extractCommandRep(register, register.getClass().getMethods());
     }
 
     public void useAuthManager(PropertyGroup authMethodProperty) {
