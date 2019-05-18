@@ -51,7 +51,7 @@ public final class CommandHandler {
     static final String NO_GROUP = "@NoGroup#";
 
     private final DiscordApi api;
-    private final Map<String, CommandRep> commands = new ConcurrentHashMap<>();
+    private final Map<String, CommandRepresentation> commands = new ConcurrentHashMap<>();
     private final Map<Long, long[]> responseMap = new ConcurrentHashMap<>();
 
     public String[] prefixes;
@@ -79,8 +79,8 @@ public final class CommandHandler {
         api.addMessageDeleteListener(this::handleMessageDelete);
     }
 
-    public Set<CommandRep> getCommands() {
-        HashSet<CommandRep> reps = new HashSet<>();
+    public Set<CommandRepresentation> getCommands() {
+        HashSet<CommandRepresentation> reps = new HashSet<>();
 
         commands.forEach((s, commandRep) -> reps.add(commandRep));
 
@@ -122,7 +122,7 @@ public final class CommandHandler {
 
             return embed;
         } else if (param.getArguments().length >= 1) {
-            Optional<CommandRep> command = getCommands().stream()
+            Optional<CommandRepresentation> command = getCommands().stream()
                     .filter(cmd -> {
                         for (String alias : cmd.annotation.aliases())
                             if (alias.equalsIgnoreCase(param.getArguments()[0]))
@@ -175,7 +175,7 @@ public final class CommandHandler {
 
             if (hasErrored) continue;
 
-            CommandRep commandRep = new CommandRep(method, annotation, invocationTarget);
+            CommandRepresentation commandRep = new CommandRepresentation(method, annotation, invocationTarget);
             if (annotation.aliases().length > 0)
                 for (String alias : annotation.aliases()) commands.put(alias, commandRep);
             else commands.put(method.getName(), commandRep);
@@ -259,7 +259,7 @@ public final class CommandHandler {
         if (pref == null && usedPrefix < prefixes.length) pref = prefixes;
         if (usedPrefix == -1 || pref == null) return;
 
-        CommandRep commandRep;
+        CommandRepresentation commandRep;
         String[] split = content.split("[\\s&&[^\\n]]++");
         String[] args;
         if (pref[usedPrefix].matches("^(.*\\s.*)+$")) {
@@ -332,7 +332,7 @@ public final class CommandHandler {
         else doInvoke(commandRep, commandParams, channel, message);
     }
 
-    private void doInvoke(CommandRep commandRep, Params commandParams, TextChannel channel, Message message) {
+    private void doInvoke(CommandRepresentation commandRep, Params commandParams, TextChannel channel, Message message) {
         Object reply;
         try {
             reply = invoke(commandRep.method, commandParams, commandRep.invocationTarget);
@@ -403,18 +403,6 @@ public final class CommandHandler {
             if (autoDeleteResponseOnCommandDeletion)
                 responseMap.put(cmdMsgId, new long[]{msg.getId(), msg.getChannel().getId()});
         });
-    }
-
-    public class CommandRep {
-        public final Method method;
-        public final Command annotation;
-        @Nullable public final Object invocationTarget;
-
-        private CommandRep(Method method, Command annotation, @Nullable Object invocationTarget) {
-            this.method = method;
-            this.annotation = annotation;
-            this.invocationTarget = invocationTarget;
-        }
     }
 
     private class Params implements Command.Parameters {
