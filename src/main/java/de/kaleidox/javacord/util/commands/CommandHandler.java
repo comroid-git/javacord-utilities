@@ -194,10 +194,10 @@ public final class CommandHandler {
             CommandRepresentation commandRep = new CommandRepresentation(method, cmd, group, invocationTarget);
             if (cmd.aliases().length > 0)
                 for (String alias : cmd.aliases()) commands.put(alias, commandRep);
+            else commands.put(method.getName(), commandRep);
             if (group == null)
                 logger.info("Command " + (cmd.aliases().length == 0 ? method.getName() : cmd.aliases()[0])
                         + " was registered without a CommandGroup annotation!");
-            else commands.put(method.getName(), commandRep);
         }
     }
 
