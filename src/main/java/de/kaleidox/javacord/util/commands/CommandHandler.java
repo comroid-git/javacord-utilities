@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -50,8 +51,8 @@ public final class CommandHandler {
     static final String NO_GROUP = "@NoGroup#";
 
     private final DiscordApi api;
-    private final ConcurrentHashMap<String, CommandRep> commands = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<Long, long[]> responseMap = new ConcurrentHashMap<>();
+    private final Map<String, CommandRep> commands = new ConcurrentHashMap<>();
+    private final Map<Long, long[]> responseMap = new ConcurrentHashMap<>();
 
     public String[] prefixes;
     public boolean autoDeleteResponseOnCommandDeletion;
