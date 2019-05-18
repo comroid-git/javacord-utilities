@@ -1,6 +1,7 @@
 package de.kaleidox.javacord.util.server.properties;
 
 import java.awt.Color;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -15,7 +16,6 @@ import de.kaleidox.javacord.util.commands.CommandHandler;
 import de.kaleidox.javacord.util.embed.DefaultEmbedFactory;
 import de.kaleidox.javacord.util.ui.messages.PagedEmbed;
 import de.kaleidox.util.interfaces.Initializable;
-import de.kaleidox.util.interfaces.Terminatable;
 import de.kaleidox.util.markers.Value;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -33,7 +33,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static de.kaleidox.util.helpers.JsonHelper.nodeOf;
 import static de.kaleidox.util.helpers.JsonHelper.objectNode;
 
-public final class ServerPropertiesManager implements Initializable, Terminatable {
+public final class ServerPropertiesManager implements Initializable, Closeable {
     private final Map<String, PropertyGroup> properties;
     private final File propertiesFile;
     private Supplier<EmbedBuilder> embedSupplier;
@@ -49,7 +49,7 @@ public final class ServerPropertiesManager implements Initializable, Terminatabl
         Runtime.getRuntime()
                 .addShutdownHook(new Thread(() -> {
                     try {
-                        terminate();
+                        close();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -161,7 +161,7 @@ public final class ServerPropertiesManager implements Initializable, Terminatabl
     }
 
     @Override
-    public void terminate() throws IOException {
+    public void close() throws IOException {
         storeData();
     }
 
