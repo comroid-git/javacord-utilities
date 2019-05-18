@@ -162,6 +162,20 @@ public @interface Command {
     String usage() default "No usage provided.";
 
     /**
+     * Defines the group name for the command, as listed in a help command.
+     *
+     * @return The name of the group of the command.
+     */
+    String groupName() default CommandHandler.NO_GROUP;
+
+    /**
+     * Defines the ordinal index of the command in the group, as listed in a help command.
+     *
+     * @return The ordinal of the command in the group.
+     */
+    int groupOrdinal() default -1;
+
+    /**
      * Defines whether the command is shown in the default help command. Default value is {@code TRUE}.
      *
      * @return Whether to list this command in the default help command.
