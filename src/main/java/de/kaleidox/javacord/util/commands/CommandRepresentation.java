@@ -4,7 +4,7 @@ import java.lang.reflect.Method;
 
 import org.jetbrains.annotations.Nullable;
 
-public class CommandRepresentation {
+public final class CommandRepresentation {
     public final Method method;
     public final Command cmd;
     public @Nullable final CommandGroup group;
