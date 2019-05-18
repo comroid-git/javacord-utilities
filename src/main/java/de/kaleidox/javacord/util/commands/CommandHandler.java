@@ -58,7 +58,7 @@ public final class CommandHandler {
     public boolean autoDeleteResponseOnCommandDeletion;
     private PropertyGroup authMethodProperty = null;
     private Supplier<EmbedBuilder> embedSupplier = null;
-    @Nullable private PropertyGroup customPrefixProperty;
+    private @Nullable PropertyGroup customPrefixProperty;
     private boolean exclusiveCustomPrefix;
 
     public CommandHandler(DiscordApi api) {
