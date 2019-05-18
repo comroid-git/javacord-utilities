@@ -60,6 +60,7 @@ public final class CommandHandler {
     private Supplier<EmbedBuilder> embedSupplier = null;
     private @Nullable PropertyGroup customPrefixProperty;
     private boolean exclusiveCustomPrefix;
+    private @Nullable HelpCommandSetup helpCommandSetup;
 
     public CommandHandler(DiscordApi api) {
         this(api, false);
@@ -95,9 +96,10 @@ public final class CommandHandler {
         else extractCommandRep(register, register.getClass().getMethods());
     }
 
-    public void useDefaultHelp(@Nullable Supplier<EmbedBuilder> embedSupplier) {
+    public HelpCommandSetup useDefaultHelp(@Nullable Supplier<EmbedBuilder> embedSupplier) {
         this.embedSupplier = (embedSupplier == null ? DefaultEmbedFactory.INSTANCE : embedSupplier);
         registerCommands(this);
+        return (helpCommandSetup == null ? helpCommandSetup = new HelpCommandSetup() : helpCommandSetup);
     }
 
     public void useCustomPrefixes(@NotNull PropertyGroup propertyGroup, boolean exclusiveCustomPrefix) {
@@ -403,6 +405,14 @@ public final class CommandHandler {
             if (autoDeleteResponseOnCommandDeletion)
                 responseMap.put(cmdMsgId, new long[]{msg.getId(), msg.getChannel().getId()});
         });
+    }
+
+    public class HelpCommandSetup {
+        private String[] groupOrder = new String[0];
+
+        public void setGroupOrder(String... groupOrder) {
+            this.groupOrder = groupOrder;
+        }
     }
 
     public class CommandRep {
