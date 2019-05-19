@@ -37,7 +37,7 @@ public class ServerPropertiesManagerTest {
                 .setValue(100).toString("\uD83D\uDD12");
         manager.getProperty("bot.emoji").getValue(200);
 
-        manager.terminate();
+        manager.close();
     }
 
     @Test(timeout = 3000)
