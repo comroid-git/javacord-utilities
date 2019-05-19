@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * CommandGroups with duplicate names are merged with the latest-registered parameters.
  * Names for merging have to be equal after {@link String#equals(Object)}.
  * <p>
- * If a {@link #groupOrdinal()} value of groups with different names are equal,
+ * If a {@link #ordinal()} value of groups with different names are equal,
  * the registration method will throw an {@link IllegalStateException}.
  */
 @Retention(RetentionPolicy.RUNTIME)
@@ -36,5 +36,5 @@ public @interface CommandGroup {
      *
      * @return The group's ordinal index.
      */
-    int groupOrdinal() default -1;
+    int ordinal() default -1;
 }

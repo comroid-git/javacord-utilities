@@ -173,7 +173,7 @@ public @interface Command {
      *
      * @return The ordinal of the command in the group.
      */
-    int groupOrdinal() default -1;
+    int ordinal() default -1;
 
     /**
      * Defines whether the command is shown in the default help command. Default value is {@code TRUE}.
