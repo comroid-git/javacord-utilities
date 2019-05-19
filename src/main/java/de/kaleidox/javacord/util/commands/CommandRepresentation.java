@@ -20,8 +20,8 @@ public final class CommandRepresentation {
     public final int requiredRoleMentions;
     public final boolean runInNSFWChannelOnly;
     public final boolean async;
-    public final String groupName;
-    public final String groupDescription;
+    public @Nullable final String groupName;
+    public @Nullable final String groupDescription;
     public final int groupOrdinal;
     public @Nullable final Object invocationTarget;
 
