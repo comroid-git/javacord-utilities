@@ -36,5 +36,5 @@ public @interface CommandGroup {
      *
      * @return The group's ordinal index.
      */
-    int ordinal() default -1;
+    int ordinal() default Integer.MAX_VALUE;
 }
