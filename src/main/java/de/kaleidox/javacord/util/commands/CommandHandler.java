@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -113,28 +114,25 @@ public final class CommandHandler {
     public Object defaultHelpCommand(Command.Parameters param) {
         PagedEmbed embed = new PagedEmbed(param.getTextChannel(), embedSupplier);
         if (param.getArguments().length == 0) {
-            getCommands().forEach(commandRep -> {
-                Command cmd = commandRep.cmd;
-                String[] aliases = cmd.aliases();
-                if (aliases.length == 0) aliases = new String[]{commandRep.method.getName()};
-                embed.addField("__" + aliases[0] + "__: _" + prefixes[0] + cmd.usage() + "_", cmd.description());
-            });
+            getCommands().stream()
+                    .sorted(Comparator.<CommandRepresentation>comparingInt(cmd -> cmd.groupOrdinal)
+                            .thenComparingInt(rep -> rep.ordinal))
+                    .forEachOrdered(cmd -> embed.addField("__" + cmd.aliases[0] + "__: _" + prefixes[0]
+                            + cmd.usage + "_", cmd.description));
 
             return embed;
         } else if (param.getArguments().length >= 1) {
             Optional<CommandRepresentation> command = getCommands().stream()
                     .filter(cmd -> {
-                        for (String alias : cmd.cmd.aliases())
+                        for (String alias : cmd.aliases)
                             if (alias.equalsIgnoreCase(param.getArguments()[0]))
                                 return true;
                         return false;
                     }).findAny();
 
             if (command.isPresent()) {
-                Command cmd = command.get().cmd;
-                String[] aliases = cmd.aliases();
-                if (aliases.length == 0) aliases = new String[]{command.get().method.getName()};
-                embed.addField("__" + aliases[0] + "__: _" + prefixes[0] + cmd.usage() + "_", cmd.description());
+                CommandRepresentation cmd = command.get();
+                embed.addField("__" + cmd.aliases[0] + "__: _" + prefixes[0] + cmd.usage + "_", cmd.description);
             } else embed.addField(
                     "__Unknown Command__: _" + param.getArguments()[0] + "_",
                     "Type _\"" + prefixes[0] + "help\"_ for a list of commands."
@@ -278,26 +276,26 @@ public final class CommandHandler {
         if (pref == null && usedPrefix < prefixes.length) pref = prefixes;
         if (usedPrefix == -1 || pref == null) return;
 
-        CommandRepresentation commandRep;
+        CommandRepresentation cmd;
         String[] split = content.split("[\\s&&[^\\n]]++");
         String[] args;
         if (pref[usedPrefix].matches("^(.*\\s.*)+$")) {
-            commandRep = commands.get(split[1]);
+            cmd = commands.get(split[1]);
             args = new String[split.length - 2];
             System.arraycopy(split, 2, args, 0, args.length);
         } else {
-            commandRep = commands.get(split[0].substring(pref[usedPrefix].length()));
+            cmd = commands.get(split[0].substring(pref[usedPrefix].length()));
             args = new String[split.length - 1];
             System.arraycopy(split, 1, args, 0, args.length);
         }
 
-        if (commandRep == null) return;
+        if (cmd == null) return;
         commandParams.args = args;
         List<String> problems = new ArrayList<>();
 
-        if (message.isPrivateMessage() && !commandRep.cmd.enablePrivateChat())
+        if (message.isPrivateMessage() && !cmd.enablePrivateChat)
             problems.add("This command can only be run in a server channel!");
-        else if (!message.isPrivateMessage() && !commandRep.cmd.enableServerChat())
+        else if (!message.isPrivateMessage() && !cmd.enableServerChat)
             problems.add("This command can only be run in a private channel!");
 
         switch (authMethodProperty == null ? "discord_permission" : commandParams.getServer()
@@ -311,29 +309,29 @@ public final class CommandHandler {
                                 .asServerTextChannel()
                                 .map(stc -> stc.hasAnyPermission(usr,
                                         PermissionType.ADMINISTRATOR,
-                                        commandRep.cmd.requiredDiscordPermission()))
+                                        cmd.requiredDiscordPermission))
                                 .orElse(true))
                         .orElse(false))
                     problems.add("You are missing the required permission: "
-                            + commandRep.cmd.requiredDiscordPermission().name() + "!");
+                            + cmd.requiredDiscordPermission.name() + "!");
                 break;
             default:
                 throw new AssertionError("Unreachable statement reached");
         }
 
-        int reqChlMent = commandRep.cmd.requiredChannelMentions();
+        int reqChlMent = cmd.requiredChannelMentions;
         if (message.getMentionedChannels().size() < reqChlMent) problems.add("This command requires at least "
                 + reqChlMent + " channel mention" + (reqChlMent == 1 ? "" : "s") + "!");
 
-        int reqUsrMent = commandRep.cmd.requiredUserMentions();
+        int reqUsrMent = cmd.requiredUserMentions;
         if (message.getMentionedUsers().size() < reqUsrMent) problems.add("This command requires at least "
                 + reqUsrMent + " user mention" + (reqUsrMent == 1 ? "" : "s") + "!");
 
-        int reqRleMent = commandRep.cmd.requiredRoleMentions();
+        int reqRleMent = cmd.requiredRoleMentions;
         if (message.getMentionedRoles().size() < reqRleMent) problems.add("This command requires at least "
                 + reqRleMent + " role mention" + (reqRleMent == 1 ? "" : "s") + "!");
 
-        if (commandRep.cmd.runInNSFWChannelOnly()
+        if (cmd.runInNSFWChannelOnly
                 && !channel.asServerTextChannel().map(ServerTextChannel::isNsfw).orElse(true))
             problems.add("This command can only run in an NSFW marked channel!");
 
@@ -345,10 +343,10 @@ public final class CommandHandler {
             return;
         }
 
-        if (commandRep.cmd.async()) api.getThreadPool()
+        if (cmd.async) api.getThreadPool()
                 .getExecutorService()
-                .submit(() -> doInvoke(commandRep, commandParams, channel, message));
-        else doInvoke(commandRep, commandParams, channel, message);
+                .submit(() -> doInvoke(cmd, commandParams, channel, message));
+        else doInvoke(cmd, commandParams, channel, message);
     }
 
     private void doInvoke(CommandRepresentation commandRep, Params commandParams, TextChannel channel, Message message) {
