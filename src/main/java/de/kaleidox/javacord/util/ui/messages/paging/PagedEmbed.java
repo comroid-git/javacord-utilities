@@ -1,4 +1,4 @@
-package de.kaleidox.javacord.util.ui.messages;
+package de.kaleidox.javacord.util.ui.messages.paging;
 
 import java.util.ArrayList;
 import java.util.List;

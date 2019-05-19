@@ -1,4 +1,4 @@
-package de.kaleidox.javacord.util.ui.messages;
+package de.kaleidox.javacord.util.ui.messages.paging;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;

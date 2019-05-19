@@ -21,8 +21,8 @@ import java.util.stream.Collectors;
 import de.kaleidox.javacord.util.embed.DefaultEmbedFactory;
 import de.kaleidox.javacord.util.server.properties.PropertyGroup;
 import de.kaleidox.javacord.util.ui.messages.InformationMessage;
-import de.kaleidox.javacord.util.ui.messages.PagedEmbed;
-import de.kaleidox.javacord.util.ui.messages.PagedMessage;
+import de.kaleidox.javacord.util.ui.messages.paging.PagedEmbed;
+import de.kaleidox.javacord.util.ui.messages.paging.PagedMessage;
 import de.kaleidox.javacord.util.ui.messages.RefreshableMessage;
 
 import org.apache.logging.log4j.Logger;
