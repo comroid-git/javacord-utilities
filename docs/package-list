@@ -2,5 +2,7 @@ de.kaleidox.javacord.util.commands
 de.kaleidox.javacord.util.embed
 de.kaleidox.javacord.util.server.properties
 de.kaleidox.javacord.util.ui.messages
+de.kaleidox.javacord.util.ui.messages.categorizing
+de.kaleidox.javacord.util.ui.messages.paging
 de.kaleidox.util.interfaces
 de.kaleidox.util.markers
