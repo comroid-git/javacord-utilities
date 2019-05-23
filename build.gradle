@@ -14,8 +14,8 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 wrapper {
-  gradleVersion = '5.2'
-  distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
+    gradleVersion = '5.2'
+    distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
 }
 
 task sourcesJar(type: Jar) {
@@ -39,12 +39,12 @@ compileJava.options.encoding = 'UTF-8'
 repositories.jcenter()
 
 dependencies {
-    implementation 'de.kaleidox:kalutils:0.4.2'
-    implementation('org.javacord:javacord-api:3.0.4') 
+    api 'de.kaleidox:kalutils:0.4.2'
+    api('org.javacord:javacord-api:3.0.4')
             { exclude group: 'com.fasterxml.jackson.core' }
-    implementation('org.javacord:javacord-core:3.0.4') 
+    implementation('org.javacord:javacord-core:3.0.4')
             { exclude group: 'com.fasterxml.jackson.core' }
-    implementation 'org.apache.logging.log4j:log4j-api:2.11.0'
+    api 'org.apache.logging.log4j:log4j-api:2.11.0'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.8'
     compileOnly 'org.jetbrains:annotations:17.0.0'
 
