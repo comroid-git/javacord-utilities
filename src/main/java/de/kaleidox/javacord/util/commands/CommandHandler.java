@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -25,6 +26,7 @@ import de.kaleidox.javacord.util.ui.messages.RefreshableMessage;
 import de.kaleidox.javacord.util.ui.messages.categorizing.CategorizedEmbed;
 import de.kaleidox.javacord.util.ui.messages.paging.PagedEmbed;
 import de.kaleidox.javacord.util.ui.messages.paging.PagedMessage;
+import de.kaleidox.javacord.util.ui.reactions.InfoReaction;
 
 import org.apache.logging.log4j.Logger;
 import org.javacord.api.DiscordApi;
@@ -396,6 +398,9 @@ public final class CommandHandler {
         } catch (IllegalAccessException e) {
             throw new RuntimeException("Cannot access command method!", e);
         } catch (InvocationTargetException e) {
+            new InfoReaction(message, "⚠", "Command threw an exception: ["
+                    + e.getCause().getClass().getSimpleName() + "] " + e.getCause().getMessage(),
+                    1, TimeUnit.MINUTES, DefaultEmbedFactory.INSTANCE);
             throw new RuntimeException("Command method threw an Exception!", e);
         }
 
