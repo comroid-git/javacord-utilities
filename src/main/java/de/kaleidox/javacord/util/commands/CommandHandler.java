@@ -19,8 +19,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import de.kaleidox.javacord.util.ui.embed.DefaultEmbedFactory;
 import de.kaleidox.javacord.util.server.properties.PropertyGroup;
+import de.kaleidox.javacord.util.ui.embed.DefaultEmbedFactory;
 import de.kaleidox.javacord.util.ui.messages.InformationMessage;
 import de.kaleidox.javacord.util.ui.messages.RefreshableMessage;
 import de.kaleidox.javacord.util.ui.messages.categorizing.CategorizedEmbed;
