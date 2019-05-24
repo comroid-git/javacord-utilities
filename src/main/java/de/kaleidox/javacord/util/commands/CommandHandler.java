@@ -265,6 +265,7 @@ public final class CommandHandler {
     private void handleMessageDelete(MessageDeleteEvent event) {
         if (autoDeleteResponseOnCommandDeletion) {
             long[] ids = responseMap.get(event.getMessageId());
+            if (ids == null) return;
             api.getMessageById(
                     ids[0],
                     api.getChannelById(ids[1]).flatMap(Channel::asTextChannel).orElseThrow(AssertionError::new))
