@@ -17,7 +17,9 @@ public class ServerPropertiesManagerTest {
 
     @Before
     public void setup() throws IOException {
-        manager = new ServerPropertiesManager(new File("props/serverProperties.json"));
+        File file = new File("props/serverProperties.json");
+        file.createNewFile();
+        manager = new ServerPropertiesManager(file);
 
         manager.register("bot.traits", 419)
                 .setDisplayName("Traits")
