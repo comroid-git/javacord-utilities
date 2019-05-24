@@ -21,10 +21,10 @@ import java.util.stream.Collectors;
 import de.kaleidox.javacord.util.embed.DefaultEmbedFactory;
 import de.kaleidox.javacord.util.server.properties.PropertyGroup;
 import de.kaleidox.javacord.util.ui.messages.InformationMessage;
+import de.kaleidox.javacord.util.ui.messages.RefreshableMessage;
 import de.kaleidox.javacord.util.ui.messages.categorizing.CategorizedEmbed;
 import de.kaleidox.javacord.util.ui.messages.paging.PagedEmbed;
 import de.kaleidox.javacord.util.ui.messages.paging.PagedMessage;
-import de.kaleidox.javacord.util.ui.messages.RefreshableMessage;
 
 import org.apache.logging.log4j.Logger;
 import org.javacord.api.DiscordApi;
@@ -113,21 +113,55 @@ public final class CommandHandler {
 
     @CommandGroup(name = "Basic Commands", description = "All commands for basic interaction with the bot")
     @Command(aliases = "help", usage = "help [command]", description = "Shows a list of commands and what they do.")
-    public Object defaultHelpCommand(Command.Parameters param) {
-        PagedEmbed embed = new PagedEmbed(param.getTextChannel(), embedSupplier);
-        if (param.getArguments().length == 0) {
-            getCommands().stream()
-                    .sorted(Comparator.<CommandRepresentation>comparingInt(cmd -> cmd.groupOrdinal)
-                            .thenComparingInt(rep -> rep.ordinal))
-                    .forEachOrdered(cmd -> embed.addField("__" + cmd.aliases[0] + "__: _" + prefixes[0]
-                            + cmd.usage + "_", cmd.description));
+    public Object defaultHelpCommand(TextChannel channel, String[] args) {
+        if (args.length == 0) {
+            if (getCommands().stream()
+                    .filter(cmd -> !Objects.equals(cmd.groupName, "Basic Commands"))
+                    .allMatch(cmd -> cmd.groupName == null)) {
+                PagedEmbed embed = new PagedEmbed(channel, embedSupplier);
+                getCommands().stream()
+                        .sorted(Comparator.<CommandRepresentation>comparingInt(cmd -> cmd.groupOrdinal)
+                                .thenComparingInt(rep -> rep.ordinal))
+                        .forEachOrdered(cmd -> embed.addField("__" + cmd.aliases[0] + "__: _" + prefixes[0]
+                                + cmd.usage + "_", cmd.description));
+                return embed;
+            } else {
+                CategorizedEmbed embed = new CategorizedEmbed(channel);
 
-            return embed;
-        } else if (param.getArguments().length >= 1) {
+                getCommands().stream()
+                        .sorted(Comparator.<CommandRepresentation>comparingInt(cmd -> cmd.groupOrdinal)
+                                .thenComparingInt(rep -> rep.ordinal))
+                        .filter(cmd -> embed.getCategories()
+                                .stream()
+                                .noneMatch(cat -> cmd.groupName != null
+                                        ? cat.getName().equals(cmd.groupName)
+                                        : cat.getName().equals("Other commands")))
+                        .forEachOrdered(cmd -> {
+                            if (cmd.groupName != null)
+                                embed.addCategory(cmd.groupName, cmd.groupDescription != null ? cmd.groupDescription : "");
+                            else embed.addCategory("Other commands", "Ungrouped commands");
+                        });
+
+                getCommands().stream()
+                        .sorted(Comparator.<CommandRepresentation>comparingInt(cmd -> cmd.groupOrdinal)
+                                .thenComparingInt(rep -> rep.ordinal))
+                        .forEach(cmd -> embed.getCategories()
+                                .stream()
+                                .filter(cat -> cmd.groupName != null
+                                        ? cat.getName().equals(cmd.groupName)
+                                        : cat.getName().equals("Other commands"))
+                                .findFirst()
+                                .ifPresent(cat -> cat.addField("__" + cmd.aliases[0] + "__: _" + prefixes[0]
+                                        + cmd.usage + "_", cmd.description)));
+
+                return embed;
+            }
+        } else {
+            EmbedBuilder embed = embedSupplier.get();
             Optional<CommandRepresentation> command = getCommands().stream()
                     .filter(cmd -> {
                         for (String alias : cmd.aliases)
-                            if (alias.equalsIgnoreCase(param.getArguments()[0]))
+                            if (alias.equalsIgnoreCase(args[0]))
                                 return true;
                         return false;
                     }).findAny();
@@ -136,14 +170,13 @@ public final class CommandHandler {
                 CommandRepresentation cmd = command.get();
                 embed.addField("__" + cmd.aliases[0] + "__: _" + prefixes[0] + cmd.usage + "_", cmd.description);
             } else embed.addField(
-                    "__Unknown Command__: _" + param.getArguments()[0] + "_",
+                    "__Unknown Command__: _" + args[0] + "_",
                     "Type _\"" + prefixes[0] + "help\"_ for a list of commands."
             );
 
             return embed;
         }
 
-        throw new AssertionError();
     }
 
     private void extractCommandRep(@Nullable Object invocationTarget, Method... methods) {

@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Optional;
 
 import de.kaleidox.javacord.util.ui.messages.InformationMessage;
+import de.kaleidox.javacord.util.ui.messages.RefreshableMessage;
 import de.kaleidox.javacord.util.ui.messages.paging.PagedEmbed;
 import de.kaleidox.javacord.util.ui.messages.paging.PagedMessage;
-import de.kaleidox.javacord.util.ui.messages.RefreshableMessage;
 
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.channel.PrivateChannel;

@@ -1,10 +1,11 @@
 package de.kaleidox.javacord.util.ui.messages.categorizing;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import de.kaleidox.javacord.util.embed.DefaultEmbedFactory;
@@ -51,6 +52,14 @@ public class CategorizedEmbed {
         return category;
     }
 
+    public List<EmbedCategory> getCategories() {
+        return Collections.unmodifiableList(categories);
+    }
+
+    public boolean removeIf(Predicate<EmbedCategory> filter) {
+        return categories.removeIf(filter);
+    }
+
     public CompletableFuture<Message> build() {
         return messageable.sendMessage(getMenuEmbed())
                 .thenApply(msg -> {
@@ -67,7 +76,7 @@ public class CategorizedEmbed {
 
         embed.setAuthor(category.getName())
                 .setDescription(category.getDescription())
-                .setFooter("Click the "+BACK_TO_MENU_EMOJI+" reaction to go back to the menu!");
+                .setFooter("Click the " + BACK_TO_MENU_EMOJI + " reaction to go back to the menu!");
         for (EmbedField field : category.getFields())
             embed.addField(field.getName(), field.getValue(), field.isInline());
 

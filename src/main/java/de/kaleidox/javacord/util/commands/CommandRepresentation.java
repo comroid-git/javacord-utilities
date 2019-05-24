@@ -25,12 +25,6 @@ public final class CommandRepresentation {
     public final int groupOrdinal;
     public @Nullable final Object invocationTarget;
 
-    @Override
-    public String toString() {
-        return method.getName();
-    }
-
-    @SuppressWarnings("StringEquality")
     CommandRepresentation(
             Method method,
             Command cmd,
@@ -55,11 +49,15 @@ public final class CommandRepresentation {
         this.async = cmd.async();
 
         if (group != null) {
-            if (group.name() != CommandHandler.NO_GROUP) groupName = group.name();
-            else groupName = method.getDeclaringClass().getSimpleName();
+            if (!group.name().equals(CommandHandler.NO_GROUP))
+                groupName = group.name();
+            else
+                groupName = method.getDeclaringClass().getSimpleName();
 
-            if (group.description() != CommandHandler.NO_GROUP) groupDescription = group.description();
-            else groupDescription = "No group description provided.";
+            if (!group.description().equals(CommandHandler.NO_GROUP))
+                groupDescription = group.description();
+            else
+                groupDescription = "No group description provided.";
 
             groupOrdinal = group.ordinal();
         } else {
@@ -69,12 +67,11 @@ public final class CommandRepresentation {
         }
     }
 
-    @SuppressWarnings("StringEquality")
     CommandRepresentation(
             Method method,
             Command cmd,
             String groupName,
-            String groupDescription,
+            @Nullable String groupDescription,
             int groupOrdinal,
             @Nullable Object invocationTarget
     ) {
@@ -98,5 +95,10 @@ public final class CommandRepresentation {
         this.groupName = groupName;
         this.groupDescription = groupDescription;
         this.groupOrdinal = groupOrdinal;
+    }
+
+    @Override
+    public String toString() {
+        return method.getName();
     }
 }
