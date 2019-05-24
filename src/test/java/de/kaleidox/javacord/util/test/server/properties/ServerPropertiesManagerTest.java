@@ -6,6 +6,7 @@ import java.io.IOException;
 import de.kaleidox.javacord.util.server.properties.PropertyGroup;
 import de.kaleidox.javacord.util.server.properties.ServerPropertiesManager;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -13,13 +14,12 @@ import static org.junit.Assert.assertEquals;
 
 public class ServerPropertiesManagerTest {
 
-    private ServerPropertiesManager manager;
+    private File propertiesFile;
 
     @Before
     public void setup() throws IOException {
-        File file = new File("props/serverProperties.json");
-        file.createNewFile();
-        manager = new ServerPropertiesManager(file);
+        propertiesFile = File.createTempFile("serverProperties", ".json");
+        ServerPropertiesManager manager = new ServerPropertiesManager(propertiesFile);
 
         manager.register("bot.traits", 419)
                 .setDisplayName("Traits")
@@ -44,7 +44,7 @@ public class ServerPropertiesManagerTest {
 
     @Test(timeout = 3000)
     public void testSerialization() throws IOException {
-        ServerPropertiesManager deserializer = new ServerPropertiesManager(new File("props/serverProperties.json"));
+        ServerPropertiesManager deserializer = new ServerPropertiesManager(propertiesFile);
 
         PropertyGroup traitsProperty = deserializer.getProperty("bot.traits");
         assertEquals(420, traitsProperty.getValue(100).asInt());
@@ -66,5 +66,10 @@ public class ServerPropertiesManagerTest {
         assertEquals("\uD83C\uDF61", emojiProperty.getDefaultValue().asString());
         assertEquals("Emoji", emojiProperty.getDisplayName());
         assertEquals("These are emojis", emojiProperty.getDescription());
+    }
+
+    @After
+    public void cleanupTempFile() {
+        propertiesFile.delete();
     }
 }
