@@ -401,7 +401,7 @@ public final class CommandHandler {
             new InfoReaction(message, "⚠", "Command threw an exception: ["
                     + e.getCause().getClass().getSimpleName() + "] " + e.getCause().getMessage(),
                     1, TimeUnit.MINUTES, () -> DefaultEmbedFactory.create().setColor(Color.RED));
-            e.getCause().printStackTrace();
+            logger.catching(e.getCause());
             return;
         }
 
