@@ -400,7 +400,7 @@ public final class CommandHandler {
         } catch (InvocationTargetException e) {
             new InfoReaction(message, "⚠", "Command threw an exception: ["
                     + e.getCause().getClass().getSimpleName() + "] " + e.getCause().getMessage(),
-                    1, TimeUnit.MINUTES, DefaultEmbedFactory.INSTANCE);
+                    1, TimeUnit.MINUTES, () -> DefaultEmbedFactory.create().setColor(Color.RED));
             e.getCause().printStackTrace();
             return;
         }
