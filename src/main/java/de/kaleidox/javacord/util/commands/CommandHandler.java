@@ -111,6 +111,7 @@ public final class CommandHandler {
         this.authMethodProperty = authMethodProperty;
     }
 
+    @CommandGroup(name = "Basic Commands", description = "All commands for basic interaction with the bot")
     @Command(aliases = "help", usage = "help [command]", description = "Shows a list of commands and what they do.")
     public Object defaultHelpCommand(Command.Parameters param) {
         PagedEmbed embed = new PagedEmbed(param.getTextChannel(), embedSupplier);

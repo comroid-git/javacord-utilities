@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 import de.kaleidox.javacord.util.commands.Command;
+import de.kaleidox.javacord.util.commands.CommandGroup;
 import de.kaleidox.javacord.util.commands.CommandHandler;
 import de.kaleidox.javacord.util.embed.DefaultEmbedFactory;
 import de.kaleidox.javacord.util.ui.messages.paging.PagedEmbed;
@@ -88,6 +89,7 @@ public final class ServerPropertiesManager implements Initializable, Closeable {
     }
 
     @SuppressWarnings("ConstantConditions")
+    @CommandGroup(name = "Basic Commands", description = "All commands for basic interaction with the bot")
     @Command(aliases = "property",
             usage = "property [<Property Name> [New Value]]",
             description = "Change or read the value of properties",
