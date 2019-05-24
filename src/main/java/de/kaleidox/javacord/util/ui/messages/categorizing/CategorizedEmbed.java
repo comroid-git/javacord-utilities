@@ -66,7 +66,8 @@ public class CategorizedEmbed {
         EmbedBuilder embed = baseEmbedSupplier.get();
 
         embed.setAuthor(category.getName())
-                .setDescription(category.getDescription());
+                .setDescription(category.getDescription())
+                .setFooter("Click the "+BACK_TO_MENU_EMOJI+" reaction to go back to the menu!");
         for (EmbedField field : category.getFields())
             embed.addField(field.getName(), field.getValue(), field.isInline());
 
