@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>de.kaleidox</groupId>
   <artifactId>javacord-utilities</artifactId>
-  <version>0.1.1-rev2</version>
+  <version>0.1.1-rev3</version>
   <name>Javacord Utilities</name>
   <description>Helpful classes and structures for Javacord</description>
   <url>https://github.com/burdoto/javacord-utilities</url>
@@ -67,7 +67,7 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <version>2.9.8</version>
+      <version>2.9.9</version>
       <scope>runtime</scope>
     </dependency>
   </dependencies>

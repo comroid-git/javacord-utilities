@@ -45,7 +45,7 @@ dependencies {
     implementation('org.javacord:javacord-core:3.0.4')
             { exclude group: 'com.fasterxml.jackson.core' }
     api 'org.apache.logging.log4j:log4j-api:2.11.0'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.8'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.9'
     compileOnly 'org.jetbrains:annotations:17.0.0'
 
     testImplementation 'junit:junit:4.12'
