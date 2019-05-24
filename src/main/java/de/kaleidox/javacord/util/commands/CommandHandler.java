@@ -401,7 +401,8 @@ public final class CommandHandler {
             new InfoReaction(message, "⚠", "Command threw an exception: ["
                     + e.getCause().getClass().getSimpleName() + "] " + e.getCause().getMessage(),
                     1, TimeUnit.MINUTES, DefaultEmbedFactory.INSTANCE);
-            throw new RuntimeException("Command method threw an Exception!", e);
+            e.getCause().printStackTrace();
+            return;
         }
 
         if (reply != null) {
