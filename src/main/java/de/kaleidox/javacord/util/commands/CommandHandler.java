@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import de.kaleidox.javacord.util.embed.DefaultEmbedFactory;
 import de.kaleidox.javacord.util.server.properties.PropertyGroup;
 import de.kaleidox.javacord.util.ui.messages.InformationMessage;
+import de.kaleidox.javacord.util.ui.messages.categorizing.CategorizedEmbed;
 import de.kaleidox.javacord.util.ui.messages.paging.PagedEmbed;
 import de.kaleidox.javacord.util.ui.messages.paging.PagedMessage;
 import de.kaleidox.javacord.util.ui.messages.RefreshableMessage;
@@ -368,6 +369,7 @@ public final class CommandHandler {
             else if (reply instanceof PagedEmbed) msgFut = ((PagedEmbed) reply).build();
             else if (reply instanceof PagedMessage) ((PagedMessage) reply).refresh();
             else if (reply instanceof RefreshableMessage) ((RefreshableMessage) reply).refresh();
+            else if (reply instanceof CategorizedEmbed) msgFut = ((CategorizedEmbed) reply).build();
             else msgFut = channel.sendMessage(String.valueOf(reply));
 
             if (msgFut != null)
