@@ -5,7 +5,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
-import de.kaleidox.javacord.util.embed.EmbedFieldRepresentative;
+import de.kaleidox.javacord.util.ui.embed.EmbedFieldRepresentative;
 import de.kaleidox.util.helpers.ListHelper;
 
 import org.javacord.api.entity.message.Message;

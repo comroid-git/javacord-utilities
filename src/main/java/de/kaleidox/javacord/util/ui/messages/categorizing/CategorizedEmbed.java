@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import de.kaleidox.javacord.util.embed.DefaultEmbedFactory;
+import de.kaleidox.javacord.util.ui.embed.DefaultEmbedFactory;
 
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.Messageable;

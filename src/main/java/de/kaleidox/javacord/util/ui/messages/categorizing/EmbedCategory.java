@@ -3,7 +3,7 @@ package de.kaleidox.javacord.util.ui.messages.categorizing;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.kaleidox.javacord.util.embed.EmbedFieldRepresentative;
+import de.kaleidox.javacord.util.ui.embed.EmbedFieldRepresentative;
 
 import org.javacord.api.entity.Nameable;
 import org.javacord.api.entity.message.embed.EmbedField;

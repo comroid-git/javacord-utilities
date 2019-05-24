@@ -14,7 +14,7 @@ import java.util.function.Supplier;
 import de.kaleidox.javacord.util.commands.Command;
 import de.kaleidox.javacord.util.commands.CommandGroup;
 import de.kaleidox.javacord.util.commands.CommandHandler;
-import de.kaleidox.javacord.util.embed.DefaultEmbedFactory;
+import de.kaleidox.javacord.util.ui.embed.DefaultEmbedFactory;
 import de.kaleidox.javacord.util.ui.messages.paging.PagedEmbed;
 import de.kaleidox.util.interfaces.Initializable;
 import de.kaleidox.util.markers.Value;

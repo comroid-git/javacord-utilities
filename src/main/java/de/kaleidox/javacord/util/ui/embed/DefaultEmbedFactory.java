@@ -1,4 +1,4 @@
-package de.kaleidox.javacord.util.embed;
+package de.kaleidox.javacord.util.ui.embed;
 
 import java.util.function.Supplier;
 
