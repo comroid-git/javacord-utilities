@@ -170,8 +170,6 @@ public class CategorizedEmbed {
             }
         }
 
-        System.out.println("yield = " + Arrays.toString(yield));
-
         return yield;
     }
 
