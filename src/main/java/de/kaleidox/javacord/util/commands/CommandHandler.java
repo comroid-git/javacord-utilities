@@ -118,6 +118,7 @@ public final class CommandHandler {
     public Object defaultHelpCommand(TextChannel channel, String[] args) {
         if (args.length == 0) {
             if (getCommands().stream()
+                    .filter(cmd -> cmd.showInHelpCommand)
                     .filter(cmd -> !Objects.equals(cmd.groupName, "Basic Commands"))
                     .allMatch(cmd -> cmd.groupName == null)) {
                 PagedEmbed embed = new PagedEmbed(channel, embedSupplier);
@@ -131,6 +132,7 @@ public final class CommandHandler {
                 CategorizedEmbed embed = new CategorizedEmbed(channel);
 
                 getCommands().stream()
+                        .filter(cmd -> cmd.showInHelpCommand)
                         .sorted(Comparator.<CommandRepresentation>comparingInt(cmd -> cmd.groupOrdinal)
                                 .thenComparingInt(rep -> rep.ordinal))
                         .filter(cmd -> embed.getCategories()
@@ -145,6 +147,7 @@ public final class CommandHandler {
                         });
 
                 getCommands().stream()
+                        .filter(cmd -> cmd.showInHelpCommand)
                         .sorted(Comparator.<CommandRepresentation>comparingInt(cmd -> cmd.groupOrdinal)
                                 .thenComparingInt(rep -> rep.ordinal))
                         .forEach(cmd -> embed.getCategories()
