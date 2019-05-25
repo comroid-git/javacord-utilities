@@ -64,7 +64,7 @@ public final class ServerPropertiesManager implements Initializable, Closeable {
     public PropertyGroup register(String name, Object defaultValue, String displayName, String description) {
         properties.compute(name, (k, v) -> {
             if (v == null) return new PropertyGroup(name, defaultValue, displayName, description);
-            else if (!v.getDefaultValue().getValue().equals(defaultValue) && name.equals(v.getName()))
+            else if (!v.getDefaultValue().equals(defaultValue) && name.equals(v.getName()))
                 v = new PropertyGroup(v.getName(), defaultValue, displayName, description);
             return v;
         });
