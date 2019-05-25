@@ -99,6 +99,14 @@ public final class CommandHandler {
         else extractCommandRep(register, register.getClass().getMethods());
     }
 
+    public void unregisterCommands(Object unregister) {
+        if (unregister instanceof Class)
+            tryUnregister(((Class) unregister).getMethods());
+        else if (unregister instanceof Method)
+            tryUnregister((Method) unregister);
+        else tryUnregister(unregister.getClass().getMethods());
+    }
+
     public void useDefaultHelp(@Nullable Supplier<EmbedBuilder> embedSupplier) {
         this.embedSupplier = (embedSupplier == null ? DefaultEmbedFactory.INSTANCE : embedSupplier);
         registerCommands(this);
@@ -237,6 +245,14 @@ public final class CommandHandler {
                 logger.info("Command " + (cmd.aliases().length == 0 ? method.getName() : cmd.aliases()[0])
                         + " was registered without a CommandGroup annotation!");
         }
+    }
+
+    private void tryUnregister(Method... methods) {
+        for (Method method : methods)
+            commands.entrySet()
+                    .stream()
+                    .filter(entry -> entry.getValue().method.equals(method))
+                    .forEach(entry -> commands.remove(entry.getKey()));
     }
 
     private void handleMessageCreate(MessageCreateEvent event) {
