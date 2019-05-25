@@ -60,6 +60,12 @@ public class Value {
         return setter;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Value) return ((Value) obj).asString().equals(asString());
+        else return String.valueOf(obj).equals(asString());
+    }
+
     public class Setter {
         private Setter() {
         }
