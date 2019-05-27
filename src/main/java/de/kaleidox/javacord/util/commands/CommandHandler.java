@@ -303,7 +303,10 @@ public final class CommandHandler {
         if (!message.isPrivateMessage() && customPrefixProperty != null) {
             @SuppressWarnings("OptionalGetWithoutIsPresent") Server server = message.getServer().get();
             if (exclusiveCustomPrefix) {
-                if (content.indexOf(customPrefixProperty.getValue(server.getId()).asString()) == 0)
+                if (content.toLowerCase()
+                        .indexOf(customPrefixProperty.getValue(server.getId())
+                                .asString()
+                                .toLowerCase()) == 0)
                     usedPrefix = Integer.MAX_VALUE;
             } else {
                 pref = new String[prefixes.length + 1];
@@ -311,18 +314,18 @@ public final class CommandHandler {
                 pref[pref.length - 1] = customPrefixProperty.getValue(server.getId()).asString();
 
                 for (int i = 0; i < pref.length; i++)
-                    if (content.indexOf(pref[i]) == 0)
+                    if (content.toLowerCase().indexOf(pref[i].toLowerCase()) == 0)
                         usedPrefix = i;
             }
         } else {
             switch (prefixes.length) {
                 case 1:
-                    if (content.indexOf(prefixes[0]) == 0)
+                    if (content.toLowerCase().indexOf(prefixes[0].toLowerCase()) == 0)
                         usedPrefix = 0;
                     break;
                 default:
                     for (int i = 0; i < prefixes.length; i++)
-                        if (content.indexOf(prefixes[i]) == 0)
+                        if (content.toLowerCase().indexOf(prefixes[i].toLowerCase()) == 0)
                             usedPrefix = i;
                     break;
                 case 0:
@@ -337,11 +340,11 @@ public final class CommandHandler {
         String[] split = content.split("[\\s&&[^\\n]]++");
         String[] args;
         if (pref[usedPrefix].matches("^(.*\\s.*)+$")) {
-            cmd = commands.get(split[1]);
+            cmd = commands.get(split[1].toLowerCase());
             args = new String[split.length - 2];
             System.arraycopy(split, 2, args, 0, args.length);
         } else {
-            cmd = commands.get(split[0].substring(pref[usedPrefix].length()));
+            cmd = commands.get(split[0].substring(pref[usedPrefix].length()).toLowerCase());
             args = new String[split.length - 1];
             System.arraycopy(split, 1, args, 0, args.length);
         }
