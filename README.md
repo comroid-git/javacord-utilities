@@ -8,13 +8,13 @@ Helpful classes and structures for Javacord
 <dependency>
   <groupId>de.kaleidox</groupId>
   <artifactId>javacord-utilities</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
 </dependency>
 ```
 ### Gradle
 ```groovy
 dependencies {
-    implementation 'de.kaleidox:javacord-utilities:1.0.1'
+    implementation 'de.kaleidox:javacord-utilities:1.0.2'
 }
 ```
 
