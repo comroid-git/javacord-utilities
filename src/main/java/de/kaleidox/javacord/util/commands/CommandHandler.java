@@ -131,6 +131,7 @@ public final class CommandHandler {
                     .allMatch(cmd -> cmd.groupName == null)) {
                 PagedEmbed embed = new PagedEmbed(channel, embedSupplier);
                 getCommands().stream()
+                        .filter(cmd -> cmd.showInHelpCommand)
                         .sorted(Comparator.<CommandRepresentation>comparingInt(cmd -> cmd.groupOrdinal)
                                 .thenComparingInt(rep -> rep.ordinal))
                         .forEachOrdered(cmd -> embed.addField("__" + cmd.aliases[0] + "__: _" + prefixes[0]
