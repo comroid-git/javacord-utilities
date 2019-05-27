@@ -140,10 +140,12 @@ public final class ServerPropertiesManager implements Initializable, Closeable {
                         .setColor(Color.RED)
                         .setDescription("Unknown property: `" + args[0] + "`");
 
-                if (args[1].equalsIgnoreCase("#default#"))
-                    args[1] = String.valueOf(propertySet.getDefaultValue().getValue());
+                Object setTo = extractValue(args[1]);
 
-                value.setter().toString(args[1]);
+                if (setTo.equals("#default#"))
+                    setTo = String.valueOf(propertySet.getDefaultValue().getValue());
+
+                value.setter().toObject(setTo);
 
                 return embedSupplier.get()
                         .setDescription("Changed property `" + args[0] + "` to new value: `" + value.asString() + "`")
@@ -185,6 +187,27 @@ public final class ServerPropertiesManager implements Initializable, Closeable {
         FileOutputStream stream = new FileOutputStream(propertiesFile);
         stream.write(node.toString().getBytes(UTF_8));
         stream.close();
+    }
+
+    private Object extractValue(String val) {
+        if (val.matches("\\d+")) {
+            // is number without decimals
+            long longVal = Long.parseLong(val);
+
+            if (longVal <= Byte.MAX_VALUE) return (byte) longVal;
+            else if (longVal <= Short.MAX_VALUE) return (short) longVal;
+            else if (longVal <= Integer.MAX_VALUE) return (int) longVal;
+            else return longVal;
+        } else if (val.matches("\\d+\\.\\d+")) {
+            // is number with decimals
+            return Double.parseDouble(val);
+        } else if (val.toLowerCase().matches("(true)|(false)")) {
+            // is boolean
+            return Boolean.valueOf(val);
+        } else {
+            // is plain string
+            return val;
+        }
     }
 
     private void readData() throws IOException {
