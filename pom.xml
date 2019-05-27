@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>de.kaleidox</groupId>
   <artifactId>javacord-utilities</artifactId>
-  <version>0.1.1-rev3</version>
+  <version>1.0.2</version>
   <name>Javacord Utilities</name>
   <description>Helpful classes and structures for Javacord</description>
   <url>https://github.com/burdoto/javacord-utilities</url>
