@@ -44,6 +44,7 @@ import org.javacord.api.entity.user.User;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.event.message.MessageDeleteEvent;
 import org.javacord.api.event.message.MessageEditEvent;
+import org.javacord.api.event.message.MessageEvent;
 import org.javacord.core.util.logging.LoggerUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -64,6 +65,7 @@ public final class CommandHandler {
     private Supplier<EmbedBuilder> embedSupplier = null;
     private @Nullable PropertyGroup customPrefixProperty;
     private boolean exclusiveCustomPrefix;
+    private long[] serverBlacklist;
 
     public CommandHandler(DiscordApi api) {
         this(api, false);
@@ -119,6 +121,14 @@ public final class CommandHandler {
 
     public void useAuthManager(PropertyGroup authMethodProperty) {
         this.authMethodProperty = authMethodProperty;
+    }
+
+    public long[] getServerBlacklist() {
+        return serverBlacklist;
+    }
+
+    public void setServerBlacklist(long... serverIds) {
+        this.serverBlacklist = serverIds;
     }
 
     @CommandGroup(name = "Basic Commands", description = "All commands for basic interaction with the bot")
@@ -257,6 +267,8 @@ public final class CommandHandler {
     }
 
     private void handleMessageCreate(MessageCreateEvent event) {
+        if (isBlacklisted(event)) return;
+
         Params params = new Params(
                 api,
                 event,
@@ -271,6 +283,8 @@ public final class CommandHandler {
     }
 
     private void handleMessageEdit(MessageEditEvent event) {
+        if (isBlacklisted(event)) return;
+
         Params params = new Params(
                 api,
                 null,
@@ -285,6 +299,8 @@ public final class CommandHandler {
     }
 
     private void handleMessageDelete(MessageDeleteEvent event) {
+        if (isBlacklisted(event)) return;
+
         if (autoDeleteResponseOnCommandDeletion) {
             long[] ids = responseMap.get(event.getMessageId());
             if (ids == null) return;
@@ -294,6 +310,16 @@ public final class CommandHandler {
                     .thenCompose(Message::delete)
                     .exceptionally(get());
         }
+    }
+
+    private boolean isBlacklisted(MessageEvent event) {
+        if (!event.getServer().isPresent()) return true;
+
+        long id = event.getServer().get().getId();
+
+        for (long blacklisted : serverBlacklist) if (id == blacklisted) return false;
+
+        return false;
     }
 
     private void handleCommand(final Message message, final TextChannel channel, final Params commandParams) {
