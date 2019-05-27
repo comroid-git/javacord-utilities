@@ -29,12 +29,6 @@
   </scm>
   <dependencies>
     <dependency>
-      <groupId>de.kaleidox</groupId>
-      <artifactId>kalutils</artifactId>
-      <version>0.4.2</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
       <groupId>org.javacord</groupId>
       <artifactId>javacord-api</artifactId>
       <version>3.0.4</version>

@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.javacord.api.entity.server.Server;
 
-import static de.kaleidox.util.helpers.JsonHelper.nodeOf;
+import static de.kaleidox.util.Util.nodeOf;
 
 public final class PropertyGroup {
     private final String name;

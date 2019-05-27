@@ -31,8 +31,8 @@ import org.javacord.api.entity.user.User;
 import org.jetbrains.annotations.Nullable;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static de.kaleidox.util.helpers.JsonHelper.nodeOf;
-import static de.kaleidox.util.helpers.JsonHelper.objectNode;
+import static de.kaleidox.util.Util.nodeOf;
+import static de.kaleidox.util.Util.objectNode;
 
 public final class ServerPropertiesManager implements Initializable, Closeable {
     private final Map<String, PropertyGroup> properties;

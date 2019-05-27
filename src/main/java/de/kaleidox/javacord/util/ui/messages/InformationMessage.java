@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 import de.kaleidox.javacord.util.ui.embed.EmbedFieldRepresentative;
-import de.kaleidox.util.helpers.ListHelper;
+import de.kaleidox.util.Util;
 
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.Messageable;
@@ -54,7 +54,7 @@ public class InformationMessage {
     }
 
     public InformationMessage editField(String name, @Nullable String newTitle, String newText, boolean newInline) {
-        Optional<InformationField> complex = ListHelper.findComplex(fields, name, InformationField::getName);
+        Optional<InformationField> complex = Util.findComplex(fields, name, InformationField::getName);
 
         if (complex.isPresent()) {
             InformationField field = complex.get();
@@ -71,7 +71,7 @@ public class InformationMessage {
     }
 
     public InformationMessage removeField(String name) {
-        Optional<InformationField> complex = ListHelper.findComplex(fields, name, InformationField::getName);
+        Optional<InformationField> complex = Util.findComplex(fields, name, InformationField::getName);
 
         if (complex.isPresent()) {
             InformationField field = complex.get();
