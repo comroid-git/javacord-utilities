@@ -78,6 +78,7 @@ public final class CommandHandler {
         autoDeleteResponseOnCommandDeletion = true;
         customPrefixProperty = null;
         exclusiveCustomPrefix = false;
+        serverBlacklist = new long[0];
 
         api.addMessageCreateListener(this::handleMessageCreate);
         if (handleMessageEdit)
