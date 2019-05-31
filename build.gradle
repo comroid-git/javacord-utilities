@@ -4,6 +4,7 @@ buildscript {
 }
 
 apply plugin: 'java-library'
+apply plugin: 'groovy'
 
 group 'de.kaleidox'
 version '1.0.2rev1'
@@ -39,16 +40,21 @@ compileJava.options.encoding = 'UTF-8'
 repositories.jcenter()
 
 dependencies {
-    api('org.javacord:javacord-api:3.0.4')
+    api 'org.apache.logging.log4j:log4j-api:2.11.0'
+
+    implementation('org.javacord:javacord-api:3.0.4')
             { exclude group: 'com.fasterxml.jackson.core' }
     implementation('org.javacord:javacord-core:3.0.4')
             { exclude group: 'com.fasterxml.jackson.core' }
-    api 'org.apache.logging.log4j:log4j-api:2.11.0'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.9'
+
     compileOnly 'org.jetbrains:annotations:17.0.0'
+    
 
     testImplementation 'junit:junit:4.12'
-    testImplementation 'org.javacord:javacord:3.0.+'
+    testImplementation 'org.easymock:easymock:4.0.2'
+
+    testCompileOnly 'org.codehaus.groovy:groovy:3.0.0-beta-1'
 }
 
 apply from: 'gradle/publishing.gradle'
