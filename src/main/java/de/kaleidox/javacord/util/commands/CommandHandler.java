@@ -349,11 +349,25 @@ public final class CommandHandler {
         String[] split = splitContent(content);
         String[] args;
         if (usedPrefix.matches("^(.*\\s.*)+$")) {
-            cmd = commands.get(split[1].toLowerCase());
+            cmd = commands.entrySet()
+                    .stream()
+                    .filter(entry -> entry.getKey()
+                            .toLowerCase()
+                            .equals(split[1].substring(usedPrefix.length()).toLowerCase()))
+                    .findAny()
+                    .map(Map.Entry::getValue)
+                    .orElse(null);
             args = new String[split.length - 2];
             arraycopy(split, 2, args, 0, args.length);
         } else {
-            cmd = commands.get(split[0].substring(usedPrefix.length()).toLowerCase());
+            cmd = commands.entrySet()
+                    .stream()
+                    .filter(entry -> entry.getKey()
+                            .toLowerCase()
+                            .equals(split[0].substring(usedPrefix.length()).toLowerCase()))
+                    .findAny()
+                    .map(Map.Entry::getValue)
+                    .orElse(null);
             args = new String[split.length - 1];
             arraycopy(split, 1, args, 0, args.length);
         }
