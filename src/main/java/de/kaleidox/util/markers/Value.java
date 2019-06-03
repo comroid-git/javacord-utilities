@@ -21,38 +21,47 @@ public class Value {
     }
 
     public String asString() {
+        if (value instanceof String) return (String) value;
         return String.valueOf(value);
     }
 
     public boolean asBoolean() {
+        if (value instanceof Boolean) return (boolean) value;
         return Boolean.valueOf(asString());
     }
 
     public byte asByte() {
+        if (value instanceof Byte) return (byte) value;
         return Byte.valueOf(asString());
     }
 
     public short asShort() {
+        if (value instanceof Short) return (short) value;
         return Short.valueOf(asString());
     }
 
     public int asInt() {
+        if (value instanceof Integer) return (int) value;
         return Integer.valueOf(asString());
     }
 
     public float asFloat() {
+        if (value instanceof Float) return (float) value;
         return Float.valueOf(asString());
     }
 
     public double asDouble() {
+        if (value instanceof Double) return (double) value;
         return Double.valueOf(asString());
     }
 
     public long asLong() {
+        if (value instanceof Long) return (long) value;
         return Long.valueOf(asString());
     }
 
     public char asChar() {
+        if (value instanceof Character) return (char) value;
         return asString().charAt(0);
     }
 
