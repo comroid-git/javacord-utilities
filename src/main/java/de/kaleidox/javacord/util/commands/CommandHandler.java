@@ -61,7 +61,6 @@ public final class CommandHandler {
 
     public String[] prefixes;
     public boolean autoDeleteResponseOnCommandDeletion;
-    private PropertyGroup authMethodProperty = null;
     private Supplier<EmbedBuilder> embedSupplier = null;
     private @Nullable PropertyGroup customPrefixProperty;
     private boolean exclusiveCustomPrefix;
@@ -118,10 +117,6 @@ public final class CommandHandler {
     public void useCustomPrefixes(@NotNull PropertyGroup propertyGroup, boolean exclusiveCustomPrefix) {
         this.customPrefixProperty = propertyGroup;
         this.exclusiveCustomPrefix = exclusiveCustomPrefix;
-    }
-
-    public void useAuthManager(PropertyGroup authMethodProperty) {
-        this.authMethodProperty = authMethodProperty;
     }
 
     public long[] getServerBlacklist() {
@@ -386,26 +381,16 @@ public final class CommandHandler {
         else if (!message.isPrivateMessage() && !cmd.enableServerChat)
             problems.add("This command can only be run in a private channel!");
 
-        switch (authMethodProperty == null ? "discord_permission" : commandParams.getServer()
-                .map(server -> authMethodProperty.getValue(server).asString())
-                .orElse("discord_permission")) {
-            case "allow_all":
-                break;
-            case "discord_permission":
-                if (!message.getUserAuthor()
-                        .map(usr -> message.getChannel()
-                                .asServerTextChannel()
-                                .map(stc -> stc.hasAnyPermission(usr,
-                                        PermissionType.ADMINISTRATOR,
-                                        cmd.requiredDiscordPermission))
-                                .orElse(true))
-                        .orElse(false))
-                    problems.add("You are missing the required permission: "
-                            + cmd.requiredDiscordPermission.name() + "!");
-                break;
-            default:
-                throw new AssertionError("Unreachable statement reached");
-        }
+        if (!message.getUserAuthor()
+                .map(usr -> message.getChannel()
+                        .asServerTextChannel()
+                        .map(stc -> stc.hasAnyPermission(usr,
+                                PermissionType.ADMINISTRATOR,
+                                cmd.requiredDiscordPermission))
+                        .orElse(true))
+                .orElse(false))
+            problems.add("You are missing the required permission: "
+                    + cmd.requiredDiscordPermission.name() + "!");
 
         int reqArgs = cmd.requiredArguments;
         if (commandParams.args.length < reqArgs) problems.add("This command requires at least "
