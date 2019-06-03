@@ -404,8 +404,8 @@ public final class CommandHandler {
                 + (customPrefixProperty != null ? 1 : 0)];
         arraycopy(prefixes, 0, prefs, 0, prefixes.length);
         if (useBotMentionAsPrefix) {
-            prefs[prefixes.length + 1] = api.getYourself().getMentionTag();
-            prefs[prefixes.length + 2] = api.getYourself().getNicknameMentionTag();
+            prefs[prefixes.length] = api.getYourself().getMentionTag();
+            prefs[prefixes.length + 1] = api.getYourself().getNicknameMentionTag();
         }
         message.getServer()
                 .map(DiscordEntity::getId)
