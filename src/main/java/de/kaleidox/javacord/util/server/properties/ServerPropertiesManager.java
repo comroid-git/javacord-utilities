@@ -201,9 +201,20 @@ public final class ServerPropertiesManager implements Initializable, Closeable {
         } else if (val.matches("\\d+\\.\\d+")) {
             // is number with decimals
             return Double.parseDouble(val);
-        } else if (val.toLowerCase().matches("(true)|(false)")) {
+        } else if (val.toLowerCase().matches("(true)|(false)|(yes)|(no)|(on)|(off)")) {
             // is boolean
-            return Boolean.valueOf(val);
+            switch (val.toLowerCase()) {
+                case "true":
+                case "yes":
+                case "on":
+                    return true;
+                case "false":
+                case "no":
+                case "off":
+                    return false;
+                default:
+                    throw new AssertionError("Unrecognized string: " + val);
+            }
         } else {
             // is plain string
             return val;
