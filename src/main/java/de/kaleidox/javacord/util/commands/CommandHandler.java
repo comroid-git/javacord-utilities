@@ -68,11 +68,7 @@ public final class CommandHandler {
     public boolean useBotMentionAsPrefix;
     private Supplier<EmbedBuilder> embedSupplier = null;
     private @Nullable PropertyGroup customPrefixProperty;
-<<<<<<< HEAD
-=======
     private @Nullable PropertyGroup commandChannelProperty;
-    private boolean exclusiveCustomPrefix;
->>>>>>> Implemented support for a command channel property
     private long[] serverBlacklist;
 
     public CommandHandler(DiscordApi api) {
