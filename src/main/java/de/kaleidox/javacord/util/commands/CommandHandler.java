@@ -27,9 +27,11 @@ import de.kaleidox.javacord.util.ui.messages.categorizing.CategorizedEmbed;
 import de.kaleidox.javacord.util.ui.messages.paging.PagedEmbed;
 import de.kaleidox.javacord.util.ui.messages.paging.PagedMessage;
 import de.kaleidox.javacord.util.ui.reactions.InfoReaction;
+import de.kaleidox.util.markers.Value;
 
 import org.apache.logging.log4j.Logger;
 import org.javacord.api.DiscordApi;
+import org.javacord.api.entity.DiscordEntity;
 import org.javacord.api.entity.channel.Channel;
 import org.javacord.api.entity.channel.PrivateChannel;
 import org.javacord.api.entity.channel.ServerTextChannel;
@@ -49,6 +51,7 @@ import org.javacord.core.util.logging.LoggerUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import static java.lang.System.arraycopy;
 import static org.javacord.api.util.logging.ExceptionLogger.get;
 
 public final class CommandHandler {
@@ -61,9 +64,9 @@ public final class CommandHandler {
 
     public String[] prefixes;
     public boolean autoDeleteResponseOnCommandDeletion;
+    public boolean useBotMentionAsPrefix;
     private Supplier<EmbedBuilder> embedSupplier = null;
     private @Nullable PropertyGroup customPrefixProperty;
-    private boolean exclusiveCustomPrefix;
     private long[] serverBlacklist;
 
     public CommandHandler(DiscordApi api) {
@@ -76,7 +79,6 @@ public final class CommandHandler {
         prefixes = new String[]{"!"};
         autoDeleteResponseOnCommandDeletion = true;
         customPrefixProperty = null;
-        exclusiveCustomPrefix = false;
         serverBlacklist = new long[0];
 
         api.addMessageCreateListener(this::handleMessageCreate);
@@ -114,9 +116,8 @@ public final class CommandHandler {
         registerCommands(this);
     }
 
-    public void useCustomPrefixes(@NotNull PropertyGroup propertyGroup, boolean exclusiveCustomPrefix) {
-        this.customPrefixProperty = propertyGroup;
-        this.exclusiveCustomPrefix = exclusiveCustomPrefix;
+    public void useCustomPrefixes(@NotNull PropertyGroup propertyGroup) {
+        this.customPrefixProperty = Objects.requireNonNull(propertyGroup);
     }
 
     public long[] getServerBlacklist() {
@@ -319,57 +320,24 @@ public final class CommandHandler {
     }
 
     private void handleCommand(final Message message, final TextChannel channel, final Params commandParams) {
+        String usedPrefix = extractUsedPrefix(message);
+
+        // if no prefix was used, stop handling
+        if (usedPrefix == null) return;
+
         String content = message.getContent();
-        int usedPrefix = -1;
-        String[] pref = null;
-
-        if (!message.isPrivateMessage() && customPrefixProperty != null) {
-            @SuppressWarnings("OptionalGetWithoutIsPresent") Server server = message.getServer().get();
-            if (exclusiveCustomPrefix) {
-                if (content.toLowerCase()
-                        .indexOf(customPrefixProperty.getValue(server.getId())
-                                .asString()
-                                .toLowerCase()) == 0)
-                    usedPrefix = Integer.MAX_VALUE;
-            } else {
-                pref = new String[prefixes.length + 1];
-                System.arraycopy(prefixes, 0, pref, 0, prefixes.length);
-                pref[pref.length - 1] = customPrefixProperty.getValue(server.getId()).asString();
-
-                for (int i = 0; i < pref.length; i++)
-                    if (content.toLowerCase().indexOf(pref[i].toLowerCase()) == 0)
-                        usedPrefix = i;
-            }
-        } else {
-            switch (prefixes.length) {
-                case 1:
-                    if (content.toLowerCase().indexOf(prefixes[0].toLowerCase()) == 0)
-                        usedPrefix = 0;
-                    break;
-                default:
-                    for (int i = 0; i < prefixes.length; i++)
-                        if (content.toLowerCase().indexOf(prefixes[i].toLowerCase()) == 0)
-                            usedPrefix = i;
-                    break;
-                case 0:
-                    return;
-            }
-        }
-
-        if (pref == null && usedPrefix < prefixes.length) pref = prefixes;
-        if (usedPrefix == -1 || pref == null) return;
 
         CommandRepresentation cmd;
         String[] split = splitContent(content);
         String[] args;
-        if (pref[usedPrefix].matches("^(.*\\s.*)+$")) {
+        if (usedPrefix.matches("^(.*\\s.*)+$")) {
             cmd = commands.get(split[1].toLowerCase());
             args = new String[split.length - 2];
-            System.arraycopy(split, 2, args, 0, args.length);
+            arraycopy(split, 2, args, 0, args.length);
         } else {
-            cmd = commands.get(split[0].substring(pref[usedPrefix].length()).toLowerCase());
+            cmd = commands.get(split[0].substring(usedPrefix.length()).toLowerCase());
             args = new String[split.length - 1];
-            System.arraycopy(split, 1, args, 0, args.length);
+            arraycopy(split, 1, args, 0, args.length);
         }
 
         if (cmd == null) return;
@@ -426,6 +394,34 @@ public final class CommandHandler {
         else doInvoke(cmd, commandParams, channel, message);
     }
 
+    private @Nullable String extractUsedPrefix(final Message message) {
+        String content = message.getContent();
+        int usedPrefix = -1;
+
+        // gather all possible prefixes
+        String[] prefs = new String[prefixes.length
+                + (useBotMentionAsPrefix ? 2 : 0)
+                + (customPrefixProperty != null ? 1 : 0)];
+        arraycopy(prefixes, 0, prefs, 0, prefixes.length);
+        if (useBotMentionAsPrefix) {
+            prefs[prefixes.length] = api.getYourself().getMentionTag() + " ";
+            prefs[prefixes.length + 1] = api.getYourself().getNicknameMentionTag() + " ";
+        }
+        message.getServer()
+                .map(DiscordEntity::getId)
+                .map(customPrefixProperty::getValue)
+                .map(Value::asString)
+                .ifPresent(val -> prefs[prefs.length - 1] = val);
+
+        for (int i = 0; i < prefs.length; i++)
+            if (content.toLowerCase().indexOf(prefs[i]) == 0) {
+                usedPrefix = i;
+                break;
+            }
+
+        return usedPrefix == -1 ? null : prefs[usedPrefix];
+    }
+
     private String[] splitContent(String content) {
         List<String> yields = new ArrayList<>();
         yields.add("");
@@ -454,15 +450,21 @@ public final class CommandHandler {
                         }
                         // if in string & ender is not escaped
                     } else if (inString && p != '\\') {
-                        // if next char is space
-                        if (content.charAt(i + 1) == ' ') {
-                            // end string
-                            yields.add("");
-                            s = y++;
-                            inString = false;
+                        // if there are more chars
+                        if (content.length() < i + 1) {
+                            // if next char is space
+                            if (content.length() < i + 1 && content.charAt(i + 1) == ' ') {
+                                // end string
+                                yields.add("");
+                                s = y++;
+                                inString = false;
+                            } else {
+                                // escape "
+                                yields.set(y, yields.get(y) + c);
+                            }
                         } else {
-                            // escape "
-                            yields.set(y, yields.get(y) + c);
+                            // end string
+                            inString = false;
                         }
                         // if " was escaped
                     } else {
