@@ -349,11 +349,25 @@ public final class CommandHandler {
         String[] split = splitContent(content);
         String[] args;
         if (usedPrefix.matches("^(.*\\s.*)+$")) {
-            cmd = commands.get(split[1].toLowerCase());
+            cmd = commands.entrySet()
+                    .stream()
+                    .filter(entry -> entry.getKey()
+                            .toLowerCase()
+                            .equals(split[1].substring(usedPrefix.length()).toLowerCase()))
+                    .findAny()
+                    .map(Map.Entry::getValue)
+                    .orElse(null);
             args = new String[split.length - 2];
             arraycopy(split, 2, args, 0, args.length);
         } else {
-            cmd = commands.get(split[0].substring(usedPrefix.length()).toLowerCase());
+            cmd = commands.entrySet()
+                    .stream()
+                    .filter(entry -> entry.getKey()
+                            .toLowerCase()
+                            .equals(split[0].substring(usedPrefix.length()).toLowerCase()))
+                    .findAny()
+                    .map(Map.Entry::getValue)
+                    .orElse(null);
             args = new String[split.length - 1];
             arraycopy(split, 1, args, 0, args.length);
         }
@@ -537,7 +551,8 @@ public final class CommandHandler {
         } catch (InvocationTargetException e) {
             new InfoReaction(message, "⚠", "Command threw an exception: ["
                     + e.getCause().getClass().getSimpleName() + "] " + e.getCause().getMessage(),
-                    1, TimeUnit.MINUTES, () -> DefaultEmbedFactory.create().setColor(Color.RED));
+                    1, TimeUnit.MINUTES, () -> DefaultEmbedFactory.create().setColor(Color.RED))
+                    .build();
             logger.catching(e.getCause());
             return;
         }
@@ -552,6 +567,7 @@ public final class CommandHandler {
             else if (reply instanceof PagedMessage) ((PagedMessage) reply).refresh();
             else if (reply instanceof RefreshableMessage) ((RefreshableMessage) reply).refresh();
             else if (reply instanceof CategorizedEmbed) msgFut = ((CategorizedEmbed) reply).build();
+            else if (reply instanceof InfoReaction) ((InfoReaction) reply).build();
             else msgFut = channel.sendMessage(String.valueOf(reply));
 
             if (msgFut != null)

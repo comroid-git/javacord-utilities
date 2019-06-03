@@ -11,6 +11,7 @@ import de.kaleidox.javacord.util.ui.messages.InformationMessage;
 import de.kaleidox.javacord.util.ui.messages.RefreshableMessage;
 import de.kaleidox.javacord.util.ui.messages.paging.PagedEmbed;
 import de.kaleidox.javacord.util.ui.messages.paging.PagedMessage;
+import de.kaleidox.javacord.util.ui.reactions.InfoReaction;
 
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.channel.PrivateChannel;
@@ -54,6 +55,9 @@ import org.javacord.api.event.message.MessageEditEvent;
  * </tr>
  * <tr>
  * <td>{@link RefreshableMessage}</td>
+ * </tr>
+ * <tr>
+ * <td>{@link InfoReaction}</td>
  * </tr>
  * </table>
  * Anything not listed here will be converted to a string using {@link String#valueOf(Object)}.
