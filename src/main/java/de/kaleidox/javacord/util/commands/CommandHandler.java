@@ -63,7 +63,6 @@ public final class CommandHandler {
     public boolean autoDeleteResponseOnCommandDeletion;
     private Supplier<EmbedBuilder> embedSupplier = null;
     private @Nullable PropertyGroup customPrefixProperty;
-    private boolean exclusiveCustomPrefix;
     private long[] serverBlacklist;
 
     public CommandHandler(DiscordApi api) {
@@ -76,7 +75,6 @@ public final class CommandHandler {
         prefixes = new String[]{"!"};
         autoDeleteResponseOnCommandDeletion = true;
         customPrefixProperty = null;
-        exclusiveCustomPrefix = false;
         serverBlacklist = new long[0];
 
         api.addMessageCreateListener(this::handleMessageCreate);
@@ -114,9 +112,8 @@ public final class CommandHandler {
         registerCommands(this);
     }
 
-    public void useCustomPrefixes(@NotNull PropertyGroup propertyGroup, boolean exclusiveCustomPrefix) {
-        this.customPrefixProperty = propertyGroup;
-        this.exclusiveCustomPrefix = exclusiveCustomPrefix;
+    public void useCustomPrefixes(@NotNull PropertyGroup propertyGroup) {
+        this.customPrefixProperty = Objects.requireNonNull(propertyGroup);
     }
 
     public long[] getServerBlacklist() {
