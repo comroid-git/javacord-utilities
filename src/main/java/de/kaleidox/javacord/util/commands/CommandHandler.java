@@ -553,6 +553,7 @@ public final class CommandHandler {
             else if (reply instanceof PagedMessage) ((PagedMessage) reply).refresh();
             else if (reply instanceof RefreshableMessage) ((RefreshableMessage) reply).refresh();
             else if (reply instanceof CategorizedEmbed) msgFut = ((CategorizedEmbed) reply).build();
+            else if (reply instanceof InfoReaction) ((InfoReaction) reply).build();
             else msgFut = channel.sendMessage(String.valueOf(reply));
 
             if (msgFut != null)
