@@ -34,6 +34,7 @@ import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.DiscordEntity;
 import org.javacord.api.entity.channel.Channel;
 import org.javacord.api.entity.channel.PrivateChannel;
+import org.javacord.api.entity.channel.ServerChannel;
 import org.javacord.api.entity.channel.ServerTextChannel;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.Message;
@@ -67,6 +68,7 @@ public final class CommandHandler {
     public boolean useBotMentionAsPrefix;
     private Supplier<EmbedBuilder> embedSupplier = null;
     private @Nullable PropertyGroup customPrefixProperty;
+    private @Nullable PropertyGroup commandChannelProperty;
     private long[] serverBlacklist;
 
     public CommandHandler(DiscordApi api) {
@@ -118,6 +120,10 @@ public final class CommandHandler {
 
     public void useCustomPrefixes(@NotNull PropertyGroup propertyGroup) {
         this.customPrefixProperty = Objects.requireNonNull(propertyGroup);
+    }
+
+    public void useCommandChannel(@NotNull PropertyGroup propertyGroup) {
+        this.commandChannelProperty = propertyGroup;
     }
 
     public long[] getServerBlacklist() {
@@ -320,6 +326,18 @@ public final class CommandHandler {
     }
 
     private void handleCommand(final Message message, final TextChannel channel, final Params commandParams) {
+        if (commandChannelProperty != null && !message.isPrivateMessage()) {
+            long serverId = channel.asServerChannel()
+                    .map(ServerChannel::getServer)
+                    .map(DiscordEntity::getId)
+                    .orElseThrow(AssertionError::new);
+
+            if (!api.getChannelById(commandChannelProperty.getValue(serverId).asLong())
+                    .map(channel::equals)
+                    .orElse(true))
+                return;
+        }
+
         String usedPrefix = extractUsedPrefix(message);
 
         // if no prefix was used, stop handling
