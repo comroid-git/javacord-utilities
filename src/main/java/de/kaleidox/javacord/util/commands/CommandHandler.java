@@ -450,15 +450,21 @@ public final class CommandHandler {
                         }
                         // if in string & ender is not escaped
                     } else if (inString && p != '\\') {
-                        // if next char is space
-                        if (content.charAt(i + 1) == ' ') {
-                            // end string
-                            yields.add("");
-                            s = y++;
-                            inString = false;
+                        // if there are more chars
+                        if (content.length() < i + 1) {
+                            // if next char is space
+                            if (content.length() < i + 1 && content.charAt(i + 1) == ' ') {
+                                // end string
+                                yields.add("");
+                                s = y++;
+                                inString = false;
+                            } else {
+                                // escape "
+                                yields.set(y, yields.get(y) + c);
+                            }
                         } else {
-                            // escape "
-                            yields.set(y, yields.get(y) + c);
+                            // end string
+                            inString = false;
                         }
                         // if " was escaped
                     } else {
