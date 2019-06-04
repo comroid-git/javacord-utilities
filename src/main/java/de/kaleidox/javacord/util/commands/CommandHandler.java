@@ -135,7 +135,12 @@ public final class CommandHandler {
     }
 
     @CommandGroup(name = "Basic Commands", description = "All commands for basic interaction with the bot")
-    @Command(aliases = "help", usage = "help [command]", description = "Shows a list of commands and what they do.")
+    @Command(
+            aliases = "help",
+            usage = "help [command]",
+            description = "Shows a list of commands and what they do.",
+            ordinal = Integer.MIN_VALUE
+    )
     public Object defaultHelpCommand(TextChannel channel, String[] args) {
         if (args.length == 0) {
             if (getCommands().stream()
