@@ -378,12 +378,8 @@ public final class CommandHandler {
         }
 
         if (cmd == null) return;
-        if (cmd.useTypingIndicator) {
-            channel.type();
-            message.getUserAuthor()
-                    .flatMap(User::getPrivateChannel)
-                    .ifPresent(TextChannel::type);
-        }
+        if (cmd.useTypingIndicator) channel.type();
+
         commandParams.args = args;
         List<String> problems = new ArrayList<>();
 
