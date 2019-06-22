@@ -72,6 +72,11 @@ import org.javacord.api.event.message.MessageEditEvent;
  * <th>Notes</th>
  * </tr>
  * <tr>
+ * <td>{@link CommandRepresentation}</td>
+ * <td>The representation of the command that was used.</td>
+ * <td></td>
+ * </tr>
+ * <tr>
  * <td>{@link DiscordApi}</td>
  * <td>The API that caught the command message's event.</td>
  * <td></td>
@@ -247,6 +252,8 @@ public @interface Command {
      * Command parameter structure
      */
     interface Parameters {
+        CommandRepresentation getCommand();
+
         DiscordApi getDiscord();
 
         Optional<MessageCreateEvent> getMessageCreateEvent();
