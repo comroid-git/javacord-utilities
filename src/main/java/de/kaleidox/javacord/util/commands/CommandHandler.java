@@ -399,7 +399,7 @@ public final class CommandHandler {
             problems.add("You are missing the required permission: "
                     + cmd.requiredDiscordPermission.name() + "!");
 
-        int reqArgs = cmd.requiredArguments;
+        int reqArgs = cmd.minimumArguments;
         if (commandParams.args.length < reqArgs) problems.add("This command requires at least "
                 + reqArgs + " argument" + (reqArgs == 1 ? "" : "s") + "!");
 

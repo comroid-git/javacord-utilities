@@ -206,7 +206,7 @@ public @interface Command {
      *
      * @return The minimum required amount of arguments.
      */
-    int requiredArguments() default 0;
+    int minimumArguments() default 0;
 
     /**
      * Defines the minimum amount of channel mentions required for the command to run. Default value is {@code 0}.
