@@ -209,6 +209,13 @@ public @interface Command {
     int minimumArguments() default 0;
 
     /**
+     * Defines the maximum amount of arguments allowed for the command to run. Default value is {@link Integer#MAX_VALUE}.
+     *
+     * @return The maximum allowed amount of arguments.
+     */
+    int maximumArguments() default Integer.MAX_VALUE;
+
+    /**
      * Defines the minimum amount of channel mentions required for the command to run. Default value is {@code 0}.
      *
      * @return The minimum required amount of channel mentions.

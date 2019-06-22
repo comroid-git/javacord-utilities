@@ -403,6 +403,10 @@ public final class CommandHandler {
         if (commandParams.args.length < reqArgs) problems.add("This command requires at least "
                 + reqArgs + " argument" + (reqArgs == 1 ? "" : "s") + "!");
 
+        int maxArgs = cmd.maximumArguments;
+        if (commandParams.args.length >= maxArgs) problems.add("This command allows a maximum of "
+                + maxArgs + " argument" + (maxArgs == 1 ? "" : "s") + "!");
+
         int reqChlMent = cmd.requiredChannelMentions;
         if (message.getMentionedChannels().size() < reqChlMent) problems.add("This command requires at least "
                 + reqChlMent + " channel mention" + (reqChlMent == 1 ? "" : "s") + "!");

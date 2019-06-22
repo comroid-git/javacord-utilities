@@ -16,6 +16,7 @@ public final class CommandRepresentation {
     public final boolean enableServerChat;
     public final PermissionType requiredDiscordPermission;
     public final int minimumArguments;
+    public final int maximumArguments;
     public final int requiredChannelMentions;
     public final int requiredUserMentions;
     public final int requiredRoleMentions;
@@ -45,6 +46,7 @@ public final class CommandRepresentation {
         this.enableServerChat = cmd.enableServerChat();
         this.requiredDiscordPermission = cmd.requiredDiscordPermission();
         this.minimumArguments = cmd.minimumArguments();
+        this.maximumArguments = cmd.maximumArguments();
         this.requiredChannelMentions = cmd.requiredChannelMentions();
         this.requiredUserMentions = cmd.requiredUserMentions();
         this.requiredRoleMentions = cmd.requiredRoleMentions();
@@ -91,6 +93,7 @@ public final class CommandRepresentation {
         this.enableServerChat = cmd.enableServerChat();
         this.requiredDiscordPermission = cmd.requiredDiscordPermission();
         this.minimumArguments = cmd.minimumArguments();
+        this.maximumArguments = cmd.maximumArguments();
         this.requiredChannelMentions = cmd.requiredChannelMentions();
         this.requiredUserMentions = cmd.requiredUserMentions();
         this.requiredRoleMentions = cmd.requiredRoleMentions();
