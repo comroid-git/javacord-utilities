@@ -321,7 +321,7 @@ public final class CommandHandler {
     }
 
     private boolean isBlacklisted(MessageEvent event) {
-        if (!event.getServer().isPresent()) return true;
+        if (!event.getServer().isPresent()) return false;
 
         long id = event.getServer().get().getId();
 
@@ -380,6 +380,9 @@ public final class CommandHandler {
         if (cmd == null) return;
         commandParams.command = cmd;
         commandParams.args = args;
+      
+        if (cmd.useTypingIndicator) channel.type();
+        
         List<String> problems = new ArrayList<>();
 
         if (message.isPrivateMessage() && !cmd.enablePrivateChat)
@@ -398,9 +401,13 @@ public final class CommandHandler {
             problems.add("You are missing the required permission: "
                     + cmd.requiredDiscordPermission.name() + "!");
 
-        int reqArgs = cmd.requiredArguments;
+        int reqArgs = cmd.minimumArguments;
         if (commandParams.args.length < reqArgs) problems.add("This command requires at least "
                 + reqArgs + " argument" + (reqArgs == 1 ? "" : "s") + "!");
+
+        int maxArgs = cmd.maximumArguments;
+        if (commandParams.args.length > maxArgs) problems.add("This command allows a maximum of "
+                + maxArgs + " argument" + (maxArgs == 1 ? "" : "s") + "!");
 
         int reqChlMent = cmd.requiredChannelMentions;
         if (message.getMentionedChannels().size() < reqChlMent) problems.add("This command requires at least "
@@ -445,7 +452,7 @@ public final class CommandHandler {
             prefs[prefixes.length] = api.getYourself().getMentionTag() + " ";
             prefs[prefixes.length + 1] = api.getYourself().getNicknameMentionTag() + " ";
         }
-        message.getServer()
+        if (customPrefixProperty != null) message.getServer()
                 .map(DiscordEntity::getId)
                 .map(customPrefixProperty::getValue)
                 .map(Value::asString)

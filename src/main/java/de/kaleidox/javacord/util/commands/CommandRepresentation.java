@@ -15,11 +15,13 @@ public final class CommandRepresentation {
     public final boolean enablePrivateChat;
     public final boolean enableServerChat;
     public final PermissionType requiredDiscordPermission;
-    public final int requiredArguments;
+    public final int minimumArguments;
+    public final int maximumArguments;
     public final int requiredChannelMentions;
     public final int requiredUserMentions;
     public final int requiredRoleMentions;
     public final boolean runInNSFWChannelOnly;
+    public final boolean useTypingIndicator;
     public final boolean async;
     public @Nullable final String groupName;
     public @Nullable final String groupDescription;
@@ -43,11 +45,13 @@ public final class CommandRepresentation {
         this.enablePrivateChat = cmd.enablePrivateChat();
         this.enableServerChat = cmd.enableServerChat();
         this.requiredDiscordPermission = cmd.requiredDiscordPermission();
-        this.requiredArguments = cmd.requiredArguments();
+        this.minimumArguments = cmd.minimumArguments();
+        this.maximumArguments = cmd.maximumArguments();
         this.requiredChannelMentions = cmd.requiredChannelMentions();
         this.requiredUserMentions = cmd.requiredUserMentions();
         this.requiredRoleMentions = cmd.requiredRoleMentions();
         this.runInNSFWChannelOnly = cmd.runInNSFWChannelOnly();
+        this.useTypingIndicator = cmd.useTypingIndicator();
         this.async = cmd.async();
 
         if (group != null) {
@@ -88,11 +92,13 @@ public final class CommandRepresentation {
         this.enablePrivateChat = cmd.enablePrivateChat();
         this.enableServerChat = cmd.enableServerChat();
         this.requiredDiscordPermission = cmd.requiredDiscordPermission();
-        this.requiredArguments = cmd.requiredArguments();
+        this.minimumArguments = cmd.minimumArguments();
+        this.maximumArguments = cmd.maximumArguments();
         this.requiredChannelMentions = cmd.requiredChannelMentions();
         this.requiredUserMentions = cmd.requiredUserMentions();
         this.requiredRoleMentions = cmd.requiredRoleMentions();
         this.runInNSFWChannelOnly = cmd.runInNSFWChannelOnly();
+        this.useTypingIndicator = cmd.useTypingIndicator();
         this.async = cmd.async();
 
         this.groupName = groupName;

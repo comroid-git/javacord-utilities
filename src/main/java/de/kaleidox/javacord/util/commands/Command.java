@@ -211,7 +211,14 @@ public @interface Command {
      *
      * @return The minimum required amount of arguments.
      */
-    int requiredArguments() default 0;
+    int minimumArguments() default 0;
+
+    /**
+     * Defines the maximum amount of arguments allowed for the command to run. Default value is {@link Integer#MAX_VALUE}.
+     *
+     * @return The maximum allowed amount of arguments.
+     */
+    int maximumArguments() default Integer.MAX_VALUE;
 
     /**
      * Defines the minimum amount of channel mentions required for the command to run. Default value is {@code 0}.
@@ -240,6 +247,22 @@ public @interface Command {
      * @return Whether to run this command in NSFW channels only.
      */
     boolean runInNSFWChannelOnly() default false;
+
+    /**
+     * Defines whether the bot should send a typing indicator in the command channel while processing the command.
+     * <p>
+     * This value should only be set to {@code TRUE} if the command evaluation is expected to take a long time.
+     * <p>
+     * Note that this will not work well when not responding with a message, as a typing indicator will
+     * last until either a message is sent or for 5 seconds.
+     * This will also send a typing indicator to the channel the command has been invoked in and, if open,
+     * the private channel to the user who sent the command.
+     * <p>
+     * Read more on the documentation: https://discordapp.com/developers/docs/resources/channel#trigger-typing-indicator
+     *
+     * @return Whether to use a typing indicator.
+     */
+    boolean useTypingIndicator() default false;
 
     /**
      * Defines whether a command should be executed async.
