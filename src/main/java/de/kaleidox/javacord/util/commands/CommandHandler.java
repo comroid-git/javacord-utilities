@@ -378,9 +378,11 @@ public final class CommandHandler {
         }
 
         if (cmd == null) return;
-        if (cmd.useTypingIndicator) channel.type();
-
+        commandParams.command = cmd;
         commandParams.args = args;
+      
+        if (cmd.useTypingIndicator) channel.type();
+        
         List<String> problems = new ArrayList<>();
 
         if (message.isPrivateMessage() && !cmd.enablePrivateChat)
@@ -594,7 +596,9 @@ public final class CommandHandler {
         for (int i = 0; i < parameterTypes.length; i++) {
             Class<?> klasse = parameterTypes[i];
 
-            if (DiscordApi.class.isAssignableFrom(klasse))
+            if (CommandRepresentation.class.isAssignableFrom(klasse))
+                args[i] = param.command;
+            else if (DiscordApi.class.isAssignableFrom(klasse))
                 args[i] = param.discord;
             else if (MessageCreateEvent.class.isAssignableFrom(klasse))
                 args[i] = param.createEvent;
@@ -641,6 +645,7 @@ public final class CommandHandler {
         private final TextChannel textChannel;
         private final Message message;
         private final MessageAuthor author;
+        private CommandRepresentation command;
         private String[] args;
 
         private Params(
@@ -652,6 +657,7 @@ public final class CommandHandler {
                 Message message,
                 @Nullable MessageAuthor author
         ) {
+            this.command = command;
             this.discord = discord;
             this.createEvent = createEvent;
             this.editEvent = editEvent;
@@ -659,6 +665,11 @@ public final class CommandHandler {
             this.textChannel = textChannel;
             this.message = message;
             this.author = author;
+        }
+
+        @Override
+        public CommandRepresentation getCommand() {
+            return command;
         }
 
         @Override
