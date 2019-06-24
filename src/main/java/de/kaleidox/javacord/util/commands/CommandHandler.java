@@ -321,7 +321,7 @@ public final class CommandHandler {
     }
 
     private boolean isBlacklisted(MessageEvent event) {
-        if (!event.getServer().isPresent()) return true;
+        if (!event.getServer().isPresent()) return false;
 
         long id = event.getServer().get().getId();
 
