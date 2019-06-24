@@ -399,9 +399,13 @@ public final class CommandHandler {
             problems.add("You are missing the required permission: "
                     + cmd.requiredDiscordPermission.name() + "!");
 
-        int reqArgs = cmd.requiredArguments;
+        int reqArgs = cmd.minimumArguments;
         if (commandParams.args.length < reqArgs) problems.add("This command requires at least "
                 + reqArgs + " argument" + (reqArgs == 1 ? "" : "s") + "!");
+
+        int maxArgs = cmd.maximumArguments;
+        if (commandParams.args.length > maxArgs) problems.add("This command allows a maximum of "
+                + maxArgs + " argument" + (maxArgs == 1 ? "" : "s") + "!");
 
         int reqChlMent = cmd.requiredChannelMentions;
         if (message.getMentionedChannels().size() < reqChlMent) problems.add("This command requires at least "
