@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -16,10 +17,14 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import de.kaleidox.javacord.util.server.properties.PropertyGroup;
+import de.kaleidox.javacord.util.model.command.SelfCommandChannelable;
+import de.kaleidox.javacord.util.model.command.SelfCustomPrefixable;
+import de.kaleidox.javacord.util.model.command.SelfMultiCommandRegisterable;
 import de.kaleidox.javacord.util.ui.embed.DefaultEmbedFactory;
 import de.kaleidox.javacord.util.ui.messages.InformationMessage;
 import de.kaleidox.javacord.util.ui.messages.RefreshableMessage;
@@ -27,7 +32,6 @@ import de.kaleidox.javacord.util.ui.messages.categorizing.CategorizedEmbed;
 import de.kaleidox.javacord.util.ui.messages.paging.PagedEmbed;
 import de.kaleidox.javacord.util.ui.messages.paging.PagedMessage;
 import de.kaleidox.javacord.util.ui.reactions.InfoReaction;
-import de.kaleidox.util.markers.Value;
 
 import org.apache.logging.log4j.Logger;
 import org.javacord.api.DiscordApi;
@@ -53,9 +57,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import static java.lang.System.arraycopy;
+import static java.lang.reflect.Modifier.isStatic;
 import static org.javacord.api.util.logging.ExceptionLogger.get;
 
-public final class CommandHandler {
+public final class CommandHandler implements
+        SelfMultiCommandRegisterable<CommandHandler>,
+        SelfCommandChannelable<CommandHandler>,
+        SelfCustomPrefixable<CommandHandler> {
     private static final Logger logger = LoggerUtil.getLogger(CommandHandler.class);
     static final String NO_GROUP = "@NoGroup#";
 
@@ -67,8 +75,8 @@ public final class CommandHandler {
     public boolean autoDeleteResponseOnCommandDeletion;
     public boolean useBotMentionAsPrefix;
     private Supplier<EmbedBuilder> embedSupplier = null;
-    private @Nullable PropertyGroup customPrefixProperty;
-    private @Nullable PropertyGroup commandChannelProperty;
+    private @Nullable Function<Long, String> customPrefixProvider;
+    private @Nullable Function<Long, Long> commandChannelProvider;
     private long[] serverBlacklist;
 
     public CommandHandler(DiscordApi api) {
@@ -80,7 +88,7 @@ public final class CommandHandler {
 
         prefixes = new String[]{"!"};
         autoDeleteResponseOnCommandDeletion = true;
-        customPrefixProperty = null;
+        customPrefixProvider = null;
         serverBlacklist = new long[0];
 
         api.addMessageCreateListener(this::handleMessageCreate);
@@ -89,41 +97,99 @@ public final class CommandHandler {
         api.addMessageDeleteListener(this::handleMessageDelete);
     }
 
+    @Override
+    public CommandHandler registerCommandTarget(Object target) {
+        Class<?> klasse = target.getClass();
+
+        if (Class.class.isAssignableFrom(klasse)) {
+            // register a static class
+            Method[] methods = Stream.of(klasse.getMethods())
+                    .filter(method -> method.isAnnotationPresent(Command.class))
+                    .filter(method -> isStatic(method.getModifiers()))
+                    .toArray(Method[]::new);
+
+            extractCommandRep(null, methods);
+
+            return this;
+        } else if (Method.class.isAssignableFrom(klasse)) {
+            // register a single method
+            Method method = (Method) target;
+
+            if (!isStatic(method.getModifiers()))
+                logger.error("Could not register non-static method: " + method.toGenericString());
+            else extractCommandRep(null, method);
+
+            return this;
+        } else {
+            // register an object
+            Method[] methods = Stream.of(klasse.getMethods())
+                    .filter(method -> method.isAnnotationPresent(Command.class))
+                    .filter(method -> !isStatic(method.getModifiers()))
+                    .toArray(Method[]::new);
+
+            extractCommandRep(target, methods);
+
+            return this;
+        }
+    }
+
+    @Override
+    public CommandHandler unregisterCommandTarget(Object target) {
+        Class<?> klasse = target.getClass();
+        Collection<String> remove = new ArrayList<>();
+
+        if (Class.class.isAssignableFrom(klasse)) {
+            // unregister a static class
+            Stream.of(klasse.getMethods())
+                    .filter(method -> method.isAnnotationPresent(Command.class))
+                    .filter(method -> isStatic(method.getModifiers()))
+                    .flatMap(method -> commands.entrySet()
+                            .stream()
+                            .filter(entry -> entry.getValue().method.equals(method)))
+                    .map(Map.Entry::getKey)
+                    .forEach(remove::add);
+        } else if (Method.class.isAssignableFrom(klasse)) {
+            // unregister a single method
+            commands.entrySet()
+                    .stream()
+                    .filter(entry -> entry.getValue().method.equals(target))
+                    .map(Map.Entry::getKey)
+                    .forEach(remove::add);
+        } else if (Command.class.isAssignableFrom(klasse)) {
+            // TODO unregister a single method from an annotation
+        } else if (CommandGroup.class.isAssignableFrom(klasse)) {
+            // TODO unregister a static class or a single method from an annotation
+        } else if (CommandRepresentation.class.isAssignableFrom(klasse)) {
+            // unregister a specific command representation
+            commands.entrySet()
+                    .stream()
+                    .filter(entry -> entry.getValue().equals(target))
+                    .map(Map.Entry::getKey)
+                    .forEach(remove::add);
+        } else {
+            // unregister an object
+            commands.entrySet()
+                    .stream()
+                    .filter(entry -> Objects.equals(entry.getValue().invocationTarget, target))
+                    .map(Map.Entry::getKey)
+                    .forEach(remove::add);
+        }
+
+        for (String s : remove)
+            if (commands.remove(s) != null)
+                logger.info("Successfully unregistered command: " + s);
+            else logger.warn("Could not unregister command: " + s);
+
+        return this;
+    }
+
     public Set<CommandRepresentation> getCommands() {
-        HashSet<CommandRepresentation> reps = new HashSet<>();
-
-        commands.forEach((s, commandRep) -> reps.add(commandRep));
-
-        return reps;
-    }
-
-    public void registerCommands(Object register) {
-        if (register instanceof Class)
-            extractCommandRep(null, ((Class) register).getMethods());
-        else if (register instanceof Method)
-            extractCommandRep(null, (Method) register);
-        else extractCommandRep(register, register.getClass().getMethods());
-    }
-
-    public void unregisterCommands(Object unregister) {
-        if (unregister instanceof Class)
-            tryUnregister(((Class) unregister).getMethods());
-        else if (unregister instanceof Method)
-            tryUnregister((Method) unregister);
-        else tryUnregister(unregister.getClass().getMethods());
+        return new HashSet<>(commands.values());
     }
 
     public void useDefaultHelp(@Nullable Supplier<EmbedBuilder> embedSupplier) {
         this.embedSupplier = (embedSupplier == null ? DefaultEmbedFactory.INSTANCE : embedSupplier);
         registerCommands(this);
-    }
-
-    public void useCustomPrefixes(@NotNull PropertyGroup propertyGroup) {
-        this.customPrefixProperty = Objects.requireNonNull(propertyGroup);
-    }
-
-    public void useCommandChannel(@NotNull PropertyGroup propertyGroup) {
-        this.commandChannelProperty = propertyGroup;
     }
 
     public long[] getServerBlacklist() {
@@ -211,6 +277,28 @@ public final class CommandHandler {
 
     }
 
+    @Override
+    public CommandHandler withCommandChannelProvider(@NotNull Function<Long, Long> commandChannelProvider) {
+        this.commandChannelProvider = commandChannelProvider;
+        return this;
+    }
+
+    @Override
+    public Optional<Function<Long, Long>> getCommandChannelProvider() {
+        return Optional.ofNullable(commandChannelProvider);
+    }
+
+    @Override
+    public CommandHandler withCustomPrefixProvider(@NotNull Function<Long, String> customPrefixProvider) {
+        this.customPrefixProvider = customPrefixProvider;
+        return this;
+    }
+
+    @Override
+    public Optional<Function<Long, String>> getCustomPrefixProvider() {
+        return Optional.ofNullable(customPrefixProvider);
+    }
+
     private void extractCommandRep(@Nullable Object invocationTarget, Method... methods) {
         for (Method method : methods) {
             Command cmd = method.getAnnotation(Command.class);
@@ -232,7 +320,7 @@ public final class CommandHandler {
                 }
             }
 
-            if (!Modifier.isStatic(method.getModifiers()) && Objects.isNull(invocationTarget))
+            if (!isStatic(method.getModifiers()) && Objects.isNull(invocationTarget))
                 throw new IllegalArgumentException("Invocation Target cannot be null on non-static methods!");
             if (Modifier.isAbstract(method.getModifiers()))
                 throw new AbstractMethodError("Command annotated method cannot be abstract!");
@@ -264,14 +352,6 @@ public final class CommandHandler {
                 logger.info("Command " + (cmd.aliases().length == 0 ? method.getName() : cmd.aliases()[0])
                         + " was registered without a CommandGroup annotation!");
         }
-    }
-
-    private void tryUnregister(Method... methods) {
-        for (Method method : methods)
-            commands.entrySet()
-                    .stream()
-                    .filter(entry -> entry.getValue().method.equals(method))
-                    .forEach(entry -> commands.remove(entry.getKey()));
     }
 
     private void handleMessageCreate(MessageCreateEvent event) {
@@ -331,13 +411,13 @@ public final class CommandHandler {
     }
 
     private void handleCommand(final Message message, final TextChannel channel, final Params commandParams) {
-        if (commandChannelProperty != null && !message.isPrivateMessage()) {
+        if (commandChannelProvider != null && !message.isPrivateMessage()) {
             long serverId = channel.asServerChannel()
                     .map(ServerChannel::getServer)
                     .map(DiscordEntity::getId)
                     .orElseThrow(AssertionError::new);
 
-            if (!api.getChannelById(commandChannelProperty.getValue(serverId).asLong())
+            if (!api.getChannelById(commandChannelProvider.apply(serverId))
                     .map(channel::equals)
                     .orElse(true))
                 return;
@@ -446,16 +526,15 @@ public final class CommandHandler {
         // gather all possible prefixes
         String[] prefs = new String[prefixes.length
                 + (useBotMentionAsPrefix ? 2 : 0)
-                + (customPrefixProperty != null ? 1 : 0)];
+                + (customPrefixProvider != null ? 1 : 0)];
         arraycopy(prefixes, 0, prefs, 0, prefixes.length);
         if (useBotMentionAsPrefix) {
             prefs[prefixes.length] = api.getYourself().getMentionTag() + " ";
             prefs[prefixes.length + 1] = api.getYourself().getNicknameMentionTag() + " ";
         }
-        if (customPrefixProperty != null) message.getServer()
+        if (customPrefixProvider != null) message.getServer()
                 .map(DiscordEntity::getId)
-                .map(customPrefixProperty::getValue)
-                .map(Value::asString)
+                .map(customPrefixProvider)
                 .ifPresent(val -> prefs[prefs.length - 1] = val);
 
         for (int i = 0; i < prefs.length; i++)

@@ -112,7 +112,7 @@ public final class ServerPropertiesManager implements Initializable, Closeable {
                 );
 
                 properties.forEach((propName, propGroup) -> pagedEmbed.addField(
-                        propGroup.getDisplayName(),
+                        propGroup.getDisplayName().orElseGet(propGroup::getName),
                         "`" + propName + "` -> `" + propGroup.getValue(server).asString() + "`" +
                                 "\n\t" + propGroup.getDescription() +
                                 "\n")
@@ -128,7 +128,7 @@ public final class ServerPropertiesManager implements Initializable, Closeable {
 
                 return embedSupplier.get()
                         .addField(
-                                propertyGet.getDisplayName(),
+                                propertyGet.getDisplayName().orElseGet(propertyGet::getName),
                                 "`" + args[0] + "` -> `" + propertyGet.getValue(server).asString() + "`" +
                                         "\n\t" + propertyGet.getDescription()
                         );
@@ -143,14 +143,14 @@ public final class ServerPropertiesManager implements Initializable, Closeable {
                 Object setTo = extractValue(args[1]);
 
                 if (setTo.equals("#default#"))
-                    setTo = String.valueOf(propertySet.getDefaultValue().getValue());
+                    setTo = propertySet.getDefaultValue().asString();
 
                 value.setter().toObject(setTo);
 
                 return embedSupplier.get()
                         .setDescription("Changed property `" + args[0] + "` to new value: `" + value.asString() + "`")
                         .addField(
-                                propertySet.getDisplayName(),
+                                propertySet.getDisplayName().orElseGet(propertySet::getName),
                                 "`" + args[0] + "` -> `" + propertySet.getValue(server).asString() + "`" +
                                         "\n\t" + propertySet.getDescription()
                         );

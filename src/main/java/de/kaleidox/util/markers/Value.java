@@ -75,6 +75,40 @@ public class Value {
         else return String.valueOf(obj).equals(asString());
     }
 
+    @SuppressWarnings("unchecked")
+    public <R> R as(Class<? extends R> targetType) {
+        if (Boolean.class.isAssignableFrom(targetType))
+            return (R) (Boolean) asBoolean();
+        else if (Byte.class.isAssignableFrom(targetType))
+            return (R) (Byte) asByte();
+        else if (Short.class.isAssignableFrom(targetType))
+            return (R) (Short) asShort();
+        else if (Integer.class.isAssignableFrom(targetType))
+            return (R) (Integer) asInt();
+        else if (Float.class.isAssignableFrom(targetType))
+            return (R) (Float) asFloat();
+        else if (Double.class.isAssignableFrom(targetType))
+            return (R) (Double) asDouble();
+        else if (Long.class.isAssignableFrom(targetType))
+            return (R) (Long) asLong();
+        else if (Character.class.isAssignableFrom(targetType))
+            return (R) (Character) asChar();
+        else if (String.class.isAssignableFrom(targetType))
+            return (R) asString();
+        else {
+            if (targetType.isInstance(value))
+                return (R) value;
+
+            try {
+                return (R) targetType.getMethod("valueOf", String.class)
+                        .invoke(null, asString());
+            } catch (Throwable t) {
+                throw new ClassCastException("Cannot deserialize to type \"" + targetType.getSimpleName() + "\"; " +
+                        "static method \"#valueOf(String)\" is missing.");
+            }
+        }
+    }
+
     public class Setter {
         private Setter() {
         }
