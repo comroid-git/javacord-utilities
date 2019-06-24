@@ -1,20 +1,29 @@
 package de.kaleidox.javacord.util.server.properties;
 
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
+import de.kaleidox.javacord.util.model.SelfDefaultable;
+import de.kaleidox.javacord.util.model.SelfDescribable;
+import de.kaleidox.javacord.util.model.SelfDisplaynameable;
 import de.kaleidox.util.markers.Value;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.javacord.api.entity.server.Server;
+import org.jetbrains.annotations.NotNull;
 
 import static de.kaleidox.util.Util.nodeOf;
 
-public final class PropertyGroup {
+public final class PropertyGroup implements
+        SelfDisplaynameable<PropertyGroup>,
+        SelfDescribable<PropertyGroup>,
+        SelfDefaultable<PropertyGroup, Object> {
     private final String name;
-    private final Value defaultValue;
     private final ConcurrentHashMap<Long, Value> values;
+    private Value defaultValue;
     private String displayName;
     private String description;
 
@@ -25,36 +34,6 @@ public final class PropertyGroup {
         this.description = description;
 
         values = new ConcurrentHashMap<>();
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public PropertyGroup setDisplayName(String displayName) {
-        this.displayName = displayName;
-        return this;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public PropertyGroup setDescription(String description) {
-        this.description = description;
-        return this;
-    }
-
-    public <R> Function<Long, R> function(final Class<? extends R> targetType) {
-        return serverId -> getValue(serverId).as(targetType);
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Value getDefaultValue() {
-        return defaultValue;
     }
 
     public Value.Setter setValue(Server server) {
@@ -71,9 +50,50 @@ public final class PropertyGroup {
 
     public Value getValue(long serverId) {
         return values.compute(serverId, (k, v) -> {
-            if (v == null) return new Value(defaultValue);
+            if (v == null) return defaultValue;
             return v;
         });
+    }
+
+    public <R> Function<Long, R> function(final Class<? extends R> targetType) {
+        return serverId -> getValue(serverId).as(targetType);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public PropertyGroup withDefaultValue(@NotNull Object value) {
+        this.defaultValue = new Value(Objects.requireNonNull(value));
+        return this;
+    }
+
+    @Override
+    public Value getDefaultValue() {
+        return defaultValue;
+    }
+
+    @Override
+    public PropertyGroup withDescription(@NotNull String description) {
+        this.description = description;
+        return this;
+    }
+
+    @Override
+    public Optional<String> getDescription() {
+        return Optional.ofNullable(description);
+    }
+
+    @Override
+    public PropertyGroup withDisplayName(@NotNull String displayName) {
+        this.displayName = displayName;
+        return this;
+    }
+
+    @Override
+    public Optional<String> getDisplayName() {
+        return Optional.ofNullable(displayName);
     }
 
     void serialize(ArrayNode node) {
