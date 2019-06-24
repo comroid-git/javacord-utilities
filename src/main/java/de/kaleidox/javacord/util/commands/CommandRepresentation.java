@@ -20,6 +20,7 @@ public final class CommandRepresentation {
     public final int requiredUserMentions;
     public final int requiredRoleMentions;
     public final boolean runInNSFWChannelOnly;
+    public final boolean useTypingIndicator;
     public final boolean async;
     public @Nullable final String groupName;
     public @Nullable final String groupDescription;
@@ -48,6 +49,7 @@ public final class CommandRepresentation {
         this.requiredUserMentions = cmd.requiredUserMentions();
         this.requiredRoleMentions = cmd.requiredRoleMentions();
         this.runInNSFWChannelOnly = cmd.runInNSFWChannelOnly();
+        this.useTypingIndicator = cmd.useTypingIndicator();
         this.async = cmd.async();
 
         if (group != null) {
@@ -93,6 +95,7 @@ public final class CommandRepresentation {
         this.requiredUserMentions = cmd.requiredUserMentions();
         this.requiredRoleMentions = cmd.requiredRoleMentions();
         this.runInNSFWChannelOnly = cmd.runInNSFWChannelOnly();
+        this.useTypingIndicator = cmd.useTypingIndicator();
         this.async = cmd.async();
 
         this.groupName = groupName;

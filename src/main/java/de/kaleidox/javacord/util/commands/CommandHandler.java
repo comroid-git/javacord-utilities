@@ -321,7 +321,7 @@ public final class CommandHandler {
     }
 
     private boolean isBlacklisted(MessageEvent event) {
-        if (!event.getServer().isPresent()) return true;
+        if (!event.getServer().isPresent()) return false;
 
         long id = event.getServer().get().getId();
 
@@ -378,6 +378,8 @@ public final class CommandHandler {
         }
 
         if (cmd == null) return;
+        if (cmd.useTypingIndicator) channel.type();
+
         commandParams.args = args;
         List<String> problems = new ArrayList<>();
 
@@ -444,7 +446,7 @@ public final class CommandHandler {
             prefs[prefixes.length] = api.getYourself().getMentionTag() + " ";
             prefs[prefixes.length + 1] = api.getYourself().getNicknameMentionTag() + " ";
         }
-        message.getServer()
+        if (customPrefixProperty != null) message.getServer()
                 .map(DiscordEntity::getId)
                 .map(customPrefixProperty::getValue)
                 .map(Value::asString)
