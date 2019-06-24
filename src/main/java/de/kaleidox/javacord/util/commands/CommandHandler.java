@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -67,8 +68,8 @@ public final class CommandHandler {
     public boolean autoDeleteResponseOnCommandDeletion;
     public boolean useBotMentionAsPrefix;
     private Supplier<EmbedBuilder> embedSupplier = null;
-    private @Nullable PropertyGroup customPrefixProperty;
-    private @Nullable PropertyGroup commandChannelProperty;
+    private @Nullable Function<Long, String> customPrefixProvider;
+    private @Nullable Function<Long, Long> commandChannelProvider;
     private long[] serverBlacklist;
 
     public CommandHandler(DiscordApi api) {
@@ -80,7 +81,7 @@ public final class CommandHandler {
 
         prefixes = new String[]{"!"};
         autoDeleteResponseOnCommandDeletion = true;
-        customPrefixProperty = null;
+        customPrefixProvider = null;
         serverBlacklist = new long[0];
 
         api.addMessageCreateListener(this::handleMessageCreate);
@@ -116,14 +117,6 @@ public final class CommandHandler {
     public void useDefaultHelp(@Nullable Supplier<EmbedBuilder> embedSupplier) {
         this.embedSupplier = (embedSupplier == null ? DefaultEmbedFactory.INSTANCE : embedSupplier);
         registerCommands(this);
-    }
-
-    public void useCustomPrefixes(@NotNull PropertyGroup propertyGroup) {
-        this.customPrefixProperty = Objects.requireNonNull(propertyGroup);
-    }
-
-    public void useCommandChannel(@NotNull PropertyGroup propertyGroup) {
-        this.commandChannelProperty = propertyGroup;
     }
 
     public long[] getServerBlacklist() {
@@ -209,6 +202,28 @@ public final class CommandHandler {
             return embed;
         }
 
+    }
+
+    @Override
+    public CommandHandler withCommandChannelProvider(@NotNull Function<Long, Long> commandChannelProvider) {
+        this.commandChannelProvider = commandChannelProvider;
+        return this;
+    }
+
+    @Override
+    public Optional<Function<Long, Long>> getCommandChannelProvider() {
+        return Optional.ofNullable(commandChannelProvider);
+    }
+
+    @Override
+    public CommandHandler withCustomPrefixProvider(@NotNull Function<Long, String> customPrefixProvider) {
+        this.customPrefixProvider = customPrefixProvider;
+        return this;
+    }
+
+    @Override
+    public Optional<Function<Long, String>> getCustomPrefixProvider() {
+        return Optional.ofNullable(customPrefixProvider);
     }
 
     private void extractCommandRep(@Nullable Object invocationTarget, Method... methods) {
@@ -331,13 +346,13 @@ public final class CommandHandler {
     }
 
     private void handleCommand(final Message message, final TextChannel channel, final Params commandParams) {
-        if (commandChannelProperty != null && !message.isPrivateMessage()) {
+        if (commandChannelProvider != null && !message.isPrivateMessage()) {
             long serverId = channel.asServerChannel()
                     .map(ServerChannel::getServer)
                     .map(DiscordEntity::getId)
                     .orElseThrow(AssertionError::new);
 
-            if (!api.getChannelById(commandChannelProperty.getValue(serverId).asLong())
+            if (!api.getChannelById(commandChannelProvider.apply(serverId))
                     .map(channel::equals)
                     .orElse(true))
                 return;
@@ -446,7 +461,7 @@ public final class CommandHandler {
         // gather all possible prefixes
         String[] prefs = new String[prefixes.length
                 + (useBotMentionAsPrefix ? 2 : 0)
-                + (customPrefixProperty != null ? 1 : 0)];
+                + (customPrefixProvider != null ? 1 : 0)];
         arraycopy(prefixes, 0, prefs, 0, prefixes.length);
         if (useBotMentionAsPrefix) {
             prefs[prefixes.length] = api.getYourself().getMentionTag() + " ";
@@ -454,8 +469,7 @@ public final class CommandHandler {
         }
         if (customPrefixProperty != null) message.getServer()
                 .map(DiscordEntity::getId)
-                .map(customPrefixProperty::getValue)
-                .map(Value::asString)
+                .map(customPrefixProvider)
                 .ifPresent(val -> prefs[prefs.length - 1] = val);
 
         for (int i = 0; i < prefs.length; i++)

@@ -1,6 +1,7 @@
 package de.kaleidox.javacord.util.server.properties;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 import de.kaleidox.util.markers.Value;
 
@@ -42,6 +43,10 @@ public final class PropertyGroup {
     public PropertyGroup setDescription(String description) {
         this.description = description;
         return this;
+    }
+
+    public <R> Function<Long, R> function(final Class<? extends R> targetType) {
+        return serverId -> getValue(serverId).as(targetType);
     }
 
     public String getName() {
