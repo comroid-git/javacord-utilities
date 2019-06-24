@@ -446,7 +446,7 @@ public final class CommandHandler {
             prefs[prefixes.length] = api.getYourself().getMentionTag() + " ";
             prefs[prefixes.length + 1] = api.getYourself().getNicknameMentionTag() + " ";
         }
-        message.getServer()
+        if (customPrefixProperty != null) message.getServer()
                 .map(DiscordEntity::getId)
                 .map(customPrefixProperty::getValue)
                 .map(Value::asString)
