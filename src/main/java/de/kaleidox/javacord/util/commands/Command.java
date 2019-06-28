@@ -7,6 +7,7 @@ import java.lang.annotation.Target;
 import java.util.List;
 import java.util.Optional;
 
+import de.kaleidox.javacord.util.ui.embed.DefaultEmbedFactory;
 import de.kaleidox.javacord.util.ui.messages.InformationMessage;
 import de.kaleidox.javacord.util.ui.messages.RefreshableMessage;
 import de.kaleidox.javacord.util.ui.messages.paging.PagedEmbed;
@@ -247,6 +248,13 @@ public @interface Command {
      * @return Whether to run this command in NSFW channels only.
      */
     boolean runInNSFWChannelOnly() default false;
+
+    /**
+     * Defines whether all returned Strings should be converted to an embed using {@link DefaultEmbedFactory}.
+     *
+     * @return Whether to convert all {@code String}-type results to embeds.
+     */
+    boolean convertStringResultsToEmbed() default false;
 
     /**
      * Defines whether the bot should send a typing indicator in the command channel while processing the command.

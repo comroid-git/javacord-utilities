@@ -460,9 +460,9 @@ public final class CommandHandler implements
         if (cmd == null) return;
         commandParams.command = cmd;
         commandParams.args = args;
-      
+
         if (cmd.useTypingIndicator) channel.type();
-        
+
         List<String> problems = new ArrayList<>();
 
         if (message.isPrivateMessage() && !cmd.enablePrivateChat)
@@ -660,6 +660,8 @@ public final class CommandHandler implements
             else if (reply instanceof RefreshableMessage) ((RefreshableMessage) reply).refresh();
             else if (reply instanceof CategorizedEmbed) msgFut = ((CategorizedEmbed) reply).build();
             else if (reply instanceof InfoReaction) ((InfoReaction) reply).build();
+            else if (commandRep.convertStringResultsToEmbed && reply instanceof String)
+                msgFut = channel.sendMessage(DefaultEmbedFactory.create().setDescription((String) reply));
             else msgFut = channel.sendMessage(String.valueOf(reply));
 
             if (msgFut != null)
