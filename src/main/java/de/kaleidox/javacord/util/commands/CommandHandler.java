@@ -32,6 +32,7 @@ import de.kaleidox.javacord.util.ui.messages.categorizing.CategorizedEmbed;
 import de.kaleidox.javacord.util.ui.messages.paging.PagedEmbed;
 import de.kaleidox.javacord.util.ui.messages.paging.PagedMessage;
 import de.kaleidox.javacord.util.ui.reactions.InfoReaction;
+import de.kaleidox.util.StringParser;
 
 import org.apache.logging.log4j.Logger;
 import org.javacord.api.DiscordApi;
@@ -431,7 +432,7 @@ public final class CommandHandler implements
         String content = message.getContent();
 
         CommandRepresentation cmd;
-        String[] split = splitContent(content);
+        String[] split = StringParser.INSTANCE.parseStrings(cmd.stringParserOption, " ", content);
         String[] args;
         if (usedPrefix.matches("^(.*\\s.*)+$")) {
             cmd = commands.entrySet()
@@ -544,94 +545,6 @@ public final class CommandHandler implements
             }
 
         return usedPrefix == -1 ? null : prefs[usedPrefix];
-    }
-
-    private String[] splitContent(String content) {
-        List<String> yields = new ArrayList<>();
-        yields.add("");
-
-        boolean inString = false;
-        int i = 0, y = 0, s = -1;
-        char c = 0, p;
-
-        while (i < content.length()) {
-            p = c;
-            c = content.charAt(i);
-
-            switch (c) {
-                case '"':
-                    // if not in string & starter is not escaped
-                    if (!inString && p != '\\') {
-                        // if string starts after a space
-                        if (p == ' ') {
-                            // start string
-                            yields.add("");
-                            s = y++;
-                            inString = true;
-                        } else {
-                            // escape "
-                            yields.set(y, yields.get(y) + c);
-                        }
-                        // if in string & ender is not escaped
-                    } else if (inString && p != '\\') {
-                        // if there are more chars
-                        if (content.length() < i + 1) {
-                            // if next char is space
-                            if (content.length() < i + 1 && content.charAt(i + 1) == ' ') {
-                                // end string
-                                yields.add("");
-                                s = y++;
-                                inString = false;
-                            } else {
-                                // escape "
-                                yields.set(y, yields.get(y) + c);
-                            }
-                        } else {
-                            // end string
-                            inString = false;
-                        }
-                        // if " was escaped
-                    } else {
-                        // append to string
-                        yields.set(y, yields.get(y) + c);
-                    }
-                    break;
-                case ' ':
-                    if (inString) {
-                        // append to string
-                        yields.set(y, yields.get(y) + c);
-                    } else {
-                        // start new item
-                        yields.add("");
-                        s = y++;
-                    }
-                    break;
-                case '\\':
-                    // never include escaping character
-                    break;
-                default:
-                    // append to string
-                    yields.set(y, yields.get(y) + c);
-                    break;
-            }
-
-            i++;
-        }
-
-        if (inString) { // if still in string -> join split string together
-            int prevSize = yields.size();
-            new ArrayList<>(yields)
-                    .stream()
-                    .skip(s)
-                    .flatMap(str -> Arrays.stream(str.split(" ")))
-                    .forEachOrdered(yields::add);
-            if (prevSize >= s + 1) yields.subList(s + 1, prevSize + 1).clear();
-            yields.set(s + 1, '"' + yields.get(s + 1));
-        }
-
-        yields.removeIf(String::isEmpty);
-
-        return yields.toArray(new String[0]);
     }
 
     private void doInvoke(CommandRepresentation commandRep, Params commandParams, TextChannel channel, Message message) {

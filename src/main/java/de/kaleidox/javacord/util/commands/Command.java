@@ -13,6 +13,7 @@ import de.kaleidox.javacord.util.ui.messages.RefreshableMessage;
 import de.kaleidox.javacord.util.ui.messages.paging.PagedEmbed;
 import de.kaleidox.javacord.util.ui.messages.paging.PagedMessage;
 import de.kaleidox.javacord.util.ui.reactions.InfoReaction;
+import de.kaleidox.util.StringParser;
 
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.channel.PrivateChannel;
@@ -215,7 +216,8 @@ public @interface Command {
     int minimumArguments() default 0;
 
     /**
-     * Defines the maximum amount of arguments allowed for the command to run. Default value is {@link Integer#MAX_VALUE}.
+     * Defines the maximum amount of arguments allowed for the command to run. Default value is {@link
+     * Integer#MAX_VALUE}.
      *
      * @return The maximum allowed amount of arguments.
      */
@@ -278,6 +280,14 @@ public @interface Command {
      * @return Whether to run the command method async.
      */
     boolean async() default false;
+
+    /**
+     * Defines how to handle provided arguments.
+     * See {@link StringParser#parseStrings(int, String, String...)} documentation for possible values.
+     *
+     * @return The option for the string parser.
+     */
+    int stringParserOption() default -1;
 
     /**
      * Command parameter structure

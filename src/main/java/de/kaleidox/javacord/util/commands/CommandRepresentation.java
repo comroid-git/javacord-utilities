@@ -24,6 +24,7 @@ public final class CommandRepresentation {
     public final boolean convertStringResultsToEmbed;
     public final boolean useTypingIndicator;
     public final boolean async;
+    public final int stringParserOption;
     public @Nullable final String groupName;
     public @Nullable final String groupDescription;
     public final int groupOrdinal;
@@ -55,6 +56,7 @@ public final class CommandRepresentation {
         this.convertStringResultsToEmbed = cmd.convertStringResultsToEmbed();
         this.useTypingIndicator = cmd.useTypingIndicator();
         this.async = cmd.async();
+        this.stringParserOption = cmd.stringParserOption();
 
         if (group != null) {
             if (!group.name().equals(CommandHandler.NO_GROUP))
@@ -103,6 +105,7 @@ public final class CommandRepresentation {
         this.convertStringResultsToEmbed = cmd.convertStringResultsToEmbed();
         this.useTypingIndicator = cmd.useTypingIndicator();
         this.async = cmd.async();
+        this.stringParserOption = cmd.stringParserOption();
 
         this.groupName = groupName;
         this.groupDescription = groupDescription;
