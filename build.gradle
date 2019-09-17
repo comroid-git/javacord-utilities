@@ -46,7 +46,7 @@ dependencies {
             { exclude group: 'com.fasterxml.jackson.core' }
     implementation('org.javacord:javacord-core:3.0.4')
             { exclude group: 'com.fasterxml.jackson.core' }
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.9.1'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.10.0.pr3'
 
     compileOnly 'org.jetbrains:annotations:17.0.0'
     
