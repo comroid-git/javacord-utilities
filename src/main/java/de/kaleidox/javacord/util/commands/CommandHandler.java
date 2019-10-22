@@ -642,7 +642,7 @@ public final class CommandHandler implements
             throw new RuntimeException("Cannot access command method!", e);
         } catch (InvocationTargetException e) {
             new InfoReaction(message, "⚠", "Command threw an exception: ["
-                    + e.getCause().getClass().getSimpleName() + "] " + e.getCause().getMessage(),
+                    + e.getCause().getClass().getSimpleName() + "] \n```\n" + e.getCause().getMessage() + "\n```",
                     1, TimeUnit.MINUTES, () -> DefaultEmbedFactory.create().setColor(Color.RED))
                     .build();
             logger.catching(e.getCause());
