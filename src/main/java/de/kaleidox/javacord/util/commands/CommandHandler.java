@@ -22,6 +22,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import de.kaleidox.javacord.util.model.command.SelfBotOwnerIgnorable;
 import de.kaleidox.javacord.util.model.command.SelfCommandChannelable;
 import de.kaleidox.javacord.util.model.command.SelfCustomPrefixable;
 import de.kaleidox.javacord.util.model.command.SelfMultiCommandRegisterable;
@@ -63,7 +64,8 @@ import static org.javacord.api.util.logging.ExceptionLogger.get;
 public final class CommandHandler implements
         SelfMultiCommandRegisterable<CommandHandler>,
         SelfCommandChannelable<CommandHandler>,
-        SelfCustomPrefixable<CommandHandler> {
+        SelfCustomPrefixable<CommandHandler>,
+        SelfBotOwnerIgnorable<CommandHandler> {
     private static final Logger logger = LoggerUtil.getLogger(CommandHandler.class);
     static final String NO_GROUP = "@NoGroup#";
 
@@ -78,6 +80,7 @@ public final class CommandHandler implements
     private @Nullable Function<Long, String> customPrefixProvider;
     private @Nullable Function<Long, Long> commandChannelProvider;
     private long[] serverBlacklist;
+    private boolean ignoreBotOwnerPermissions;
 
     public CommandHandler(DiscordApi api) {
         this(api, false);
@@ -90,6 +93,7 @@ public final class CommandHandler implements
         autoDeleteResponseOnCommandDeletion = true;
         customPrefixProvider = null;
         serverBlacklist = new long[0];
+        ignoreBotOwnerPermissions = false;
 
         api.addMessageCreateListener(this::handleMessageCreate);
         if (handleMessageEdit)
@@ -299,6 +303,15 @@ public final class CommandHandler implements
         return Optional.ofNullable(customPrefixProvider);
     }
 
+    @Override public CommandHandler ignoreBotOwnerPermissions(boolean status) {
+        this.ignoreBotOwnerPermissions = status;
+        return this;
+    }
+
+    @Override public boolean doesIgnoreBotOwnerPermissions() {
+        return ignoreBotOwnerPermissions;
+    }
+
     private void extractCommandRep(@Nullable Object invocationTarget, Method... methods) {
         for (Method method : methods) {
             Command cmd = method.getAnnotation(Command.class);
@@ -470,7 +483,8 @@ public final class CommandHandler implements
         else if (!message.isPrivateMessage() && !cmd.enableServerChat)
             problems.add("This command can only be run in a private channel!");
 
-        if (!message.getUserAuthor()
+        if (!(ignoreBotOwnerPermissions && message.getAuthor().isBotOwner())
+                && !message.getUserAuthor()
                 .map(usr -> message.getChannel()
                         .asServerTextChannel()
                         .map(stc -> stc.hasAnyPermission(usr,
