@@ -62,6 +62,8 @@ task generateGithubPom(type: GenerateMavenPom) {
 }
 
 signing {
+    useGpgCmd()
+
     sign publishing.publications.mavenJava
 }
 
