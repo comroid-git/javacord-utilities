@@ -61,10 +61,8 @@ task generateGithubPom(type: GenerateMavenPom) {
     pom = publishing.publications.mavenJava.pom
 }
 
-if (!System.getenv().containsKey('JITPACK')) {
-    signing {
-        sign publishing.publications.mavenJava
-    }
+signing {
+    sign publishing.publications.mavenJava
 }
 
 tasks.removeAll([promoteRepository, closeAndPromoteRepository, getStagingProfile])
