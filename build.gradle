@@ -42,11 +42,9 @@ repositories.jcenter()
 dependencies {
     api 'org.apache.logging.log4j:log4j-api:2.11.2'
 
-    implementation('org.javacord:javacord-api:3.0.4')
-            { exclude group: 'com.fasterxml.jackson.core' }
-    implementation('org.javacord:javacord-core:3.0.4')
-            { exclude group: 'com.fasterxml.jackson.core' }
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.10.0'
+    compileOnly('org.javacord:javacord-api:3.0.4')
+    compileOnly('org.javacord:javacord-core:3.0.4')
+    compileOnly 'com.fasterxml.jackson.core:jackson-databind:2.10.0'
 
     compileOnly 'org.jetbrains:annotations:17.0.0'
 
