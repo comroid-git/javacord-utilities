@@ -11,4 +11,4 @@ ext {
     sonatypePassword = getenv("sonatypePassword")
 }
 
-ext."signing.password" = getenv("gpgKeyPassword")
+ext."signing.gnupg.passphrase" = getenv("gpgKeyPassword")
