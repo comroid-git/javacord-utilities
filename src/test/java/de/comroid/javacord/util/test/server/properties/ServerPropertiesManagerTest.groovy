@@ -1,7 +1,7 @@
 package de.comroid.javacord.util.test.server.properties
 
-import de.kaleidox.javacord.util.server.properties.PropertyGroup
-import de.kaleidox.javacord.util.server.properties.ServerPropertiesManager
+import de.comroid.javacord.util.server.properties.PropertyGroup
+import de.comroid.javacord.util.server.properties.ServerPropertiesManager
 
 import org.junit.After
 import org.junit.Before
