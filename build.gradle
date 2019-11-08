@@ -48,7 +48,7 @@ dependencies {
             { exclude group: 'com.fasterxml.jackson.core' }
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.10.0'
 
-    compileOnly 'org.jetbrains:annotations:17.0.0'
+    compileOnly 'org.jetbrains:annotations:18.0.0'
     
 
     testImplementation 'junit:junit:4.12'
