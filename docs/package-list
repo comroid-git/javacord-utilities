@@ -1,4 +1,8 @@
+de.comroid.eval
+de.comroid.eval.model
 de.comroid.javacord.util.commands
+de.comroid.javacord.util.model
+de.comroid.javacord.util.model.command
 de.comroid.javacord.util.server.properties
 de.comroid.javacord.util.ui.embed
 de.comroid.javacord.util.ui.messages
