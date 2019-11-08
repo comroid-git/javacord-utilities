@@ -63,8 +63,6 @@ task generateGithubPom(type: GenerateMavenPom) {
 
 if (!System.getenv().containsKey('JITPACK')) {
     signing {
-        useGpgCmd()
-        
         sign publishing.publications.mavenJava
     }
 }
