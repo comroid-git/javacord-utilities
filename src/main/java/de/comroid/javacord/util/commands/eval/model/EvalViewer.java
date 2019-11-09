@@ -121,7 +121,7 @@ public class EvalViewer {
     }
 
     public boolean complete(Message message) {
-        return this.viewer.complete(message);
+        return this.viewer != null && this.viewer.complete(message);
     }
 }
 
