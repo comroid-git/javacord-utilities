@@ -1,4 +1,4 @@
-package de.comroid.eval.model;
+package de.comroid.javacord.util.commands.eval.model;
 
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;

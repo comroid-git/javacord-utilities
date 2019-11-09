@@ -1,4 +1,4 @@
-package de.comroid.eval.model;
+package de.comroid.javacord.util.commands.eval.model;
 
 import javax.script.Bindings;
 import javax.script.ScriptContext;

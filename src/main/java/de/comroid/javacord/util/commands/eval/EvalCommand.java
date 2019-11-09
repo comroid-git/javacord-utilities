@@ -1,8 +1,10 @@
-package de.comroid.eval;
+package de.comroid.javacord.util.commands.eval;
 
 import de.comroid.javacord.util.commands.Command;
 import de.comroid.javacord.util.commands.CommandGroup;
-import de.comroid.eval.model.*;
+import de.comroid.javacord.util.commands.eval.model.BindingFactory;
+import de.comroid.javacord.util.commands.eval.model.EvalFactory;
+import de.comroid.javacord.util.commands.eval.model.EvalViewer;
 
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.Message;
