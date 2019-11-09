@@ -57,9 +57,19 @@ compileJava.options.encoding = 'UTF-8'
 repositories.jcenter()
 
 dependencies {
-    compileOnly 'org.jetbrains:annotations:17.0.0'
+    api 'org.apache.logging.log4j:log4j-api:2.11.2'
+
+    compileOnly 'org.javacord:javacord-api:3.0.4'
+    compileOnly 'org.javacord:javacord-core:3.0.4'
+    compileOnly 'com.fasterxml.jackson.core:jackson-databind:2.10.0'
+
+    compileOnly 'org.jetbrains:annotations:18.0.0'
 
     testImplementation 'junit:junit:4.12'
+    testImplementation 'org.easymock:easymock:4.0.2'
+    testImplementation 'org.javacord:javacord:3.0.4'
+
+    testCompileOnly 'org.codehaus.groovy:groovy:3.0.0-rc-1'
 }
 
 sourceSets {
