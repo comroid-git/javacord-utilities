@@ -8,10 +8,20 @@ import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
 
+/**
+ * @deprecated Use {@link DefaultEmbedFactory}.
+ */
+@Deprecated
 public class Embed {
     protected EmbedBuilder embed;
+    
+    private Embed() {
+        throw new UnsupportedOperationException("Deprecated Class");
+    }
 
     public Embed(Server server, User user) {
+        this();
+        
         this.embed = DefaultEmbedFactory.create()
                 .setAuthor(user)
                 .setColor(user.getRoleColor(server).orElse(new Color(0x7289da)));

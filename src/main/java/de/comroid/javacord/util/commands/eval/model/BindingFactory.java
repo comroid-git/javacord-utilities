@@ -2,6 +2,8 @@ package de.comroid.javacord.util.commands.eval.model;
 
 import java.util.HashMap;
 
+import de.comroid.javacord.util.ui.embed.DefaultEmbedFactory;
+
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.server.Server;
@@ -17,7 +19,7 @@ public class BindingFactory {
             put("chl", channel);
             put("srv", server);
             put("api", command.getApi());
-            put("embed", new Embed(server, user));
+            put("embed", DefaultEmbedFactory.create(server, user));
             channel.getMessagesBefore(1, command)
                     .join()
                     .getOldestMessage()

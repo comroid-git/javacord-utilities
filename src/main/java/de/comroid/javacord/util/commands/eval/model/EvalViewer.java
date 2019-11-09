@@ -3,6 +3,8 @@ package de.comroid.javacord.util.commands.eval.model;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
+import de.comroid.javacord.util.ui.embed.DefaultEmbedFactory;
+
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.server.Server;
@@ -20,7 +22,7 @@ class CompletionViewer {
         this.evalResult = evalResult;
     }
 
-    public void handle(EvalEmbed embed) {
+    public void handle(EmbedBuilder embed) {
         embed
                 .addField("Executed Code", "```javascript\n" + Util.escapeString(eval.getDisplayCode()) + "```")
                 .addField("Result", "```" + Util.escapeString(String.valueOf(evalResult)) + "```");
@@ -81,28 +83,30 @@ public class EvalViewer {
 
 
     public EmbedBuilder createEmbed(Server server, User user) {
-        final EvalEmbed embed = new EvalEmbed(server, user);
+        final EmbedBuilder embedBuilder = DefaultEmbedFactory.create(server, user)
+                .setUrl("http://kaleidox.de:8111")
+                .setFooter("Evaluated by " + user.getDiscriminatedName());
         if (this.evalResult != null) {
             if (this.evalResult instanceof Throwable) {
                 ExecutionFactory.Execution exec = new ExecutionFactory()._safeBuild(lines);
-                embed
+                embedBuilder
                         .addField("Executed Code", "```javascript\n" + Util.escapeString(exec.isVerbose() ? exec.toString() : exec.getOriginalCode()) + "```")
                         .addField("Message of thrown " + this.evalResult.getClass().getSimpleName(), "```" + ((Throwable) this.evalResult).getMessage() + "```");
             } else if (this.evalResult instanceof CompletionStage) {
                 this.viewer = new CompletionViewer(this.eval, (CompletionStage<?>) this.evalResult);
-                viewer.handle(embed);
+                viewer.handle(embedBuilder);
             } else {
-                embed
+                embedBuilder
                         .addField("Executed Code", "```javascript\n" + Util.escapeString(this.eval.getDisplayCode()) + "```")
                         .addField("Result", "```" + Util.escapeString(String.valueOf(evalResult)) + "```");
             }
         }
 
-        embed
+        embedBuilder
                 .addField("Script Time", String.format("```%1.0f ms```", eval.getExecTime()), true)
                 .addField("Evaluation Time", String.format("```%1.3f ms```", eval.getEvalTime() / (double) 1000000), true);
 
-        return embed.getBuilder();
+        return embedBuilder;
         /*
         DefaultEmbedFactory.create()
                 .addField("Executed Code", "```javascript\n" + Util.escapeString(eval.getDisplayCode()) + "```")
