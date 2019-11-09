@@ -61,6 +61,15 @@ task generateGithubPom(type: GenerateMavenPom) {
     pom = publishing.publications.mavenJava.pom
 }
 
+task teamcityPublish {
+    dependsOn 'publish'
+    
+    if (!snapshot) {
+        dependsOn 'closeAndReleaseRepository'
+        tasks.findByName('closeAndReleaseRepository').mustRunAfter 'publish'
+    }
+}
+
 signing {
     useGpgCmd()
 
