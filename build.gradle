@@ -1,58 +1,70 @@
 buildscript {
     repositories.gradlePluginPortal()
-    dependencies.classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.21.1"
+    dependencies.classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.21.0"
 }
 
 apply plugin: 'java-library'
-apply plugin: 'groovy'
 
 group 'de.comroid'
 version '1.1.1-SNAPSHOT'
 
 apply from: 'gradle/vars.gradle'
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = targetCompatibility = 1.8 
 
-wrapper {
-    gradleVersion = '5.2'
-    distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
+tasks.findByName('wrapper').configure {
+    gradleVersion = '5.6'
+    distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"   
 }
 
 task sourcesJar(type: Jar) {
     from sourceSets.main.allJava
-    archiveClassifier = "sources"
+    
+    try {
+        archiveClassifier.set 'sources'
+    } catch (MissingPropertyException ignored) {
+        classifier = "sources"
+    }
 }
 
 task javadocJar(type: Jar) {
-    //javadoc
+    dependsOn 'javadoc'
+    
     from javadoc.destinationDir
-    archiveClassifier = "javadoc"
+
+    try {
+        archiveClassifier.set 'javadoc'
+    } catch (MissingPropertyException ignored) {
+        classifier = "javadoc"
+    }
 }
 
 javadoc {
     source = sourceSets.main.java
-    options.encoding = 'UTF-8'
-    options.destinationDirectory(file("./docs/"))
+    
+    options {
+        encoding = 'UTF-8'
+        destinationDirectory(file("./docs/"))
+        
+        links = [
+                "https://docs.oracle.com/javase/8/docs/api/",
+                "https://docs.oracle.com/javaee/7/api/"
+        ]
+    }
 }
 
 compileJava.options.encoding = 'UTF-8'
 repositories.jcenter()
 
 dependencies {
-    api 'org.apache.logging.log4j:log4j-api:2.11.2'
-
-    compileOnly 'org.javacord:javacord-api:3.0.4'
-    compileOnly 'org.javacord:javacord-core:3.0.4'
-    compileOnly 'com.fasterxml.jackson.core:jackson-databind:2.10.0'
-
-    compileOnly 'org.jetbrains:annotations:18.0.0'
+    compileOnly 'org.jetbrains:annotations:17.0.0'
 
     testImplementation 'junit:junit:4.12'
-    testImplementation 'org.easymock:easymock:4.0.2'
-    testImplementation 'org.javacord:javacord:3.0.4'
+}
 
-    testCompileOnly 'org.codehaus.groovy:groovy:3.0.0-rc-1'
+sourceSets {
+    main.java.srcDirs = ["src\\main\\java"]
+    test.java.srcDirs = ["src\\test\\java"]
 }
 
 apply from: 'gradle/publishing.gradle'

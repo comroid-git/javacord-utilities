@@ -26,10 +26,10 @@ publishing {
             artifact javadocJar
 
             pom {
-                name = projectName
+                name = rootProject.name
                 description = projectDescription
                 inceptionYear = '2019'
-                url = 'https://github.com/burdoto/javacord-utilities'
+                url = "https://github.com/$userbase/$rootProject.name".toString()
 
                 licenses {
                     license {
@@ -40,16 +40,16 @@ publishing {
 
                 developers {
                     developer {
-                        id = "burdoto"
-                        name = "Tobias Burdow"
-                        email = "burdoto@outlook.com"
+                        id = 'burdoto'
+                        name = 'Tobias Burdow'
+                        email = 'burdoto@outlook.com'
                     }
                 }
 
                 scm {
-                    connection = 'scm:git:git://github.com/burdoto/javacord-utilities.git'
-                    developerConnection = 'scm:git:ssh://github.com/burdoto/javacord-utilities.git'
-                    url = 'https://github.com/burdoto/javacord-utilities'
+                    connection = "scm:git:git://github.com/$userbase/${rootProject.name}.git".toString()
+                    developerConnection = "scm:git:ssh://github.com/$userbase/${rootProject.name}.git".toString()
+                    url = "https://github.com/$userbase/$rootProject.name".toString()
                 }
             }
         }
@@ -63,17 +63,19 @@ task generateGithubPom(type: GenerateMavenPom) {
 
 task teamcityPublish {
     dependsOn 'publish'
-    
+
     if (!snapshot) {
         dependsOn 'closeAndReleaseRepository'
         tasks.findByName('closeAndReleaseRepository').mustRunAfter 'publish'
     }
 }
 
-signing {
-    useGpgCmd()
+if (!snapshot) {
+    signing {
+        useGpgCmd()
 
-    sign publishing.publications.mavenJava
+        sign publishing.publications.mavenJava
+    }
 }
 
 tasks.removeAll([promoteRepository, closeAndPromoteRepository, getStagingProfile])
