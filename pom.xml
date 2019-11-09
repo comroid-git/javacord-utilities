@@ -5,9 +5,9 @@
   <groupId>de.comroid</groupId>
   <artifactId>javacord-utilities</artifactId>
   <version>1.1.1-SNAPSHOT</version>
-  <name>Javacord Utilities</name>
-  <description>Helpful classes and structures for Javacord</description>
-  <url>https://github.com/burdoto/javacord-utilities</url>
+  <name>javacord-utilities</name>
+  <description>Helpful structures for Javacord</description>
+  <url>https://github.com/comroid-git/javacord-utilities</url>
   <inceptionYear>2019</inceptionYear>
   <licenses>
     <license>
@@ -23,9 +23,9 @@
     </developer>
   </developers>
   <scm>
-    <connection>scm:git:git://github.com/burdoto/javacord-utilities.git</connection>
-    <developerConnection>scm:git:ssh://github.com/burdoto/javacord-utilities.git</developerConnection>
-    <url>https://github.com/burdoto/javacord-utilities</url>
+    <connection>scm:git:git://github.com/comroid-git/javacord-utilities.git</connection>
+    <developerConnection>scm:git:ssh://github.com/comroid-git/javacord-utilities.git</developerConnection>
+    <url>https://github.com/comroid-git/javacord-utilities</url>
   </scm>
   <dependencies>
     <dependency>
