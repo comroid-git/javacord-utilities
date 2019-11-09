@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -33,6 +34,7 @@ import de.comroid.javacord.util.ui.messages.categorizing.CategorizedEmbed;
 import de.comroid.javacord.util.ui.messages.paging.PagedEmbed;
 import de.comroid.javacord.util.ui.messages.paging.PagedMessage;
 import de.comroid.javacord.util.ui.reactions.InfoReaction;
+import de.comroid.util.Util;
 
 import org.apache.logging.log4j.Logger;
 import org.javacord.api.DiscordApi;
@@ -340,7 +342,7 @@ public final class CommandHandler implements
 
             boolean hasErrored = false;
             if (!cmd.enableServerChat()
-                    && cmd.requiredDiscordPermission() != PermissionType.SEND_MESSAGES) {
+                    && Util.arrayContains(cmd.requiredDiscordPermissions(), PermissionType.SEND_MESSAGES)) {
                 logger.error("Command " + method.getName() + "(" + Arrays.stream(method.getParameterTypes())
                         .map(Class::getSimpleName)
                         .collect(Collectors.joining(", ")) + ")"
@@ -483,17 +485,19 @@ public final class CommandHandler implements
         else if (!message.isPrivateMessage() && !cmd.enableServerChat)
             problems.add("This command can only be run in a private channel!");
 
+        PermissionType[] perms = new PermissionType[cmd.requiredDiscordPermissions.length];
+        perms[0] = PermissionType.ADMINISTRATOR;
+        System.arraycopy(cmd.requiredDiscordPermissions, 0, perms, 1, cmd.requiredDiscordPermissions.length);
         if (!(ignoreBotOwnerPermissions && message.getAuthor().isBotOwner())
                 && !message.getUserAuthor()
                 .map(usr -> message.getChannel()
                         .asServerTextChannel()
-                        .map(stc -> stc.hasAnyPermission(usr,
-                                PermissionType.ADMINISTRATOR,
-                                cmd.requiredDiscordPermission))
+                        .map(stc -> stc.hasAnyPermission(usr, perms))
                         .orElse(true))
                 .orElse(false))
-            problems.add("You are missing the required permission: "
-                    + cmd.requiredDiscordPermission.name() + "!");
+            problems.add("You are missing " + (perms.length == 2
+                    ? "the required permission: " + perms[1].name() + "!"
+                    : "one of the required permissions: " + Arrays.toString(perms)));
 
         int reqArgs = cmd.minimumArguments;
         if (commandParams.args.length < reqArgs) problems.add("This command requires at least "

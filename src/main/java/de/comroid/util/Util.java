@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.javacord.api.entity.permission.PermissionType;
 
 public class Util {
     /**
@@ -125,5 +126,14 @@ public class Util {
             // ignore all pairs of which both sides are NULL
         }
         return objectNode;
+    }
+
+    public static boolean arrayContains(Object[] types, Object target) {
+        for (Object type : types) {
+            if (type.equals(target))
+                return true;
+        }
+        
+        return false;
     }
 }

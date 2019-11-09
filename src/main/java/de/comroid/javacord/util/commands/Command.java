@@ -205,7 +205,7 @@ public @interface Command {
      *
      * @return The required permission to execute this command.
      */
-    PermissionType requiredDiscordPermission() default PermissionType.SEND_MESSAGES;
+    PermissionType[] requiredDiscordPermissions() default PermissionType.SEND_MESSAGES;
 
     /**
      * Defines the minimum amount of arguments required for the command to run. Default value is {@code 0}.

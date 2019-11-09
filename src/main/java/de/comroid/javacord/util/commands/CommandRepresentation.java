@@ -14,7 +14,7 @@ public final class CommandRepresentation {
     public final boolean showInHelpCommand;
     public final boolean enablePrivateChat;
     public final boolean enableServerChat;
-    public final PermissionType requiredDiscordPermission;
+    public final PermissionType[] requiredDiscordPermissions;
     public final int minimumArguments;
     public final int maximumArguments;
     public final int requiredChannelMentions;
@@ -45,7 +45,7 @@ public final class CommandRepresentation {
         this.showInHelpCommand = cmd.shownInHelpCommand();
         this.enablePrivateChat = cmd.enablePrivateChat();
         this.enableServerChat = cmd.enableServerChat();
-        this.requiredDiscordPermission = cmd.requiredDiscordPermission();
+        this.requiredDiscordPermissions = cmd.requiredDiscordPermissions();
         this.minimumArguments = cmd.minimumArguments();
         this.maximumArguments = cmd.maximumArguments();
         this.requiredChannelMentions = cmd.requiredChannelMentions();
@@ -78,7 +78,7 @@ public final class CommandRepresentation {
     CommandRepresentation(
             Method method,
             Command cmd,
-            String groupName,
+            @SuppressWarnings("NullableProblems") String groupName,
             @Nullable String groupDescription,
             int groupOrdinal,
             @Nullable Object invocationTarget
@@ -93,7 +93,7 @@ public final class CommandRepresentation {
         this.showInHelpCommand = cmd.shownInHelpCommand();
         this.enablePrivateChat = cmd.enablePrivateChat();
         this.enableServerChat = cmd.enableServerChat();
-        this.requiredDiscordPermission = cmd.requiredDiscordPermission();
+        this.requiredDiscordPermissions = cmd.requiredDiscordPermissions();
         this.minimumArguments = cmd.minimumArguments();
         this.maximumArguments = cmd.maximumArguments();
         this.requiredChannelMentions = cmd.requiredChannelMentions();
