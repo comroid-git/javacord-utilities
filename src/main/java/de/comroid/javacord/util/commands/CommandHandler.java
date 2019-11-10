@@ -324,7 +324,6 @@ public final class CommandHandler implements
     }
 
     @Override
-    
     public boolean doesRespondToUnknownCommands() {
         return respondToUnknownCommand;
     }
