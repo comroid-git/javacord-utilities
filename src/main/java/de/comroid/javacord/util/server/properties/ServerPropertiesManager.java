@@ -93,7 +93,7 @@ public final class ServerPropertiesManager implements Initializable, Closeable {
     @Command(aliases = "property",
             usage = "property [<Property Name> [New Value]]",
             description = "Change or read the value of properties",
-            requiredDiscordPermission = PermissionType.MANAGE_SERVER,
+            requiredDiscordPermissions = PermissionType.MANAGE_SERVER,
             enablePrivateChat = false)
     public Object propertyCommand(Command.Parameters param) {
         Server server = param.getServer().orElseThrow(AssertionError::new);
