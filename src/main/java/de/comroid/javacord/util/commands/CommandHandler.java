@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,6 +26,7 @@ import de.comroid.javacord.util.model.command.SelfBotOwnerIgnorable;
 import de.comroid.javacord.util.model.command.SelfCommandChannelable;
 import de.comroid.javacord.util.model.command.SelfCustomPrefixable;
 import de.comroid.javacord.util.model.command.SelfMultiCommandRegisterable;
+import de.comroid.javacord.util.model.command.SelfUnknownCommandRespondable;
 import de.comroid.javacord.util.ui.embed.DefaultEmbedFactory;
 import de.comroid.javacord.util.ui.messages.InformationMessage;
 import de.comroid.javacord.util.ui.messages.RefreshableMessage;
@@ -67,7 +67,8 @@ public final class CommandHandler implements
         SelfMultiCommandRegisterable<CommandHandler>,
         SelfCommandChannelable<CommandHandler>,
         SelfCustomPrefixable<CommandHandler>,
-        SelfBotOwnerIgnorable<CommandHandler> {
+        SelfBotOwnerIgnorable<CommandHandler>,
+        SelfUnknownCommandRespondable<CommandHandler> {
     private static final Logger logger = LoggerUtil.getLogger(CommandHandler.class);
     static final String NO_GROUP = "@NoGroup#";
 
@@ -83,6 +84,7 @@ public final class CommandHandler implements
     private @Nullable Function<Long, Long> commandChannelProvider;
     private long[] serverBlacklist;
     private boolean ignoreBotOwnerPermissions;
+    private boolean respondToUnknownCommand;
 
     public CommandHandler(DiscordApi api) {
         this(api, false);
@@ -96,6 +98,7 @@ public final class CommandHandler implements
         customPrefixProvider = null;
         serverBlacklist = new long[0];
         ignoreBotOwnerPermissions = false;
+        respondToUnknownCommand = false;
 
         api.addMessageCreateListener(this::handleMessageCreate);
         if (handleMessageEdit)
@@ -314,6 +317,17 @@ public final class CommandHandler implements
         return ignoreBotOwnerPermissions;
     }
 
+    @Override
+    public CommandHandler withUnknownCommandResponseStatus(boolean status) {
+        this.respondToUnknownCommand = status;
+        return this;
+    }
+
+    @Override
+    public boolean doesRespondToUnknownCommands() {
+        return respondToUnknownCommand;
+    }
+
     private void extractCommandRep(@Nullable Object invocationTarget, Method... methods) {
         for (Method method : methods) {
             Command cmd = method.getAnnotation(Command.class);
@@ -447,14 +461,15 @@ public final class CommandHandler implements
 
         CommandRepresentation cmd;
         String[] split = splitContent(content);
+        final String[] commandName = new String[1];
         String[] args;
         if (usedPrefix.matches("^(.*\\s.*)+$")) {
             cmd = commands.entrySet()
                     .stream()
                     .filter(entry -> entry.getKey()
                             .toLowerCase()
-                            .equals(split[1].substring(usedPrefix.length()).toLowerCase()))
-                    .findAny()
+                            .equals((commandName[0] = split[1]).substring(usedPrefix.length()).toLowerCase()))
+                    .findFirst()
                     .map(Map.Entry::getValue)
                     .orElse(null);
             args = new String[split.length - 2];
@@ -464,21 +479,26 @@ public final class CommandHandler implements
                     .stream()
                     .filter(entry -> entry.getKey()
                             .toLowerCase()
-                            .equals(split[0].substring(usedPrefix.length()).toLowerCase()))
-                    .findAny()
+                            .equals((commandName[0] = split[0]).substring(usedPrefix.length()).toLowerCase()))
+                    .findFirst()
                     .map(Map.Entry::getValue)
                     .orElse(null);
             args = new String[split.length - 1];
             arraycopy(split, 1, args, 0, args.length);
         }
 
-        if (cmd == null) return;
+        List<String> problems = new ArrayList<>();
+
+        if (cmd == null) {
+            if (respondToUnknownCommand)
+                problems.add("Unknown command: " + usedPrefix + commandName[0]);
+            else return;
+        }
+
         commandParams.command = cmd;
         commandParams.args = args;
 
         if (cmd.useTypingIndicator) channel.type();
-
-        List<String> problems = new ArrayList<>();
 
         if (message.isPrivateMessage() && !cmd.enablePrivateChat)
             problems.add("This command can only be run in a server channel!");

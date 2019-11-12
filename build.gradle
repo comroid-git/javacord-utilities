@@ -6,11 +6,11 @@ buildscript {
 apply plugin: 'java-library'
 
 group 'de.comroid'
-version '1.1.1-SNAPSHOT'
+version '1.2.0'
 
 apply from: 'gradle/vars.gradle'
 
-sourceCompatibility = targetCompatibility = 1.8 
+sourceCompatibility = targetCompatibility = 13
 
 tasks.findByName('wrapper').configure {
     gradleVersion = '5.6'
