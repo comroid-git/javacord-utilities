@@ -3,7 +3,7 @@
 # Edit at https://www.gitignore.io/?templates=gradle,intellij
 
 # Ignore IDEA Platform configurations
-.idea/**
+.idea/
 
 ### Gradle ###
 .gradle
