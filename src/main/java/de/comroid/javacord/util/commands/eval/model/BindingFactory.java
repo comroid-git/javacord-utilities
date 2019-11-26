@@ -24,6 +24,9 @@ public class BindingFactory {
                     .join()
                     .getOldestMessage()
                     .ifPresent(prev -> put("prev", prev));
+            command.getUserAuthor()
+                    .flatMap(user -> user.getConnectedVoiceChannel(server))
+                    .ifPresent(svc -> put("voice", svc));
         }});
     }
 
