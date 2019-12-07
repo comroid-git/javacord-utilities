@@ -507,7 +507,7 @@ public final class CommandHandler implements
 
         PermissionType[] perms = new PermissionType[cmd.requiredDiscordPermissions.length];
         perms[0] = PermissionType.ADMINISTRATOR;
-        System.arraycopy(cmd.requiredDiscordPermissions, 0, perms, 1, cmd.requiredDiscordPermissions.length);
+        System.arraycopy(cmd.requiredDiscordPermissions, 0, perms, 1, cmd.requiredDiscordPermissions.length - 1);
         if (!(ignoreBotOwnerPermissions && message.getAuthor().isBotOwner())
                 && !message.getUserAuthor()
                 .map(usr -> message.getChannel()
