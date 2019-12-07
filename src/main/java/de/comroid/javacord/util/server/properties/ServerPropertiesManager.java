@@ -178,7 +178,7 @@ public final class ServerPropertiesManager implements Initializable, Closeable {
             data.set("name", nodeOf(name));
             data.set("default", nodeOf(group.getDefaultValue().asString()));
             data.set("displayName", nodeOf(group.getDisplayName()));
-            data.set("description", nodeOf(group.getDescription()));
+            group.getDescription().ifPresent(str -> data.set("description", nodeOf(str)));
             group.serialize(data.putArray("items"));
         });
 
