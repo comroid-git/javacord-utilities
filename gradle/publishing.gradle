@@ -1,15 +1,18 @@
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
+apply plugin: "io.codearte.nexus-staging"
 
 publishing {
     repositories {
         maven {
-            url = "https://maven.jetbrains.space/comroid/maven"
-            name = "comroid-space-maven"
+            url = snapshot
+                    ? "https://oss.sonatype.org/content/repositories/snapshots"
+                    : "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+            name = "Sonatype"
 
             credentials {
-                username spaceUsername
-                password spacePassword
+                username sonatypeUsername
+                password sonatypePassword
             }
         }
     }
@@ -58,7 +61,9 @@ task generateGithubPom(type: GenerateMavenPom) {
     pom = publishing.publications.mavenJava.pom
 }
 
-task teamcityPublish(dependsOn: 'publish') {
+task teamcityPublish {
+    dependsOn 'publish'
+
     if (!snapshot) {
         dependsOn 'closeAndReleaseRepository'
         tasks.findByName('closeAndReleaseRepository').mustRunAfter 'publish'
@@ -71,4 +76,11 @@ if (!snapshot) {
 
         sign publishing.publications.mavenJava
     }
+}
+
+tasks.removeAll([promoteRepository, closeAndPromoteRepository, getStagingProfile])
+
+nexusStaging {
+    username sonatypeUsername
+    password sonatypePassword
 }

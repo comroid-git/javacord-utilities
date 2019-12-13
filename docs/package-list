@@ -10,6 +10,5 @@ de.comroid.javacord.util.ui.messages.categorizing
 de.comroid.javacord.util.ui.messages.paging
 de.comroid.javacord.util.ui.reactions
 de.comroid.util
-de.comroid.util.files
 de.comroid.util.interfaces
 de.comroid.util.markers
