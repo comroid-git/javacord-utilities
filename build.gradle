@@ -48,10 +48,10 @@ javadoc {
         encoding = 'UTF-8'
         destinationDirectory(file("./docs/"))
         
-        links = [
+        /*links = [
                 "https://docs.oracle.com/javase/8/docs/api/",
                 "https://docs.oracle.com/javaee/7/api/"
-        ]
+        ]*/
     }
 }
 
