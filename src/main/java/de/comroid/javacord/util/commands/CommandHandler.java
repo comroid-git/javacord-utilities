@@ -73,6 +73,7 @@ public final class CommandHandler implements
     static final String NO_GROUP = "@NoGroup#";
 
     private final DiscordApi api;
+    private final ResponseManager responseManager;
     private final Map<String, CommandRepresentation> commands = new ConcurrentHashMap<>();
     private final Map<Long, long[]> responseMap = new ConcurrentHashMap<>();
 
@@ -92,6 +93,8 @@ public final class CommandHandler implements
 
     public CommandHandler(DiscordApi api, boolean handleMessageEdit) {
         this.api = api;
+
+        this.responseManager = new ResponseManager(api);
 
         prefixes = new String[]{"!"};
         autoDeleteResponseOnCommandDeletion = true;
@@ -544,10 +547,12 @@ public final class CommandHandler implements
             problems.add("This command can only run in an NSFW marked channel!");
 
         if (problems.size() > 0) {
-            applyResponseDeletion(message.getId(), channel.sendMessage(DefaultEmbedFactory.create()
+            channel.sendMessage(DefaultEmbedFactory.create()
                     .setColor(Color.RED)
                     .setDescription(String.join("\n", problems)))
-                    .exceptionally(get()));
+                    .thenAccept(msg -> responseManager.accept(msg, message))
+                    .exceptionally(get());
+
             return;
         }
 
@@ -703,7 +708,7 @@ public final class CommandHandler implements
             else msgFut = channel.sendMessage(String.valueOf(reply));
 
             if (msgFut != null)
-                applyResponseDeletion(message.getId(), msgFut.exceptionally(get()));
+                msgFut.thenAccept(msg -> responseManager.accept(msg, message));
         }
     }
 
@@ -749,6 +754,7 @@ public final class CommandHandler implements
         return method.invoke(invocationTarget, args);
     }
 
+    @Deprecated
     private void applyResponseDeletion(long cmdMsgId, CompletableFuture<Message> message) {
         message.thenAcceptAsync(msg -> {
             if (autoDeleteResponseOnCommandDeletion)
