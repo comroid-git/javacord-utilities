@@ -67,7 +67,7 @@ dependencies {
 
     compileOnly 'org.jetbrains:annotations:18.0.0'
 
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13'
     testImplementation 'org.easymock:easymock:4.1'
     testImplementation 'org.javacord:javacord:3.0.4'
 
