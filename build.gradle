@@ -63,7 +63,7 @@ dependencies {
 
     compileOnly 'org.javacord:javacord-api:3.0.5'
     compileOnly 'org.javacord:javacord-core:3.0.5'
-    compileOnly 'com.fasterxml.jackson.core:jackson-databind:2.10.1'
+    compileOnly 'com.fasterxml.jackson.core:jackson-databind:2.10.2'
 
     compileOnly 'org.jetbrains:annotations:18.0.0'
 
