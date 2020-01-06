@@ -40,9 +40,15 @@ publishing {
 
                 developers {
                     developer {
-                        id = 'burdoto'
+                        id = 'Kaleidox'
                         name = 'Tobias Burdow'
-                        email = 'burdoto@outlook.com'
+                        email = 'kaleidox@comroid.org'
+                    }
+
+                    developer {
+                        id = 'yuna'
+                        name = 'Yuna G'
+                        email = 'yuna@comroid.org'
                     }
                 }
 

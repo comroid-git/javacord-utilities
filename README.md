@@ -6,7 +6,7 @@ Helpful classes and structures for Javacord
 ### Maven
 ```xml
 <dependency>
-  <groupId>de.comroid</groupId>
+  <groupId>org.comroid</groupId>
   <artifactId>javacord-utilities</artifactId>
   <version>1.0.2rev1</version>
 </dependency>
@@ -14,7 +14,7 @@ Helpful classes and structures for Javacord
 ### Gradle
 ```groovy
 dependencies {
-    implementation 'de.comroid:javacord-utilities:1.0.2rev1'
+    implementation 'org.comroid:javacord-utilities:1.0.2rev1'
 }
 ```
 
