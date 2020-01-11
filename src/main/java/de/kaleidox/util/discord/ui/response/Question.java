@@ -10,9 +10,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import javax.annotation.Nullable;
-
-import de.kaleidox.util.Utils;
 import de.kaleidox.util.interfaces.Subclass;
 import de.kaleidox.util.listeners.MessageListeners;
 import de.kaleidox.util.objects.NamedItem;
@@ -24,6 +21,7 @@ import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.listener.message.MessageAttachableListener;
 import org.javacord.api.util.logging.ExceptionLogger;
+import org.jetbrains.annotations.Nullable;
 
 public class Question<ResultType> extends ResponseElement<ResultType> {
     private final ArrayList<Option> optionsOrdered;
@@ -35,7 +33,7 @@ public class Question<ResultType> extends ResponseElement<ResultType> {
 
     public Question<ResultType> addOption(final String emoji, final String description, final ResultType representation) {
         try {
-            if (representation.getClass() == Enum.class || representation.getClass().getMethod("toString", new Class[0]).getDeclaringClass() == representation.getClass()) {
+            if (representation instanceof Enum || representation.getClass().getMethod("toString").getDeclaringClass() == representation.getClass()) {
                 return this.addOption(emoji, representation.toString(), description, representation);
             }
             throw new RuntimeException("The Representation [" + representation + "] has to manually override the method \"toString()\"; or you have to use the implementation of \"addOption(String, String, String, ResultType)\".");
