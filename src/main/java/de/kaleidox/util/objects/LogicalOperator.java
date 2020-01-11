@@ -4,27 +4,22 @@
 
 package de.kaleidox.util.objects;
 
-import java.util.stream.Stream;
 import java.util.Optional;
+import java.util.stream.Stream;
 
-public enum LogicalOperator
-{
-    UNKNOWN("unknown"), 
-    AND("and"), 
-    OR("or"), 
-    NOT("not"), 
+public enum LogicalOperator {
+    UNKNOWN("unknown"),
+    AND("and"),
+    OR("or"),
+    NOT("not"),
     XOR("xor");
-    
+
     String name;
-    
-    private LogicalOperator(final String name) {
+
+    LogicalOperator(final String name) {
         this.name = name;
     }
-    
-    public static Optional<LogicalOperator> find(final String tag) {
-        return Stream.of(values()).filter(lo -> lo.name.equalsIgnoreCase(tag)).findAny();
-    }
-    
+
     public boolean test(final Stream<Boolean> booleans) {
         switch (this) {
             case AND: {
@@ -44,13 +39,17 @@ public enum LogicalOperator
             }
         }
     }
-    
+
     public String getName() {
         return this.name;
     }
-    
+
     @Override
     public String toString() {
         return "LogicalOperator (" + this.name + ")";
+    }
+
+    public static Optional<LogicalOperator> find(final String tag) {
+        return Stream.of(values()).filter(lo -> lo.name.equalsIgnoreCase(tag)).findAny();
     }
 }

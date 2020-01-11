@@ -4,6 +4,5 @@
 
 package de.kaleidox.util.interfaces;
 
-public interface Standalone
-{
+public interface Standalone {
 }

@@ -4,27 +4,30 @@
 
 package de.kaleidox.util.tools;
 
-import java.util.Date;
 import java.sql.Timestamp;
-import de.kaleidox.util.Bot;
 import java.text.SimpleDateFormat;
 
-public class Debugger
-{
+import de.kaleidox.util.Bot;
+
+public class Debugger {
     private static Debugger log;
     private final SimpleDateFormat sdf;
     private String title;
     private String subclass;
     private boolean isSubclass;
     private StringBuilder sb;
-    
+
+    static {
+        Debugger.log = new Debugger("Debugger");
+    }
+
     public Debugger(final String title) {
         this.sdf = new SimpleDateFormat("HH:mm:ss");
         this.isSubclass = false;
         this.sb = new StringBuilder();
         this.title = title;
     }
-    
+
     public Debugger(final String title, final String subclass) {
         this.sdf = new SimpleDateFormat("HH:mm:ss");
         this.isSubclass = false;
@@ -33,28 +36,23 @@ public class Debugger
         this.subclass = subclass;
         this.isSubclass = true;
     }
-    
-    public static void print() {
-        System.out.println("### --- DEBUGGING --- ###");
-    }
-    
+
     public void speak() {
         this.put("### --- DEBUGGING --- ###", true);
     }
-    
+
     public Boolean put(final Object t, final boolean isDebug) {
         return this.put(t.toString(), isDebug);
     }
-    
+
     public Boolean put(final Object t) {
         try {
             return this.put(t.toString());
-        }
-        catch (NullPointerException e) {
+        } catch (NullPointerException e) {
             return this.put("Tried to output NULL with cause: " + e.getCause());
         }
     }
-    
+
     public Boolean put(final String method, final String message, final boolean isDebug) {
         if (!isDebug) {
             return this.put("[" + method + "] " + message);
@@ -64,7 +62,7 @@ public class Debugger
         }
         return false;
     }
-    
+
     public Boolean put(final String message, final boolean isDebug) {
         if (!isDebug) {
             return this.put(message);
@@ -74,7 +72,7 @@ public class Debugger
         }
         return this.put("[Debug] " + message);
     }
-    
+
     public Boolean put(final String message) {
         this.clear();
         this.sb.append("[");
@@ -86,34 +84,32 @@ public class Debugger
         this.sb.append(message);
         return this.send();
     }
-    
+
     private Boolean send() {
         Boolean give;
         try {
             System.out.println(this.sb.toString());
-        }
-        catch (NullPointerException e) {
+        } catch (NullPointerException e) {
             give = false;
-        }
-        finally {
+        } finally {
             give = true;
         }
         return give;
     }
-    
+
     private void clear() {
         this.sb.delete(0, this.sb.length());
     }
-    
+
     private String getTime() {
         return this.sdf.format(new Timestamp(System.currentTimeMillis()));
     }
-    
+
     private void putTime() {
         this.sb.append(this.getTime());
     }
-    
-    static {
-        Debugger.log = new Debugger("Debugger");
+
+    public static void print() {
+        System.out.println("### --- DEBUGGING --- ###");
     }
 }

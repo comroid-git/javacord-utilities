@@ -4,8 +4,7 @@
 
 package de.kaleidox.util.objects.strum;
 
-public enum ElementType
-{
-    MAP, 
-    FILTER;
+public enum ElementType {
+    MAP,
+    FILTER
 }

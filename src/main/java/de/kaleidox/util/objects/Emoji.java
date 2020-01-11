@@ -5,30 +5,28 @@
 package de.kaleidox.util.objects;
 
 import com.vdurmont.emoji.EmojiParser;
-import org.javacord.core.entity.emoji.UnicodeEmojiImpl;
 import org.javacord.api.entity.emoji.KnownCustomEmoji;
+import org.javacord.core.entity.emoji.UnicodeEmojiImpl;
 
-public class Emoji
-{
+public class Emoji {
     private org.javacord.api.entity.emoji.Emoji emoji;
-    
+
     public Emoji(final org.javacord.api.entity.emoji.Emoji emoji) {
         if (emoji instanceof KnownCustomEmoji) {
             this.emoji = emoji.asKnownCustomEmoji().get();
-        }
-        else {
+        } else {
             if (!(emoji instanceof UnicodeEmojiImpl)) {
                 this.emoji = null;
                 throw new NullPointerException("Not an Emoji");
             }
-            this.emoji = (org.javacord.api.entity.emoji.Emoji)UnicodeEmojiImpl.fromString(EmojiParser.parseToAliases(emoji.getMentionTag()));
+            this.emoji = UnicodeEmojiImpl.fromString(EmojiParser.parseToAliases(emoji.getMentionTag()));
         }
     }
-    
+
     public Emoji(final String unicodeEmoji) {
-        this.emoji = (org.javacord.api.entity.emoji.Emoji)UnicodeEmojiImpl.fromString(EmojiParser.parseToAliases(unicodeEmoji));
+        this.emoji = UnicodeEmojiImpl.fromString(EmojiParser.parseToAliases(unicodeEmoji));
     }
-    
+
     public String getPrintable() {
         if (this.emoji instanceof KnownCustomEmoji) {
             return this.emoji.asKnownCustomEmoji().get().getMentionTag();
@@ -38,7 +36,7 @@ public class Emoji
         }
         return "\u274c";
     }
-    
+
     @Override
     public String toString() {
         return this.getPrintable();

@@ -4,30 +4,30 @@
 
 package de.kaleidox.util.objects.successstate;
 
-import de.kaleidox.util.Bot;
 import javax.annotation.Nullable;
 
-public enum Type
-{
-    NONE(-1, ""), 
-    NOT_RUN(-1, ""), 
-    SUCCESSFUL(0, "\u2705"), 
-    SILENT(0, "\u2705"), 
-    INFO(1, "\u2139"), 
-    UNIMPLEMENTED(1, "\ud83d\udd1a"), 
-    SERVER_ONLY(1, "\ud83d\udeab"), 
-    UNAUTHORIZED(2, "\u26d4"), 
-    UNSUCCESSFUL(3, "\u2757"), 
+import de.kaleidox.util.Bot;
+
+public enum Type {
+    NONE(-1, ""),
+    NOT_RUN(-1, ""),
+    SUCCESSFUL(0, "\u2705"),
+    SILENT(0, "\u2705"),
+    INFO(1, "\u2139"),
+    UNIMPLEMENTED(1, "\ud83d\udd1a"),
+    SERVER_ONLY(1, "\ud83d\udeab"),
+    UNAUTHORIZED(2, "\u26d4"),
+    UNSUCCESSFUL(3, "\u2757"),
     ERRORED(4, "\u274c");
-    
+
     String reaction;
     int severity;
-    
-    private Type(final int severity, final String reaction) {
+
+    Type(final int severity, final String reaction) {
         this.severity = severity;
         this.reaction = reaction;
     }
-    
+
     protected MessageRepresentation getStandardMessage(@Nullable final String text) {
         String putTitle = "";
         String putText = "";

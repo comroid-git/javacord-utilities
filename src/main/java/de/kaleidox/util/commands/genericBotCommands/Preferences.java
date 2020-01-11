@@ -4,30 +4,31 @@
 
 package de.kaleidox.util.commands.genericBotCommands;
 
-import java.util.Optional;
 import java.util.ArrayList;
-import org.javacord.api.entity.message.embed.EmbedBuilder;
-import org.javacord.api.entity.message.Message;
-import de.kaleidox.util.objects.successstate.Type;
+import java.util.List;
+import java.util.Optional;
+
+import de.kaleidox.util.Bot;
+import de.kaleidox.util.commands.CommandBase;
+import de.kaleidox.util.commands.CommandGroup;
+import de.kaleidox.util.commands.EmbedMaker;
 import de.kaleidox.util.objects.serverpreferences.Preference;
 import de.kaleidox.util.objects.serverpreferences.ServerPreferences;
-import de.kaleidox.util.Bot;
-import org.javacord.api.entity.user.User;
-import org.javacord.api.entity.channel.ServerTextChannel;
-import org.javacord.api.entity.server.Server;
 import de.kaleidox.util.objects.successstate.SuccessState;
-import java.util.List;
-import org.javacord.api.event.message.MessageCreateEvent;
-import de.kaleidox.util.commands.EmbedMaker;
-import de.kaleidox.util.commands.CommandGroup;
-import de.kaleidox.util.commands.CommandBase;
+import de.kaleidox.util.objects.successstate.Type;
 
-public class Preferences extends CommandBase
-{
+import org.javacord.api.entity.channel.ServerTextChannel;
+import org.javacord.api.entity.message.Message;
+import org.javacord.api.entity.message.embed.EmbedBuilder;
+import org.javacord.api.entity.server.Server;
+import org.javacord.api.entity.user.User;
+import org.javacord.api.event.message.MessageCreateEvent;
+
+public class Preferences extends CommandBase {
     public Preferences() {
-        super(new String[] { "setup", "pref", "preferences" }, true, false, true, new int[] { 0, 2 }, CommandGroup.BOT_SETUP, EmbedMaker.getBasicEmbed().addField("Bot Preferences", "Lets you specify how you want the bot to behave in different ways.").addField("Changing Values", "If you want to change a value of a variable, you need to provide a fitting value for that variable.\nThe Variables have different Regular Expressions that define what kind of Inputs are valid, and if you click the reactions from DangoBot on your Commands, you get a detailed description on what went wrong, or if everything went alright.").addField("Resetting to defaults:", "The preferences can be set to their defaults by using `dango setup reset`"));
+        super(new String[]{"setup", "pref", "preferences"}, true, false, true, new int[]{0, 2}, CommandGroup.BOT_SETUP, EmbedMaker.getBasicEmbed().addField("Bot Preferences", "Lets you specify how you want the bot to behave in different ways.").addField("Changing Values", "If you want to change a value of a variable, you need to provide a fitting value for that variable.\nThe Variables have different Regular Expressions that define what kind of Inputs are valid, and if you click the reactions from DangoBot on your Commands, you get a detailed description on what went wrong, or if everything went alright.").addField("Resetting to defaults:", "The preferences can be set to their defaults by using `dango setup reset`"));
     }
-    
+
     @Override
     public SuccessState runServer(final MessageCreateEvent event, final List<String> param) {
         final SuccessState state = new SuccessState();
@@ -45,8 +46,7 @@ public class Preferences extends CommandBase
                 if (entries.size() > 0) {
                     entries.forEach(pref -> embed.addField("Preference `" + pref.getName() + "` has the value:", "```" + pref.get(srv) + "```"));
                     stc.sendMessage(embed.setDescription("All preferences and their values:"));
-                }
-                else {
+                } else {
                     stc.sendMessage(embed.addField("Whoops!", "No Preferences available!"));
                 }
                 state.successful();
@@ -73,8 +73,7 @@ public class Preferences extends CommandBase
                         embed.addField("Preference `" + param.get(0) + "` has ben changed.", "New value: ```" + value + "```");
                         stc.sendMessage(embed);
                         state.successful();
-                    }
-                    else {
+                    } else {
                         state.addMessage(Type.ERRORED, "This preference does not accept this input.");
                     }
                     break;
@@ -89,7 +88,7 @@ public class Preferences extends CommandBase
         }
         return state;
     }
-    
+
     @Override
     public SuccessState runPrivate(final MessageCreateEvent event, final List<String> param) {
         return SuccessState.SERVER_ONLY;

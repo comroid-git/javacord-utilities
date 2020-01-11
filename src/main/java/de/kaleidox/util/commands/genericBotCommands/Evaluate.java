@@ -4,32 +4,31 @@
 
 package de.kaleidox.util.commands.genericBotCommands;
 
-import org.javacord.api.entity.channel.PrivateChannel;
-import javax.script.ScriptEngine;
-import org.javacord.api.DiscordApi;
-import org.javacord.api.entity.message.Message;
 import java.awt.Color;
-import org.javacord.api.entity.message.embed.EmbedBuilder;
-import java.util.function.Function;
-import org.javacord.api.entity.channel.ServerChannel;
-import javax.script.ScriptEngineManager;
-import java.util.stream.Collector;
-import de.kaleidox.util.libs.CustomCollectors;
-import org.javacord.api.entity.user.User;
-import org.javacord.api.entity.channel.ServerTextChannel;
-import de.kaleidox.util.objects.successstate.SuccessState;
 import java.util.List;
-import org.javacord.api.event.message.MessageCreateEvent;
-import de.kaleidox.util.commands.EmbedMaker;
-import de.kaleidox.util.commands.CommandGroup;
-import de.kaleidox.util.commands.CommandBase;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 
-public class Evaluate extends CommandBase
-{
+import de.kaleidox.util.commands.CommandBase;
+import de.kaleidox.util.commands.CommandGroup;
+import de.kaleidox.util.commands.EmbedMaker;
+import de.kaleidox.util.libs.CustomCollectors;
+import de.kaleidox.util.objects.successstate.SuccessState;
+
+import org.javacord.api.DiscordApi;
+import org.javacord.api.entity.channel.PrivateChannel;
+import org.javacord.api.entity.channel.ServerChannel;
+import org.javacord.api.entity.channel.ServerTextChannel;
+import org.javacord.api.entity.message.Message;
+import org.javacord.api.entity.message.embed.EmbedBuilder;
+import org.javacord.api.entity.user.User;
+import org.javacord.api.event.message.MessageCreateEvent;
+
+public class Evaluate extends CommandBase {
     public Evaluate() {
-        super("eval", false, true, new int[] { 0, 999 }, CommandGroup.NONE, EmbedMaker.getBasicEmbed().addField("you should not be using this", ":P"));
+        super("eval", false, true, new int[]{0, 999}, CommandGroup.NONE, EmbedMaker.getBasicEmbed().addField("you should not be using this", ":P"));
     }
-    
+
     @Override
     public SuccessState runServer(final MessageCreateEvent event, final List<String> param) {
         final Message message = event.getMessage();
@@ -51,7 +50,7 @@ public class Evaluate extends CommandBase
             engine.put("user", user);
             engine.put("content", message.getContent());
             engine.put("server", channel.asServerChannel().map(ServerChannel::getServer).orElse(null));
-            final String[] packagesToImport = { "java.util", "java.lang", "java.net", "java.io", "Packages.org.javacord", "Packages.org.javacord.entity.channel", "Packages.org.javacord.entity.message", "Packages.org.javacord.entity.message.embed", "Packages.org.javacord.entity.emoji", "Packages.org.javacord.entity.permission", "Packages.org.javacord.entity", "Packages.org.javacord.entity.message.reaction", "Packages.org.javacord.entity.message", "Packages.org.javacord.entity.server" };
+            final String[] packagesToImport = {"java.util", "java.lang", "java.net", "java.io", "Packages.org.javacord", "Packages.org.javacord.entity.channel", "Packages.org.javacord.entity.message", "Packages.org.javacord.entity.message.embed", "Packages.org.javacord.entity.emoji", "Packages.org.javacord.entity.permission", "Packages.org.javacord.entity", "Packages.org.javacord.entity.message.reaction", "Packages.org.javacord.entity.message", "Packages.org.javacord.entity.server"};
             final StringBuilder builder = new StringBuilder();
             builder.append("load('nashorn:mozilla_compat.js');\n");
             for (final String packageToImport : packagesToImport) {
@@ -65,13 +64,12 @@ public class Evaluate extends CommandBase
             try {
                 final Object result = engine.eval(code);
                 embed.setColor(Color.GREEN);
-                embed.addField(":printer: **Result**", "```\n" + String.valueOf(result) + "\n```", false);
+                embed.addField(":printer: **Result**", "```\n" + result + "\n```", false);
                 embed.addField(":wrench: **Result Type**", "```\n" + ((result == null) ? "None" : result.getClass().getSimpleName()) + "\n```", false);
-            }
-            catch (Throwable e) {
+            } catch (Throwable e) {
                 noOutput = false;
                 embed.setColor(Color.RED);
-                embed.addField(":bomb: **Error**", "```\n" + String.valueOf(e.getMessage()) + "\n```", false);
+                embed.addField(":bomb: **Error**", "```\n" + e.getMessage() + "\n```", false);
                 e.printStackTrace();
             }
             if (!noOutput) {
@@ -81,7 +79,7 @@ public class Evaluate extends CommandBase
         }
         return SuccessState.UNAUTHORIZED;
     }
-    
+
     @Override
     public SuccessState runPrivate(final MessageCreateEvent event, final List<String> param) {
         final Message message = event.getMessage();
@@ -103,7 +101,7 @@ public class Evaluate extends CommandBase
             engine.put("user", user);
             engine.put("content", message.getContent());
             engine.put("server", channel.asServerChannel().map(ServerChannel::getServer).orElse(null));
-            final String[] packagesToImport = { "java.util", "java.lang", "java.net", "java.io", "Packages.org.javacord", "Packages.org.javacord.entity.channel", "Packages.org.javacord.entity.message", "Packages.org.javacord.entity.message.embed", "Packages.org.javacord.entity.emoji", "Packages.org.javacord.entity.permission", "Packages.org.javacord.entity", "Packages.org.javacord.entity.message.reaction", "Packages.org.javacord.entity.message", "Packages.de.kaleidox.util", "Packages.de.kaleidox.util.objects", "Packages.de.kaleidox.util.objects.strum", "Packages.de.kaleidox.util.objects.serverpreferences", "Packages.de.kaleidox.util.objects.successstate", "Packages.de.kaleidox.util.libs", "Packages.de.kaleidox.util.libs.listeners" };
+            final String[] packagesToImport = {"java.util", "java.lang", "java.net", "java.io", "Packages.org.javacord", "Packages.org.javacord.entity.channel", "Packages.org.javacord.entity.message", "Packages.org.javacord.entity.message.embed", "Packages.org.javacord.entity.emoji", "Packages.org.javacord.entity.permission", "Packages.org.javacord.entity", "Packages.org.javacord.entity.message.reaction", "Packages.org.javacord.entity.message", "Packages.de.kaleidox.util", "Packages.de.kaleidox.util.objects", "Packages.de.kaleidox.util.objects.strum", "Packages.de.kaleidox.util.objects.serverpreferences", "Packages.de.kaleidox.util.objects.successstate", "Packages.de.kaleidox.util.libs", "Packages.de.kaleidox.util.libs.listeners"};
             final StringBuilder builder = new StringBuilder();
             builder.append("load('nashorn:mozilla_compat.js');\n");
             for (final String packageToImport : packagesToImport) {
@@ -117,13 +115,12 @@ public class Evaluate extends CommandBase
             try {
                 final Object result = engine.eval(code);
                 embed.setColor(Color.GREEN);
-                embed.addField(":printer: **Result**", "```\n" + String.valueOf(result) + "\n```", false);
+                embed.addField(":printer: **Result**", "```\n" + result + "\n```", false);
                 embed.addField(":wrench: **Result Type**", "```\n" + ((result == null) ? "None" : result.getClass().getSimpleName()) + "\n```", false);
-            }
-            catch (Throwable e) {
+            } catch (Throwable e) {
                 noOutput = false;
                 embed.setColor(Color.RED);
-                embed.addField(":bomb: **Error**", "```\n" + String.valueOf(e.getMessage()) + "\n```", false);
+                embed.addField(":bomb: **Error**", "```\n" + e.getMessage() + "\n```", false);
                 e.printStackTrace();
             }
             if (!noOutput) {

@@ -4,6 +4,5 @@
 
 package de.kaleidox.util.tools.intention;
 
-public class Intention
-{
+public class Intention {
 }

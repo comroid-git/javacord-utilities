@@ -4,53 +4,50 @@
 
 package de.kaleidox.util.discord.ui.response;
 
-import de.kaleidox.util.interfaces.Subclass;
+import java.util.ArrayList;
 import java.util.Optional;
-import org.javacord.api.entity.emoji.Emoji;
-import de.kaleidox.util.Utils;
-import org.javacord.api.event.message.reaction.ReactionAddEvent;
-import java.util.List;
-import org.javacord.api.listener.ObjectAttachableListener;
-import org.javacord.api.util.logging.ExceptionLogger;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
-import org.javacord.api.entity.message.Message;
-import org.javacord.api.listener.message.MessageAttachableListener;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+import javax.annotation.Nullable;
+
+import de.kaleidox.util.Utils;
+import de.kaleidox.util.interfaces.Subclass;
 import de.kaleidox.util.listeners.MessageListeners;
 import de.kaleidox.util.objects.NamedItem;
-import java.util.concurrent.CompletableFuture;
-import org.javacord.api.entity.user.User;
-import java.util.function.Predicate;
-import javax.annotation.Nullable;
-import org.javacord.api.entity.message.embed.EmbedBuilder;
-import java.util.function.Supplier;
-import org.javacord.api.entity.message.Messageable;
-import java.util.ArrayList;
 
-public class Question<ResultType> extends ResponseElement<ResultType>
-{
+import org.javacord.api.entity.emoji.Emoji;
+import org.javacord.api.entity.message.Message;
+import org.javacord.api.entity.message.Messageable;
+import org.javacord.api.entity.message.embed.EmbedBuilder;
+import org.javacord.api.entity.user.User;
+import org.javacord.api.listener.message.MessageAttachableListener;
+import org.javacord.api.util.logging.ExceptionLogger;
+
+public class Question<ResultType> extends ResponseElement<ResultType> {
     private final ArrayList<Option> optionsOrdered;
-    
+
     public Question(final String name, final Messageable parent, @Nullable final Supplier<EmbedBuilder> embedBaseSupplier, @Nullable final Predicate<User> userCanRespond) {
         super(name, parent, embedBaseSupplier, userCanRespond);
         this.optionsOrdered = new ArrayList<Option>();
     }
-    
+
     public Question<ResultType> addOption(final String emoji, final String description, final ResultType representation) {
         try {
-            if (representation.getClass() == Enum.class || representation.getClass().getMethod("toString", (Class<?>[])new Class[0]).getDeclaringClass() == representation.getClass()) {
+            if (representation.getClass() == Enum.class || representation.getClass().getMethod("toString", new Class[0]).getDeclaringClass() == representation.getClass()) {
                 return this.addOption(emoji, representation.toString(), description, representation);
             }
             throw new RuntimeException("The Representation [" + representation + "] has to manually override the method \"toString()\"; or you have to use the implementation of \"addOption(String, String, String, ResultType)\".");
-        }
-        catch (NoSuchMethodException ignored) {
-            throw new AssertionError((Object)"Fatal internal error.");
+        } catch (NoSuchMethodException ignored) {
+            throw new AssertionError("Fatal internal error.");
         }
     }
-    
+
     public Question<ResultType> addOption(final String emoji, final String name, final String description, final ResultType representation) {
         return this.addOption(new Option(emoji, name, description, representation));
     }
-    
+
     public Question<ResultType> addOption(final Option option) {
         if (this.optionsOrdered.stream().anyMatch(optionS -> optionS.getEmoji().equalsIgnoreCase(option.getEmoji()))) {
             throw new ArrayStoreException("Option Emojis can not duplicate!");
@@ -61,7 +58,7 @@ public class Question<ResultType> extends ResponseElement<ResultType>
         this.optionsOrdered.add(option);
         return this;
     }
-    
+
     @Override
     public CompletableFuture<NamedItem<ResultType>> build() {
         if (this.optionsOrdered.isEmpty()) {
@@ -76,62 +73,60 @@ public class Question<ResultType> extends ResponseElement<ResultType>
             this.affiliateMessages.add(message);
             this.optionsOrdered.forEach(option -> message.addReaction(option.getEmoji()));
             message.addReactionAddListener(event -> {
-                event.requestMessage().thenAcceptAsync((Consumer)this.affiliateMessages::add);
+                event.requestMessage().thenAcceptAsync((Consumer) this.affiliateMessages::add);
                 final Emoji emoji = event.getEmoji();
                 final User user = event.getUser();
                 if (!user.isYourself() && this.userCanRespond.test(user)) {
                     final Optional<Option> any = this.optionsOrdered.stream().filter(option -> Utils.compareAnyEmoji(emoji, option.getEmoji())).findAny();
                     if (any.isPresent()) {
                         completableFuture.complete(new NamedItem<Object>(this.name, any.get().getValue()));
-                    }
-                    else {
+                    } else {
                         completableFuture.cancel(true);
                     }
                 }
             });
             message.addMessageDeleteListener(MessageListeners::deleteCleanup).removeAfter(this.duration, this.timeUnit).addRemoveHandler(() -> {
                 message.removeAllReactions();
-                message.getMessageAttachableListeners().forEach((key, value) -> message.removeMessageAttachableListener((MessageAttachableListener)key));
+                message.getMessageAttachableListeners().forEach((key, value) -> message.removeMessageAttachableListener(key));
                 return;
             });
             if (this.deleteLater) {
-                completableFuture.thenRunAsync(() -> this.affiliateMessages.forEach(Message::delete)).exceptionally(ExceptionLogger.get(new Class[0]));
+                completableFuture.thenRunAsync(() -> this.affiliateMessages.forEach(Message::delete)).exceptionally(ExceptionLogger.get());
             }
             return;
         }).exceptionally(ExceptionLogger.get(new Class[0]));
         return future;
     }
-    
-    public class Option implements Subclass
-    {
+
+    public class Option implements Subclass {
         private final String emoji;
         private final String description;
         private final ResultType value;
         private final String name;
-        
+
         public Option(final String emoji, final String name, final String description, final ResultType value) {
             this.emoji = emoji;
             this.name = name;
             this.description = description;
             this.value = value;
         }
-        
+
         public String getEmoji() {
             return this.emoji;
         }
-        
+
         public String getName() {
             return this.name;
         }
-        
+
         public String getDescription() {
             return this.description;
         }
-        
+
         public ResultType getValue() {
             return this.value;
         }
-        
+
         @Override
         public String toString() {
             return "[" + this.emoji + "|" + this.name + "] with description [" + this.description + "]";

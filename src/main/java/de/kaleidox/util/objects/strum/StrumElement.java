@@ -4,7 +4,6 @@
 
 package de.kaleidox.util.objects.strum;
 
-public interface StrumElement
-{
+public interface StrumElement {
     ElementType getType();
 }
