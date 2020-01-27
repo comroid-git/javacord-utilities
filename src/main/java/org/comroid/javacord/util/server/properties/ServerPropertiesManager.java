@@ -190,7 +190,7 @@ public final class ServerPropertiesManager implements Initializable, Closeable {
         if (propertiesFile.exists()) propertiesFile.delete();
         propertiesFile.createNewFile();
         FileOutputStream stream = new FileOutputStream(propertiesFile);
-        stream.write(node.toString().getBytes(UTF_8));
+        stream.write(node.toPrettyString().getBytes(UTF_8));
         stream.close();
 
         logger.info("Written properties to file " + propertiesFile.getAbsolutePath() + "; content:\n" + node.toPrettyString());
