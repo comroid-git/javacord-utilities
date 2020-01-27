@@ -4,7 +4,7 @@ apply plugin: 'maven-publish'
 publishing {
     repositories {
         maven {
-            url = "https://maven.jetbrains.space/comroid/maven"
+            url = "https://maven.jetbrains.space/comroid/comroid-maven"
             name = "Space"
 
             credentials {
