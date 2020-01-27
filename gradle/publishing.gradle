@@ -4,7 +4,7 @@ apply plugin: 'maven-publish'
 publishing {
     repositories {
         maven {
-            url = "https://maven.jetbrains.space/comroid/comroid-maven"
+            url = "https://maven.jetbrains.space/comroid/repo"
             name = "Space"
 
             credentials {
@@ -16,7 +16,7 @@ publishing {
 
     publications {
         mavenJava(MavenPublication) {
-            artifactId = artifactName + '-' + project.name
+            artifactId = project.name
             from components.java
 
             artifact sourcesJar
