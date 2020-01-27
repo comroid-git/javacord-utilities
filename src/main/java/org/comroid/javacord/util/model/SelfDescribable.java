@@ -5,6 +5,8 @@ import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 
 public interface SelfDescribable<Self extends SelfDescribable> {
+    String NO_DESCRIPTION = "No description provided.";
+
     @SuppressWarnings("NullableProblems")
     Self withDescription(@NotNull String description);
 

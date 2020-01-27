@@ -14,6 +14,7 @@ import java.util.function.Supplier;
 import org.comroid.javacord.util.commands.Command;
 import org.comroid.javacord.util.commands.CommandGroup;
 import org.comroid.javacord.util.commands.CommandHandler;
+import org.comroid.javacord.util.model.SelfDescribable;
 import org.comroid.javacord.util.ui.embed.DefaultEmbedFactory;
 import org.comroid.javacord.util.ui.messages.paging.PagedEmbed;
 import org.comroid.util.interfaces.Initializable;
@@ -118,7 +119,7 @@ public final class ServerPropertiesManager implements Initializable, Closeable {
                 properties.forEach((propName, propGroup) -> pagedEmbed.addField(
                         propGroup.getDisplayName().orElseGet(propGroup::getName),
                         "`" + propName + "` -> `" + propGroup.getValue(server).asString() + "`" +
-                                "\n\t" + propGroup.getDescription() +
+                                "\n\t" + propGroup.getDescription().orElse(SelfDescribable.NO_DESCRIPTION) +
                                 "\n")
                 );
 
@@ -134,7 +135,7 @@ public final class ServerPropertiesManager implements Initializable, Closeable {
                         .addField(
                                 propertyGet.getDisplayName().orElseGet(propertyGet::getName),
                                 "`" + args[0] + "` -> `" + propertyGet.getValue(server).asString() + "`" +
-                                        "\n\t" + propertyGet.getDescription()
+                                        "\n\t" + propertyGet.getDescription().orElse(SelfDescribable.NO_DESCRIPTION)
                         );
             case 2: // change one property
                 PropertyGroup propertySet = getProperty(args[0]);
@@ -156,7 +157,7 @@ public final class ServerPropertiesManager implements Initializable, Closeable {
                         .addField(
                                 propertySet.getDisplayName().orElseGet(propertySet::getName),
                                 "`" + args[0] + "` -> `" + propertySet.getValue(server).asString() + "`" +
-                                        "\n\t" + propertySet.getDescription()
+                                        "\n\t" + propertySet.getDescription().orElse(SelfDescribable.NO_DESCRIPTION)
                         );
         }
 
@@ -181,7 +182,7 @@ public final class ServerPropertiesManager implements Initializable, Closeable {
             ObjectNode data = array.addObject();
             data.set("name", nodeOf(name));
             data.set("default", nodeOf(group.getDefaultValue().asString()));
-            data.set("displayName", nodeOf(group.getDisplayName()));
+            data.set("displayName", nodeOf(group.getDisplayName().orElse("No name provided.")));
             group.getDescription().ifPresent(str -> data.set("description", nodeOf(str)));
             group.serialize(data.putArray("items"));
         });
