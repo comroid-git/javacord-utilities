@@ -7,8 +7,8 @@ ext {
 
     snapshot = project.version.endsWith("-SNAPSHOT")
 
-    String spaceUsername = getenv("SONATYPE_USERNAME")
-    String spacePassword = getenv("SONATYPE_PASSWORD")
+    spaceUsername = getenv("SONATYPE_USERNAME")
+    spacePassword = getenv("SONATYPE_PASSWORD")
 }
 
 ext."signing.gnupg.passphrase" = getenv("gpgKeyPassword")
