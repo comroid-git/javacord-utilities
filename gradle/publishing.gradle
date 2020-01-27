@@ -70,7 +70,5 @@ if (!snapshot) {
 }
 */
 
-subprojects {
-    task teamcityPublish(dependsOn: 'publish') {
-    }
+task teamcityPublish(dependsOn: 'publish') {
 }

@@ -35,7 +35,7 @@ import org.javacord.api.event.message.MessageEditEvent;
  * The return value of such a command method is used as the response to the actual command.
  * The response is deleted when the command message is deleted.
  * Command methods can return one of the following:
- * <table summary="All possible return values.">
+ * <table>
  * <tr>
  * <th>{@link String}</th>
  * </tr>
