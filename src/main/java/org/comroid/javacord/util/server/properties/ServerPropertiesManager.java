@@ -80,8 +80,13 @@ public final class ServerPropertiesManager implements Initializable, Closeable {
         return property;
     }
 
-    public PropertyGroup getProperty(String name) {
-        return properties.get(name);
+    public @Nullable PropertyGroup getProperty(String name) {
+        return properties.entrySet()
+                .stream()
+                .filter(entry -> entry.getKey().startsWith(name))
+                .map(Map.Entry::getValue)
+                .findAny()
+                .orElse(null);
     }
 
     public void usePropertyCommand(
