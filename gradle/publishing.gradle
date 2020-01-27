@@ -56,11 +56,6 @@ subprojects {
         }
     }
 
-    task generateGithubPom(type: GenerateMavenPom) {
-        destination = file("$projectDir/pom.xml")
-        pom = publishing.publications.mavenJava.pom
-    }
-
     /*
     if (!snapshot) {
         signing {
@@ -70,6 +65,13 @@ subprojects {
         }
     }
     */
+}
+
+allprojects {
+    task generateGithubPom(type: GenerateMavenPom) {
+        destination = file("$projectDir/pom.xml")
+        pom = publishing.publications.mavenJava.pom
+    }
 }
 
 task teamcityPublish {
