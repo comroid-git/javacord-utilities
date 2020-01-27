@@ -97,6 +97,8 @@ public final class PropertyGroup implements
     }
 
     void serialize(ArrayNode node) {
+        ServerPropertiesManager.logger.info("Serializing PropertyGroup " + toString());
+
         values.forEach((id, value) -> {
             if (!value.asString().equals(defaultValue.asString())) {
                 ObjectNode object = node.addObject();

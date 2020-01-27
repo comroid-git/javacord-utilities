@@ -23,11 +23,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.apache.logging.log4j.Logger;
 import org.javacord.api.entity.message.MessageAuthor;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.permission.PermissionType;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
+import org.javacord.core.util.logging.LoggerUtil;
 import org.jetbrains.annotations.Nullable;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -35,6 +37,8 @@ import static org.comroid.util.Util.nodeOf;
 import static org.comroid.util.Util.objectNode;
 
 public final class ServerPropertiesManager implements Initializable, Closeable {
+    public static final Logger logger = LoggerUtil.getLogger(ServerPropertiesManager.class);
+
     private final Map<String, PropertyGroup> properties;
     private final File propertiesFile;
     private Supplier<EmbedBuilder> embedSupplier;
@@ -187,6 +191,8 @@ public final class ServerPropertiesManager implements Initializable, Closeable {
         FileOutputStream stream = new FileOutputStream(propertiesFile);
         stream.write(node.toString().getBytes(UTF_8));
         stream.close();
+
+        logger.info("Written properties to file " + propertiesFile.getAbsolutePath() + "; content:\n" + node.toPrettyString());
     }
 
     private Object extractValue(String val) {
