@@ -6,7 +6,7 @@ buildscript {
 apply plugin: 'java-library'
 
 group 'org.comroid'
-version '1.4.1'
+version '1.4.2-SNAPSHOT'
 
 System.out.println("##teamcity[buildNumber '$version']")
 
