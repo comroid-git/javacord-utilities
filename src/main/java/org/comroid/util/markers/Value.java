@@ -21,43 +21,44 @@ public class Value {
     }
 
     public String asString() {
-        if (value instanceof String) return (String) value;
-        return String.valueOf(value);
+        if (value instanceof String)
+            return (String) value;
+        return value.toString();
     }
 
     public boolean asBoolean() {
         if (value instanceof Boolean) return (boolean) value;
-        return Boolean.valueOf(asString());
+        return Boolean.parseBoolean(asString());
     }
 
     public byte asByte() {
         if (value instanceof Byte) return (byte) value;
-        return Byte.valueOf(asString());
+        return Byte.parseByte(asString());
     }
 
     public short asShort() {
         if (value instanceof Short) return (short) value;
-        return Short.valueOf(asString());
+        return Short.parseShort(asString());
     }
 
     public int asInt() {
         if (value instanceof Integer) return (int) value;
-        return Integer.valueOf(asString());
+        return Integer.parseInt(asString());
     }
 
     public float asFloat() {
         if (value instanceof Float) return (float) value;
-        return Float.valueOf(asString());
+        return Float.parseFloat(asString());
     }
 
     public double asDouble() {
         if (value instanceof Double) return (double) value;
-        return Double.valueOf(asString());
+        return Double.parseDouble(asString());
     }
 
     public long asLong() {
         if (value instanceof Long) return (long) value;
-        return Long.valueOf(asString());
+        return Long.parseLong(asString());
     }
 
     public char asChar() {
