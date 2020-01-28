@@ -2,17 +2,19 @@ package org.comroid.util.markers;
 
 import java.util.Objects;
 
+import org.jetbrains.annotations.Nullable;
+
 public class Value {
     protected final Setter setter;
-    protected Object value;
+    protected @Nullable Object value;
 
-    public Value(Object value) {
+    public Value(@Nullable Object value) {
         this.value = (value instanceof Value ? ((Value) value).getValue() : value);
 
         setter = new Setter();
     }
 
-    public Object getValue() {
+    public @Nullable Object getValue() {
         return value;
     }
 
@@ -23,7 +25,7 @@ public class Value {
     public String asString() {
         if (value instanceof String)
             return (String) value;
-        return value.toString();
+        return String.valueOf(value);
     }
 
     public boolean asBoolean() {

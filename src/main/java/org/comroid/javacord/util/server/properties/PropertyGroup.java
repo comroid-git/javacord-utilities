@@ -50,7 +50,7 @@ public final class PropertyGroup implements
 
     public Value getValue(long serverId) {
         return values.compute(serverId, (k, v) -> {
-            if (v == null) return defaultValue;
+            if (v == null) return new Value(null);
             return v;
         });
     }
