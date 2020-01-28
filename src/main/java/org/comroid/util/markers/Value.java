@@ -5,10 +5,12 @@ import java.util.Objects;
 import org.jetbrains.annotations.Nullable;
 
 public class Value {
+    protected final Value defaultValue;
     protected final Setter setter;
     protected @Nullable Object value;
 
-    public Value(@Nullable Object value) {
+    public Value(Value defaultValue, @Nullable Object value) {
+        this.defaultValue = defaultValue;
         this.value = (value instanceof Value ? ((Value) value).getValue() : value);
 
         setter = new Setter();
@@ -25,7 +27,7 @@ public class Value {
     public String asString() {
         if (value instanceof String)
             return (String) value;
-        return String.valueOf(value);
+        return value == null ? defaultString() : String.valueOf(value);
     }
 
     public boolean asBoolean() {
@@ -110,6 +112,12 @@ public class Value {
                         "static method \"#valueOf(String)\" is missing.");
             }
         }
+    }
+
+    private String defaultString() {
+        if (defaultValue == null)
+            throw new NullPointerException("Cannot get default value of default value!");
+        return defaultValue.asString();
     }
 
     public class Setter {

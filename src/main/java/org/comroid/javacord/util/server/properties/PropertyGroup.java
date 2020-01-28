@@ -29,7 +29,7 @@ public final class PropertyGroup implements
 
     public PropertyGroup(String name, Object defaultValue, String displayName, String description) {
         this.name = name;
-        this.defaultValue = new Value(defaultValue);
+        this.defaultValue = new Value(null, defaultValue);
         this.displayName = displayName;
         this.description = description;
 
@@ -50,7 +50,7 @@ public final class PropertyGroup implements
 
     public Value getValue(long serverId) {
         return values.compute(serverId, (k, v) -> {
-            if (v == null) return new Value(null);
+            if (v == null) return new Value(defaultValue, null);
             return v;
         });
     }
@@ -65,7 +65,7 @@ public final class PropertyGroup implements
 
     @Override
     public PropertyGroup withDefaultValue(@NotNull Object value) {
-        this.defaultValue = new Value(Objects.requireNonNull(value));
+        this.defaultValue = new Value(defaultValue, Objects.requireNonNull(value));
         return this;
     }
 
