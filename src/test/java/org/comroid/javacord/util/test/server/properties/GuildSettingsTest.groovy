@@ -1,46 +1,56 @@
 package org.comroid.javacord.util.test.server.properties
 
-
 import org.comroid.javacord.util.server.properties.GuildSettings
-
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
+import static org.comroid.javacord.util.server.properties.GuildSettings.using
 import static org.junit.Assert.assertEquals
 
 class GuildSettingsTest {
-    private File propertiesFile
+    private File file = File.createTempFile("guildSettingsTest", ".json")
 
     @Before
-    void setup() throws IOException {
-        propertiesFile = File.createTempFile("serverProperties", ".json")
-        GuildSettings manager = new GuildSettings(propertiesFile)
+    void setup() {
+        GuildSettings settings = using file
 
-        manager.register("bot.traits", 419)
+        settings.registerProperty(prop -> prop
+                .setType(String.class)
+                .setName("bot.version")
+                .setDefaultValue("5.2")
+                .setPattern("\\d\\.\\d"))
+        settings.properties("bot.version")
+                .findAny()
+                .orElseThrow(AssertionError::new)
+                .setRawValue(100, "6.2")
+
+        // todo: complete this unit test
+
+        settings.register("bot.traits", 419)
                 .setDisplayName("Traits")
                 .setDescription("These are traits")
                 .setValue(100).toInt(420)
-        manager.getProperty("bot.traits").getValue(200)
+        settings.getProperty("bot.traits").getValue(200)
 
-        manager.register("bot.name", "William")
+        settings.register("bot.name", "William")
                 .setDisplayName("Name")
                 .setDescription("These are names")
                 .setValue(100).toString("Alfred")
-        manager.getProperty("bot.name").getValue(200)
+        settings.getProperty("bot.name").getValue(200)
 
-        manager.register("bot.emoji", "\uD83C\uDF61")
+        settings.register("bot.emoji", "\uD83C\uDF61")
                 .setDisplayName("Emoji")
                 .setDescription("These are emojis")
                 .setValue(100).toString("\uD83D\uDD12")
-        manager.getProperty("bot.emoji").getValue(200)
+        settings.getProperty("bot.emoji").getValue(200)
 
-        manager.close()
+        settings.close()
     }
 
     @Test(timeout = 10000L)
     void testSerialization() throws IOException {
-        GuildSettings deserializer = new GuildSettings(propertiesFile)
+        GuildSettings deserializer = new GuildSettings(file)
 
         PropertyGroup traitsProperty = deserializer.register("bot.traits", 419)
         assertEquals 420, traitsProperty.getValue(100).asInt()
@@ -66,6 +76,6 @@ class GuildSettingsTest {
 
     @After
     void cleanup() {
-        propertiesFile.delete()
+        file.delete()
     }
 }

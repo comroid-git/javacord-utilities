@@ -19,6 +19,18 @@ public class ValueContainer implements ContainerAccessor {
     }
 
     @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof ValueContainer)
+            return ((ValueContainer) obj).value.equals(value);
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("ValueContainer[%s]", value);
+    }
+
+    @Override
     public boolean isNull() {
         return getRaw() == null;
     }

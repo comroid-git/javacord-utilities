@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ValueNode;
 import com.fasterxml.jackson.databind.util.RawValue;
+import org.intellij.lang.annotations.Language;
 import org.javacord.api.entity.Nameable;
 import org.javacord.api.entity.server.Server;
 
@@ -38,6 +39,17 @@ public final class Property implements Nameable {
     private final Pattern pattern;
     private final ValueContainer defaultValue;
     private final PropertySerializer propertySerializer;
+
+    Property rebuild(Builder builder) {
+        return new Property(
+                parent,
+                !builder.name.equals(name) ? builder.name : name,
+                !builder.type.equals(type) ? builder.type : type,
+                !builder.pattern.equals(pattern.pattern()) ? Pattern.compile(builder.pattern) : pattern,
+                !builder.defaultValue.equals(defaultValue) ? builder.defaultValue : defaultValue,
+                propertySerializer
+        );
+    }
 
     Property(GuildSettings parent, String name, Class<?> type, Pattern pattern, ValueContainer defaultValue, PropertySerializer propertySerializer) {
         this.parent = parent;
@@ -262,7 +274,7 @@ public final class Property implements Nameable {
             return pattern;
         }
 
-        public Builder setPattern(String pattern) {
+        public Builder setPattern(@Language("RegExp") String pattern) {
             this.pattern = pattern;
 
             return this;
@@ -272,8 +284,8 @@ public final class Property implements Nameable {
             return defaultValue;
         }
 
-        public Builder setDefaultValue(ValueContainer defaultValue) {
-            this.defaultValue = defaultValue;
+        public Builder setDefaultValue(String defaultValue) {
+            this.defaultValue = new ValueContainer(defaultValue);
 
             return this;
         }

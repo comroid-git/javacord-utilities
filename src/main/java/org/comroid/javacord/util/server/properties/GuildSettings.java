@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -63,6 +64,13 @@ public final class GuildSettings implements Closeable {
         else throw new IOException("Could not delete previous file!");
     }
 
+    public Stream<Property> properties(String thatStartWith) {
+        return properties.entrySet()
+                .stream()
+                .filter(entry -> entry.getKey().startsWith(thatStartWith))
+                .map(Map.Entry::getValue);
+    }
+
     private JsonNode serialize() {
         final ArrayNode data = JsonNodeFactory.instance.arrayNode();
 
@@ -71,14 +79,21 @@ public final class GuildSettings implements Closeable {
         return data;
     }
 
-    private GuildSettings registerProperty(Consumer<Property.Builder> propertySetup) {
+    public GuildSettings registerProperty(Consumer<Property.Builder> propertySetup) {
         final Property.Builder builder = new Property.Builder(this);
 
         propertySetup.accept(builder);
 
         try {
-            final Property property = builder.build();
-            properties.put(property.getName(), property);
+            properties.compute(builder.getName(), (key, prop) -> {
+                try {
+                    if (prop == null)
+                        return builder.build();
+                    else return prop.rebuild(builder);
+                } catch (NoSuchMethodException | ClassNotFoundException e) {
+                    throw new RuntimeException("Could not create Property", e);
+                }
+            });
         } catch (Exception e) {
             throw new RuntimeException("Error registering property [ " + builder.getName() + " ]", e);
         }
@@ -86,13 +101,8 @@ public final class GuildSettings implements Closeable {
         return this;
     }
 
-    public static GuildSettings deserialize(File file) throws IOException {
-        final JsonNode data = new ObjectMapper()
-                .readTree(file);
-
-        int version;
-        if ((version = data.path("version").asInt(2)) != 2)
-            throw new IllegalStateException("Illegal settings file version: " + version);
+    public static GuildSettings using(File file) throws IOException {
+        final JsonNode data = file.exists() ? new ObjectMapper().readTree(file) : JsonNodeFactory.instance.arrayNode();
 
         try {
             return new GuildSettings(file, data);
