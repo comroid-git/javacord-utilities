@@ -2,18 +2,24 @@ package org.comroid.javacord.util.server.properties;
 
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import org.apache.logging.log4j.Logger;
 import org.javacord.core.util.logging.LoggerUtil;
 
 public final class GuildSettings implements Closeable {
     public static final Logger logger = LoggerUtil.getLogger(GuildSettings.class);
 
+    private final File file;
     private final Map<String, Property> properties;
 
     { // initializer
@@ -26,8 +32,43 @@ public final class GuildSettings implements Closeable {
         }));
     }
 
-    private GuildSettings(Map<String, Property> properties) {
-        this.properties = properties;
+    private GuildSettings(File file, JsonNode data) throws NoSuchMethodException, ClassNotFoundException {
+        this.file = file;
+        this.properties = new ConcurrentHashMap<>();
+
+        for (JsonNode propertyData : data) {
+            final Property property = Property.from(this, propertyData);
+
+            this.properties.put(property.getName(), property);
+        }
+    }
+
+    @Override
+    public void close() throws IOException {
+        storeData();
+    }
+
+    public void storeData() throws IOException {
+        final String json = serialize().toPrettyString();
+
+        final File tmpFile = File.createTempFile("GuildSettings-" + System.currentTimeMillis(), ".json.tmp");
+        final FileOutputStream fileOutputStream = new FileOutputStream(tmpFile);
+
+        for (byte aByte : json.getBytes(StandardCharsets.UTF_8))
+            fileOutputStream.write(aByte);
+        fileOutputStream.close();
+
+        if (!file.exists() || (file.exists() && file.delete()))
+            tmpFile.renameTo(file);
+        else throw new IOException("Could not delete previous file!");
+    }
+
+    private JsonNode serialize() {
+        final ArrayNode data = JsonNodeFactory.instance.arrayNode();
+
+        properties.forEach((key, property) -> data.add(property.serialize()));
+
+        return data;
     }
 
     private GuildSettings registerProperty(Consumer<Property.Builder> propertySetup) {
@@ -35,14 +76,14 @@ public final class GuildSettings implements Closeable {
 
         propertySetup.accept(builder);
 
-        final Property property = builder.build();
-        properties.put(property.getName(), property);
+        try {
+            final Property property = builder.build();
+            properties.put(property.getName(), property);
+        } catch (Exception e) {
+            throw new RuntimeException("Error registering property [ " + builder.getName() + " ]", e);
+        }
 
         return this;
-    }
-
-    @Override
-    public void close() throws IOException {
     }
 
     public static GuildSettings deserialize(File file) throws IOException {
@@ -52,37 +93,11 @@ public final class GuildSettings implements Closeable {
         int version;
         if ((version = data.path("version").asInt(2)) != 2)
             throw new IllegalStateException("Illegal settings file version: " + version);
-    }
 
-    private static Object extractValue(String val) {
-        if (val.matches("\\d+")) {
-            // is number without decimals
-            long longVal = Long.parseLong(val);
-
-            if (longVal <= Byte.MAX_VALUE) return (byte) longVal;
-            else if (longVal <= Short.MAX_VALUE) return (short) longVal;
-            else if (longVal <= Integer.MAX_VALUE) return (int) longVal;
-            else return longVal;
-        } else if (val.matches("\\d+\\.\\d+")) {
-            // is number with decimals
-            return Double.parseDouble(val);
-        } else if (val.toLowerCase().matches("(true)|(false)|(yes)|(no)|(on)|(off)")) {
-            // is boolean
-            switch (val.toLowerCase()) {
-                case "true":
-                case "yes":
-                case "on":
-                    return true;
-                case "false":
-                case "no":
-                case "off":
-                    return false;
-                default:
-                    throw new AssertionError("Unrecognized string: " + val);
-            }
-        } else {
-            // is plain string
-            return val;
+        try {
+            return new GuildSettings(file, data);
+        } catch (NoSuchMethodException | ClassNotFoundException e) {
+            throw new IOException("An exception occurred while deserializing", e);
         }
     }
 }

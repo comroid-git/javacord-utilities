@@ -1,4 +1,4 @@
-package org.comroid.javacord.util.model;
+package org.comroid.javacord.util.model.container;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,13 +23,13 @@ public final class PrioritySupplier<T> implements Supplier<T> {
         suppliers.add(this.fallback);
     }
 
-    public PrioritySupplier<T> possible(@Nullable T value) {
-        return possible(new FixedValueSupplier(value));
+    public PrioritySupplier<T> butRather(@Nullable T value) {
+        return butRather(new FixedValueSupplier(value));
     }
 
-    public PrioritySupplier<T> possible(@Nullable Supplier<T> supplier) {
+    public PrioritySupplier<T> butRather(@Nullable Supplier<T> supplier) {
         if (supplier == null)
-            return possible((T) null);
+            return butRather((T) null);
 
         suppliers.add(supplier);
 
