@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.comroid.javacord.util.ui.embed.EmbedFieldRepresentative;
-import org.comroid.util.Util;
+import org.comroid.javacord.util.CommonUtil;
 
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.Messageable;
@@ -54,7 +54,7 @@ public class InformationMessage {
     }
 
     public InformationMessage editField(String name, @Nullable String newTitle, String newText, boolean newInline) {
-        Optional<InformationField> complex = Util.findComplex(fields, name, InformationField::getName);
+        Optional<InformationField> complex = CommonUtil.findComplex(fields, name, InformationField::getName);
 
         if (complex.isPresent()) {
             InformationField field = complex.get();
@@ -71,7 +71,7 @@ public class InformationMessage {
     }
 
     public InformationMessage removeField(String name) {
-        Optional<InformationField> complex = Util.findComplex(fields, name, InformationField::getName);
+        Optional<InformationField> complex = CommonUtil.findComplex(fields, name, InformationField::getName);
 
         if (complex.isPresent()) {
             InformationField field = complex.get();

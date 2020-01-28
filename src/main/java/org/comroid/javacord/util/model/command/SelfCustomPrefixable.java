@@ -3,8 +3,6 @@ package org.comroid.javacord.util.model.command;
 import java.util.Optional;
 import java.util.function.Function;
 
-import org.comroid.javacord.util.server.properties.PropertyGroup;
-
 import org.jetbrains.annotations.NotNull;
 
 public interface SelfCustomPrefixable<Self extends SelfCustomPrefixable> {

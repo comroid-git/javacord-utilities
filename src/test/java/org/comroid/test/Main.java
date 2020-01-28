@@ -6,8 +6,7 @@ import java.util.concurrent.TimeUnit;
 import org.comroid.javacord.util.commands.Command;
 import org.comroid.javacord.util.commands.CommandGroup;
 import org.comroid.javacord.util.commands.CommandHandler;
-import org.comroid.javacord.util.server.properties.PropertyGroup;
-import org.comroid.javacord.util.server.properties.ServerPropertiesManager;
+import org.comroid.javacord.util.server.properties.GuildSettings;
 import org.comroid.javacord.util.ui.embed.DefaultEmbedFactory;
 import org.comroid.javacord.util.ui.messages.categorizing.CategorizedEmbed;
 import org.comroid.javacord.util.ui.reactions.InfoReaction;
@@ -32,7 +31,7 @@ public class Main {
 
         cmd.useDefaultHelp(null);
 
-        ServerPropertiesManager prop = new ServerPropertiesManager(new File("props/runProps.json"));
+        GuildSettings prop = new GuildSettings(new File("props/runProps.json"));
 
         prop.usePropertyCommand(null, cmd);
 

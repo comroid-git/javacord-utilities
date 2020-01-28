@@ -34,7 +34,7 @@ import org.comroid.javacord.util.ui.messages.categorizing.CategorizedEmbed;
 import org.comroid.javacord.util.ui.messages.paging.PagedEmbed;
 import org.comroid.javacord.util.ui.messages.paging.PagedMessage;
 import org.comroid.javacord.util.ui.reactions.InfoReaction;
-import org.comroid.util.Util;
+import org.comroid.javacord.util.CommonUtil;
 
 import org.apache.logging.log4j.Logger;
 import org.javacord.api.DiscordApi;
@@ -356,7 +356,7 @@ public final class CommandHandler implements
 
             boolean hasErrored = false;
             if (!cmd.enableServerChat()
-                    && Util.arrayContains(cmd.requiredDiscordPermissions(), PermissionType.SEND_MESSAGES)) {
+                    && CommonUtil.arrayContains(cmd.requiredDiscordPermissions(), PermissionType.SEND_MESSAGES)) {
                 logger.error("Command " + method.getName() + "(" + Arrays.stream(method.getParameterTypes())
                         .map(Class::getSimpleName)
                         .collect(Collectors.joining(", ")) + ")"
