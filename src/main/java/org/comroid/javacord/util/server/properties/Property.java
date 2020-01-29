@@ -9,6 +9,7 @@ import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
@@ -18,7 +19,6 @@ import org.comroid.javacord.util.model.container.ValueContainer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.ValueNode;
 import org.intellij.lang.annotations.Language;
 import org.javacord.api.entity.Nameable;
 import org.javacord.api.entity.server.Server;
@@ -110,17 +110,19 @@ public final class Property implements Nameable {
         final Class<?> type = Class.forName(data.get("type").asText());
         final Pattern pattern = Pattern.compile(data.get("pattern").asText());
         final PropertySerializer propertySerializer = new PropertySerializer(data.get("serialization"));
-        final ValueContainer defaultValue = propertySerializer.containerDeserializer.apply(data.get("defaultValue").asText());
+        final String defaultStringValue = data.get("defaultValue").asText();
+        final ValueContainer defaultValue = propertySerializer.containerDeserializer.apply(defaultStringValue, defaultStringValue);
 
         final Property property = new Property(parent, name, type, pattern, defaultValue, propertySerializer);
+        propertySerializer.parent = property;
 
-        if (data.has("values") && !data.path("values").isEmpty()) {
+        if (data.has("values")) {
             final JsonNode values = data.get("values");
             final Iterator<String> serverIds = values.fieldNames();
 
             serverIds.forEachRemaining(id -> {
                 final String stringValue = values.get(id).asText();
-                final ValueContainer container = propertySerializer.containerDeserializer.apply(stringValue);
+                final ValueContainer container = propertySerializer.containerDeserializer.apply(defaultStringValue, stringValue);
 
                 property.values.put(Long.parseLong(id), container);
             });
@@ -131,7 +133,6 @@ public final class Property implements Nameable {
 
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME) @interface Serializer {
-
     }
 
     @Target(ElementType.METHOD)
@@ -140,17 +141,17 @@ public final class Property implements Nameable {
 
     private static class PropertySerializer {
         private final Function<ValueContainer, String> containerSerializer;
-        private final Function<String, ValueContainer> containerDeserializer;
+        private final BiFunction<String, Object, ValueContainer> containerDeserializer;
         Property parent;
 
-        PropertySerializer(Function<ValueContainer, String> containerSerializer, Function<String, ValueContainer> containerDeserializer) {
+        PropertySerializer(Function<ValueContainer, String> containerSerializer, BiFunction<String, Object, ValueContainer> containerDeserializer) {
             this.containerSerializer = containerSerializer;
             this.containerDeserializer = containerDeserializer;
         }
 
         PropertySerializer(JsonNode data) throws ClassNotFoundException, NoSuchMethodException {
             // init serializer side
-            if (data.has("serializer") && !data.get("serializer").isEmpty()) {
+            if (data.has("serializer")) {
                 final JsonNode serializerData = data.get("serializer");
                 this.containerSerializer = new Function<ValueContainer, String>() {
                     private final Class<?> klass = Class.forName(serializerData.get("class").asText());
@@ -172,14 +173,14 @@ public final class Property implements Nameable {
 
                 // init deserializer side
                 final JsonNode deserializerData = data.get("deserializer");
-                this.containerDeserializer = new Function<String, ValueContainer>() {
+                this.containerDeserializer = new BiFunction<String, Object, ValueContainer>() {
                     private final Class<?> klass = Class.forName(deserializerData.get("class").asText());
-                    private final Method method = klass.getMethod(deserializerData.get("method").asText(), String.class);
+                    private final Method method = klass.getMethod(deserializerData.get("method").asText(), String.class, Object.class);
 
                     @Override
-                    public ValueContainer apply(String jsonNodes) {
+                    public ValueContainer apply(String defaultValue, Object value) {
                         try {
-                            return (ValueContainer) method.invoke(null, jsonNodes);
+                            return (ValueContainer) method.invoke(null, defaultValue, value);
                         } catch (IllegalAccessException e) {
                             throw new AssertionError("Could not access deserializer method: " + method.toGenericString(), e);
                         } catch (InvocationTargetException e) {
@@ -190,8 +191,8 @@ public final class Property implements Nameable {
                     }
                 };
             } else {
-                this.containerSerializer = ValueContainer::stringValue;
-                this.containerDeserializer = ValueContainer::new;
+                this.containerSerializer = valueContainer -> valueContainer.stringValue();
+                this.containerDeserializer = (fallbackString, value) -> new ValueContainer(fallbackString, value);
             }
         }
 
@@ -215,8 +216,8 @@ public final class Property implements Nameable {
         public static PropertySerializer ofNative(Class<?> type) {
             class Local {
                 private final Class<?> klass = type;
-                private final Function<ValueContainer, String> serializer = ValueContainer::stringValue;
-                private final Function<String, ValueContainer> deserializer = ValueContainer::new;
+                private final Function<ValueContainer, String> serializer = valueContainer -> valueContainer.stringValue();
+                private final BiFunction<String, Object, ValueContainer> deserializer = (str, obj) -> new ValueContainer(str, obj);
             }
 
             final Local local = new Local();
@@ -248,7 +249,7 @@ public final class Property implements Nameable {
         private static boolean validateSerializer(Method method) {
             final Class<?>[] parameterTypes = method.getParameterTypes();
 
-            return ValueNode.class.isAssignableFrom(method.getReturnType())
+            return String.class.isAssignableFrom(method.getReturnType())
                     && parameterTypes.length == 1
                     && ValueContainer.class.isAssignableFrom(parameterTypes[0]);
         }
@@ -257,8 +258,9 @@ public final class Property implements Nameable {
             final Class<?>[] parameterTypes = method.getParameterTypes();
 
             return ValueContainer.class.isAssignableFrom(method.getReturnType())
-                    && parameterTypes.length == 1
-                    && ValueNode.class.isAssignableFrom(parameterTypes[0]);
+                    && parameterTypes.length == 2
+                    && String.class.isAssignableFrom(parameterTypes[0])
+                    && Object.class.isAssignableFrom(parameterTypes[1]);
         }
     }
 
