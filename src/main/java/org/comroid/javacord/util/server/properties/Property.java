@@ -137,7 +137,7 @@ public final class Property implements Nameable {
 
         PropertySerializer(JsonNode data) throws ClassNotFoundException, NoSuchMethodException {
             // init serializer side
-            if (data.has("serializer")) {
+            if (data.has("serializer") && !data.get("serializer").isEmpty()) {
                 final JsonNode serializerData = data.get("serializer");
                 this.containerSerializer = new Function<ValueContainer, String>() {
                     private final Class<?> klass = Class.forName(serializerData.get("class").asText());
