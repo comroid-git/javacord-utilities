@@ -6,6 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -18,7 +19,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ValueNode;
-import com.fasterxml.jackson.databind.util.RawValue;
 import org.intellij.lang.annotations.Language;
 import org.javacord.api.entity.Nameable;
 import org.javacord.api.entity.server.Server;
@@ -42,21 +42,6 @@ public final class Property implements Nameable {
     private final ValueContainer defaultValue;
     private final PropertySerializer propertySerializer;
 
-    public <T> Function<Long, T> function(Class<T> targetType) {
-        return serverId -> targetType.cast(getValue(serverId).getRaw());
-    }
-
-    Property rebuild(Builder builder) {
-        return new Property(
-                parent,
-                !builder.name.equals(name) ? builder.name : name,
-                !builder.type.equals(type) ? builder.type : type,
-                !builder.pattern.equals(pattern.pattern()) ? Pattern.compile(builder.pattern) : pattern,
-                !builder.defaultValue.equals(defaultValue) ? builder.defaultValue : defaultValue,
-                propertySerializer
-        );
-    }
-
     Property(GuildSettings parent, String name, Class<?> type, Pattern pattern, ValueContainer defaultValue, PropertySerializer propertySerializer) {
         this.parent = parent;
         this.name = name;
@@ -64,6 +49,10 @@ public final class Property implements Nameable {
         this.pattern = pattern;
         this.defaultValue = defaultValue;
         this.propertySerializer = propertySerializer;
+    }
+
+    public <T> Function<Long, T> function(Class<T> targetType) {
+        return serverId -> targetType.cast(getValue(serverId).getRaw());
     }
 
     @Override
@@ -101,19 +90,43 @@ public final class Property implements Nameable {
         return false;
     }
 
+    Property rebuild(Builder builder) {
+        return new Property(
+                parent,
+                !builder.name.equals(name) ? builder.name : name,
+                !builder.type.equals(type) ? builder.type : type,
+                !builder.pattern.equals(pattern.pattern()) ? Pattern.compile(builder.pattern) : pattern,
+                !builder.defaultValue.equals(defaultValue) ? builder.defaultValue : defaultValue,
+                propertySerializer
+        );
+    }
+
     public final JsonNode serialize() {
         return propertySerializer.serialize();
     }
 
     static Property from(GuildSettings parent, JsonNode data) throws ClassNotFoundException, NoSuchMethodException {
-        // TODO: 28.01.2020 deserializer method
         final String name = data.get("name").asText();
         final Class<?> type = Class.forName(data.get("type").asText());
         final Pattern pattern = Pattern.compile(data.get("pattern").asText());
         final PropertySerializer propertySerializer = new PropertySerializer(data.get("serialization"));
         final ValueContainer defaultValue = propertySerializer.containerDeserializer.apply(data.get("defaultValue").asText());
 
-        return new Property(parent, name, type, pattern, defaultValue, propertySerializer);
+        final Property property = new Property(parent, name, type, pattern, defaultValue, propertySerializer);
+
+        if (data.has("values") && !data.path("values").isEmpty()) {
+            final JsonNode values = data.get("values");
+            final Iterator<String> serverIds = values.fieldNames();
+
+            serverIds.forEachRemaining(id -> {
+                final String stringValue = values.get(id).asText();
+                final ValueContainer container = propertySerializer.containerDeserializer.apply(stringValue);
+
+                property.values.put(Long.parseLong(id), container);
+            });
+        }
+
+        return property;
     }
 
     @Target(ElementType.METHOD)
