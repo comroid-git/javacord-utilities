@@ -8,6 +8,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -22,6 +23,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.intellij.lang.annotations.Language;
 import org.javacord.api.entity.Nameable;
 import org.javacord.api.entity.server.Server;
+import org.jetbrains.annotations.Nullable;
 
 public final class Property implements Nameable {
     public static final @Language("RegExp") String ANY_STRING = "(?s).*";
@@ -41,6 +43,7 @@ public final class Property implements Nameable {
     private final Pattern pattern;
     private final ValueContainer defaultValue;
     private final PropertySerializer propertySerializer;
+    private @Nullable String description;
 
     Property(GuildSettings parent, String name, Class<?> type, Pattern pattern, ValueContainer defaultValue, PropertySerializer propertySerializer) {
         this.parent = parent;
@@ -49,6 +52,14 @@ public final class Property implements Nameable {
         this.pattern = pattern;
         this.defaultValue = defaultValue;
         this.propertySerializer = propertySerializer;
+    }
+
+    public Optional<String> getDescription() {
+        return Optional.ofNullable(description);
+    }
+
+    public void setDescription(@Nullable String description) {
+        this.description = description;
     }
 
     public <T> Function<Long, T> function(Class<T> targetType) {
@@ -91,7 +102,7 @@ public final class Property implements Nameable {
     }
 
     Property rebuild(Builder builder) {
-        return new Property(
+        final Property property = new Property(
                 parent,
                 !builder.name.equals(name) ? builder.name : name,
                 !builder.type.equals(type) ? builder.type : type,
@@ -99,6 +110,11 @@ public final class Property implements Nameable {
                 !builder.defaultValue.equals(defaultValue) ? builder.defaultValue : defaultValue,
                 propertySerializer
         );
+
+        if (!builder.description.equals(description))
+            property.setDescription(builder.description);
+
+        return property;
     }
 
     public final JsonNode serialize() {
@@ -115,6 +131,8 @@ public final class Property implements Nameable {
 
         final Property property = new Property(parent, name, type, pattern, defaultValue, propertySerializer);
         propertySerializer.parent = property;
+
+        Optional.ofNullable(data.path("description").asText(null)).ifPresent(property::setDescription);
 
         if (data.has("values")) {
             final JsonNode values = data.get("values");
@@ -191,8 +209,8 @@ public final class Property implements Nameable {
                     }
                 };
             } else {
-                this.containerSerializer = valueContainer -> valueContainer.stringValue();
-                this.containerDeserializer = (fallbackString, value) -> new ValueContainer(fallbackString, value);
+                this.containerSerializer = ValueContainer::stringValue;
+                this.containerDeserializer = ValueContainer::new;
             }
         }
 
@@ -201,6 +219,7 @@ public final class Property implements Nameable {
             final ObjectNode data = JsonNodeFactory.instance.objectNode();
 
             data.put("name", parent.name);
+            parent.getDescription().ifPresent(str -> data.put("description", str));
             data.put("type", parent.type.getName());
             data.put("pattern", parent.pattern.pattern());
 
@@ -216,8 +235,8 @@ public final class Property implements Nameable {
         public static PropertySerializer ofNative(Class<?> type) {
             class Local {
                 private final Class<?> klass = type;
-                private final Function<ValueContainer, String> serializer = valueContainer -> valueContainer.stringValue();
-                private final BiFunction<String, Object, ValueContainer> deserializer = (str, obj) -> new ValueContainer(str, obj);
+                private final Function<ValueContainer, String> serializer = ValueContainer::stringValue;
+                private final BiFunction<String, Object, ValueContainer> deserializer = ValueContainer::new;
             }
 
             final Local local = new Local();
@@ -267,12 +286,20 @@ public final class Property implements Nameable {
     public static class Builder {
         private final GuildSettings parent;
         private String name;
+        private String description;
         private Class<?> type;
         private String pattern;
         private ValueContainer defaultValue;
-
         Builder(GuildSettings parent) {
             this.parent = parent;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
         }
 
         public String getName() {
