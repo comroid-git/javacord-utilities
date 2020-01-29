@@ -137,44 +137,49 @@ public final class Property implements Nameable {
 
         PropertySerializer(JsonNode data) throws ClassNotFoundException, NoSuchMethodException {
             // init serializer side
-            final JsonNode serializerData = data.get("serializer");
-            this.containerSerializer = new Function<ValueContainer, String>() {
-                private final Class<?> klass = Class.forName(serializerData.get("class").asText());
-                private final Method method = klass.getMethod(serializerData.get("method").asText(), ValueContainer.class);
+            if (data.has("serializer")) {
+                final JsonNode serializerData = data.get("serializer");
+                this.containerSerializer = new Function<ValueContainer, String>() {
+                    private final Class<?> klass = Class.forName(serializerData.get("class").asText());
+                    private final Method method = klass.getMethod(serializerData.get("method").asText(), ValueContainer.class);
 
-                @Override
-                public String apply(ValueContainer container) {
-                    try {
-                        return (String) method.invoke(null, container);
-                    } catch (IllegalAccessException e) {
-                        throw new AssertionError("Could not access serializer method: " + method.toGenericString(), e);
-                    } catch (InvocationTargetException e) {
-                        throw new RuntimeException("Serializer threw an exception", e);
-                    } catch (ClassCastException e) {
-                        throw new AssertionError("Serializer returned an illegal object; must return " + String.class.getName(), e);
+                    @Override
+                    public String apply(ValueContainer container) {
+                        try {
+                            return (String) method.invoke(null, container);
+                        } catch (IllegalAccessException e) {
+                            throw new AssertionError("Could not access serializer method: " + method.toGenericString(), e);
+                        } catch (InvocationTargetException e) {
+                            throw new RuntimeException("Serializer threw an exception", e);
+                        } catch (ClassCastException e) {
+                            throw new AssertionError("Serializer returned an illegal object; must return " + String.class.getName(), e);
+                        }
                     }
-                }
-            };
+                };
 
-            // init deserializer side
-            final JsonNode deserializerData = data.get("deserializer");
-            this.containerDeserializer = new Function<String, ValueContainer>() {
-                private final Class<?> klass = Class.forName(deserializerData.get("class").asText());
-                private final Method method = klass.getMethod(deserializerData.get("method").asText(), String.class);
+                // init deserializer side
+                final JsonNode deserializerData = data.get("deserializer");
+                this.containerDeserializer = new Function<String, ValueContainer>() {
+                    private final Class<?> klass = Class.forName(deserializerData.get("class").asText());
+                    private final Method method = klass.getMethod(deserializerData.get("method").asText(), String.class);
 
-                @Override
-                public ValueContainer apply(String jsonNodes) {
-                    try {
-                        return (ValueContainer) method.invoke(null, jsonNodes);
-                    } catch (IllegalAccessException e) {
-                        throw new AssertionError("Could not access deserializer method: " + method.toGenericString(), e);
-                    } catch (InvocationTargetException e) {
-                        throw new RuntimeException("Deserializer threw an exception", e);
-                    } catch (ClassCastException e) {
-                        throw new AssertionError("Deserializer returned an illegal object; must return " + ValueContainer.class.getName(), e);
+                    @Override
+                    public ValueContainer apply(String jsonNodes) {
+                        try {
+                            return (ValueContainer) method.invoke(null, jsonNodes);
+                        } catch (IllegalAccessException e) {
+                            throw new AssertionError("Could not access deserializer method: " + method.toGenericString(), e);
+                        } catch (InvocationTargetException e) {
+                            throw new RuntimeException("Deserializer threw an exception", e);
+                        } catch (ClassCastException e) {
+                            throw new AssertionError("Deserializer returned an illegal object; must return " + ValueContainer.class.getName(), e);
+                        }
                     }
-                }
-            };
+                };
+            } else {
+                this.containerSerializer = ValueContainer::stringValue;
+                this.containerDeserializer = ValueContainer::new;
+            }
         }
 
         @SuppressWarnings("deprecation")
