@@ -109,7 +109,10 @@ public final class GuildSettings implements Closeable {
     }
 
     public static GuildSettings using(File file) throws IOException {
-        final JsonNode data = file.exists() ? new ObjectMapper().readTree(file) : JsonNodeFactory.instance.arrayNode();
+        JsonNode data = file.exists() ? new ObjectMapper().readTree(file) : JsonNodeFactory.instance.arrayNode();
+
+        // if data is still null, set it to an empty array
+        if (data == null) data = JsonNodeFactory.instance.arrayNode();
 
         try {
             return new GuildSettings(file, data);
