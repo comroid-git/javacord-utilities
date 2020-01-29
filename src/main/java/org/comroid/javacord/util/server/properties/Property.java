@@ -290,6 +290,7 @@ public final class Property implements Nameable {
         private Class<?> type;
         private String pattern;
         private ValueContainer defaultValue;
+
         Builder(GuildSettings parent) {
             this.parent = parent;
         }

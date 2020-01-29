@@ -5,8 +5,8 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.comroid.javacord.util.ui.embed.EmbedFieldRepresentative;
 import org.comroid.javacord.util.CommonUtil;
+import org.comroid.javacord.util.ui.embed.EmbedFieldRepresentative;
 
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.Messageable;

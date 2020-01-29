@@ -55,9 +55,9 @@ class GuildSettingsTest {
     @Test(timeout = 10000L)
     void testDeserialization() throws IOException {
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line;
+            String line
             while ((line = br.readLine()) != null) {
-                System.out.println(line);
+                System.out.println(line)
             }
         }
 

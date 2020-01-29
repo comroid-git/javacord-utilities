@@ -22,6 +22,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.comroid.javacord.util.CommonUtil;
 import org.comroid.javacord.util.model.command.SelfBotOwnerIgnorable;
 import org.comroid.javacord.util.model.command.SelfCommandChannelable;
 import org.comroid.javacord.util.model.command.SelfCustomPrefixable;
@@ -34,7 +35,6 @@ import org.comroid.javacord.util.ui.messages.categorizing.CategorizedEmbed;
 import org.comroid.javacord.util.ui.messages.paging.PagedEmbed;
 import org.comroid.javacord.util.ui.messages.paging.PagedMessage;
 import org.comroid.javacord.util.ui.reactions.InfoReaction;
-import org.comroid.javacord.util.CommonUtil;
 
 import org.apache.logging.log4j.Logger;
 import org.javacord.api.DiscordApi;
