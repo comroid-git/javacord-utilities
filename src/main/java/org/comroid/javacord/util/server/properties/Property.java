@@ -302,7 +302,10 @@ public final class Property implements Nameable {
                 propertySerializer = PropertySerializer.ofNative(type);
             else propertySerializer = new PropertySerializer(PropertySerializer.serializerData(type));
 
-            return new Property(parent, name, type, Pattern.compile(pattern), defaultValue, propertySerializer);
+            final Property property = new Property(parent, name, type, Pattern.compile(pattern), defaultValue, propertySerializer);
+            propertySerializer.parent = property;
+
+            return property;
         }
     }
 }
