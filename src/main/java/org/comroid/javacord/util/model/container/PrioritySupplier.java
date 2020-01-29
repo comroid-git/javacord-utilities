@@ -51,7 +51,8 @@ public final class PrioritySupplier<T> implements Supplier<T> {
 
         for (Supplier<T> supplier : suppliers) {
             try {
-                if (((yield = supplier.get()) == null && !nullable) | (filter != null && !filter.test(yield))) {
+                if ((((yield = supplier.get()) == null || String.valueOf(yield).equals("null")) && !nullable)
+                        | (filter != null && !filter.test(yield))) {
                     yield = fallback.value; // reset
                     continue;
                 }

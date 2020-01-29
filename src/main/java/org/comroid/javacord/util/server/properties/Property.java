@@ -310,7 +310,7 @@ public final class Property implements Nameable {
         }
 
         public Builder setDefaultValue(String defaultValue) {
-            this.defaultValue = new ValueContainer(defaultValue);
+            this.defaultValue = new ValueContainer(defaultValue, defaultValue);
 
             return this;
         }
