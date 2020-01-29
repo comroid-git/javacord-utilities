@@ -51,7 +51,7 @@ public final class GuildSettings implements Closeable {
     }
 
     public void storeData() throws IOException {
-        final String json = serialize().toPrettyString();
+        final String json = serialize().toString();
 
         final File tmpFile = File.createTempFile("GuildSettings-" + System.currentTimeMillis(), ".json.tmp");
         final FileOutputStream fileOutputStream = new FileOutputStream(tmpFile);
