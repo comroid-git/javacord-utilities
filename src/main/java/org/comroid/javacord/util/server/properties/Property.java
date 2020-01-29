@@ -24,7 +24,9 @@ import org.javacord.api.entity.Nameable;
 import org.javacord.api.entity.server.Server;
 
 public final class Property implements Nameable {
+    private static final @Language("RegExp") String ANY_STRING = "(?s).*";
     public static final Map<Class<?>, String> DEFAULT_PATTERNS = new ConcurrentHashMap<Class<?>, String>() {{
+        put(String.class, ANY_STRING);
         put(Integer.class, "\\d+");
         put(Long.class, "\\d+");
         put(Boolean.class, "(true)|(false)");
