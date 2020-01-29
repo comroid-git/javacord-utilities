@@ -111,7 +111,7 @@ public final class Property implements Nameable {
         final Class<?> type = Class.forName(data.get("type").asText());
         final Pattern pattern = Pattern.compile(data.get("pattern").asText());
         final PropertySerializer propertySerializer = new PropertySerializer(data.get("serialization"));
-        final ValueContainer defaultValue = propertySerializer.containerDeserializer.apply((ValueNode) data.get("defaultValue"));
+        final ValueContainer defaultValue = propertySerializer.containerDeserializer.apply(data.get("defaultValue").asText());
 
         return new Property(parent, name, type, pattern, defaultValue, propertySerializer);
     }
@@ -126,11 +126,11 @@ public final class Property implements Nameable {
     }
 
     private static class PropertySerializer {
-        private final Function<ValueContainer, ValueNode> containerSerializer;
-        private final Function<ValueNode, ValueContainer> containerDeserializer;
+        private final Function<ValueContainer, String> containerSerializer;
+        private final Function<String, ValueContainer> containerDeserializer;
         Property parent;
 
-        PropertySerializer(Function<ValueContainer, ValueNode> containerSerializer, Function<ValueNode, ValueContainer> containerDeserializer) {
+        PropertySerializer(Function<ValueContainer, String> containerSerializer, Function<String, ValueContainer> containerDeserializer) {
             this.containerSerializer = containerSerializer;
             this.containerDeserializer = containerDeserializer;
         }
@@ -138,32 +138,32 @@ public final class Property implements Nameable {
         PropertySerializer(JsonNode data) throws ClassNotFoundException, NoSuchMethodException {
             // init serializer side
             final JsonNode serializerData = data.get("serializer");
-            this.containerSerializer = new Function<ValueContainer, ValueNode>() {
+            this.containerSerializer = new Function<ValueContainer, String>() {
                 private final Class<?> klass = Class.forName(serializerData.get("class").asText());
                 private final Method method = klass.getMethod(serializerData.get("method").asText(), ValueContainer.class);
 
                 @Override
-                public ValueNode apply(ValueContainer container) {
+                public String apply(ValueContainer container) {
                     try {
-                        return (ValueNode) method.invoke(null, container);
+                        return (String) method.invoke(null, container);
                     } catch (IllegalAccessException e) {
                         throw new AssertionError("Could not access serializer method: " + method.toGenericString(), e);
                     } catch (InvocationTargetException e) {
                         throw new RuntimeException("Serializer threw an exception", e);
                     } catch (ClassCastException e) {
-                        throw new AssertionError("Serializer returned an illegal object; must return " + ValueNode.class.getName(), e);
+                        throw new AssertionError("Serializer returned an illegal object; must return " + String.class.getName(), e);
                     }
                 }
             };
 
             // init deserializer side
             final JsonNode deserializerData = data.get("deserializer");
-            this.containerDeserializer = new Function<ValueNode, ValueContainer>() {
+            this.containerDeserializer = new Function<String, ValueContainer>() {
                 private final Class<?> klass = Class.forName(deserializerData.get("class").asText());
-                private final Method method = klass.getMethod(deserializerData.get("method").asText(), ValueNode.class);
+                private final Method method = klass.getMethod(deserializerData.get("method").asText(), String.class);
 
                 @Override
-                public ValueContainer apply(ValueNode jsonNodes) {
+                public ValueContainer apply(String jsonNodes) {
                     try {
                         return (ValueContainer) method.invoke(null, jsonNodes);
                     } catch (IllegalAccessException e) {
@@ -197,9 +197,8 @@ public final class Property implements Nameable {
         public static PropertySerializer ofNative(Class<?> type) {
             class Local {
                 private final Class<?> klass = type;
-                private final Function<ValueContainer, ValueNode> serializer =
-                        valueContainer -> JsonNodeFactory.instance.rawValueNode(new RawValue(valueContainer.stringValue()));
-                private final Function<ValueNode, ValueContainer> deserializer = node -> new ValueContainer(node.asText());
+                private final Function<ValueContainer, String> serializer = ValueContainer::stringValue;
+                private final Function<String, ValueContainer> deserializer = ValueContainer::new;
             }
 
             final Local local = new Local();
