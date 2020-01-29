@@ -25,7 +25,7 @@ class GuildSettingsTest {
                 .setName("bot.version")
                 .setDefaultValue("5.2")
                 .setPattern("\\d\\.\\d"))
-        settings.properties("bot.version")
+        settings.property("bot.version")
                 .orElseThrow()
                 .setRawValue(100, "6.2")
 
@@ -43,8 +43,7 @@ class GuildSettingsTest {
                 .setName("bot.counter")
                 .setDefaultValue(500 as String)
                 .setPattern("\\d+"))
-        settings.properties("bot.counter")
-                .findAny()
+        settings.property("bot.counter")
                 .orElseThrow()
                 .setRawValue(100, 200)
 
