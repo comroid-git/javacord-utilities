@@ -14,6 +14,8 @@ class GuildSettingsTest {
     {
         file = File.createTempFile("guildSettingsTest", ".json")
         file.deleteOnExit()
+
+        System.out.printf "Using temporary file %s for UnitTest\n", file.absolutePath
     }
 
     @Before
@@ -52,6 +54,13 @@ class GuildSettingsTest {
 
     @Test(timeout = 10000L)
     void testDeserialization() throws IOException {
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                System.out.println(line);
+            }
+        }
+
         GuildSettings settings = using file
 
         def versionProp = settings.property("bot.version").orElseThrow()
