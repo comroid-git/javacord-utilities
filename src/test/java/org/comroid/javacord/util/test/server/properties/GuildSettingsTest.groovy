@@ -1,7 +1,7 @@
 package org.comroid.javacord.util.test.server.properties
 
 import org.comroid.javacord.util.server.properties.GuildSettings
-import org.junit.After
+import org.comroid.javacord.util.server.properties.Property
 import org.junit.Before
 import org.junit.Test
 
@@ -9,7 +9,12 @@ import static org.comroid.javacord.util.server.properties.GuildSettings.using
 import static org.junit.Assert.assertEquals
 
 class GuildSettingsTest {
-    private File file = File.createTempFile("guildSettingsTest", ".json")
+    private File file
+
+    {
+        file = File.createTempFile("guildSettingsTest", ".json")
+        file.deleteOnExit()
+    }
 
     @Before
     void setup() {
@@ -21,61 +26,78 @@ class GuildSettingsTest {
                 .setDefaultValue("5.2")
                 .setPattern("\\d\\.\\d"))
         settings.properties("bot.version")
-                .findAny()
-                .orElseThrow(AssertionError::new)
+                .orElseThrow()
                 .setRawValue(100, "6.2")
 
-        // todo: complete this unit test
+        settings.registerProperty(prop -> prop
+                .setType(String.class)
+                .setName("bot.name")
+                .setDefaultValue("william")
+                .setPattern(Property.ANY_STRING))
+        settings.property("bot.name")
+                .orElseThrow()
+                .setRawValue(100, "rufus")
 
-        settings.register("bot.traits", 419)
-                .setDisplayName("Traits")
-                .setDescription("These are traits")
-                .setValue(100).toInt(420)
-        settings.getProperty("bot.traits").getValue(200)
-
-        settings.register("bot.name", "William")
-                .setDisplayName("Name")
-                .setDescription("These are names")
-                .setValue(100).toString("Alfred")
-        settings.getProperty("bot.name").getValue(200)
-
-        settings.register("bot.emoji", "\uD83C\uDF61")
-                .setDisplayName("Emoji")
-                .setDescription("These are emojis")
-                .setValue(100).toString("\uD83D\uDD12")
-        settings.getProperty("bot.emoji").getValue(200)
+        settings.registerProperty(prop -> prop
+                .setType(Integer.class)
+                .setName("bot.counter")
+                .setDefaultValue(500 as String)
+                .setPattern("\\d+"))
+        settings.properties("bot.counter")
+                .findAny()
+                .orElseThrow()
+                .setRawValue(100, 200)
 
         settings.close()
     }
 
     @Test(timeout = 10000L)
-    void testSerialization() throws IOException {
-        GuildSettings deserializer = new GuildSettings(file)
+    void testDeserialization() throws IOException {
+        GuildSettings settings = using file
 
-        PropertyGroup traitsProperty = deserializer.register("bot.traits", 419)
-        assertEquals 420, traitsProperty.getValue(100).asInt()
-        assertEquals 419, traitsProperty.getValue(200).asInt()
-        assertEquals 419, traitsProperty.getDefaultValue().asInt()
-        assertEquals "Traits", traitsProperty.getDisplayName()
-        assertEquals "These are traits", traitsProperty.getDescription()
+        def versionProp = settings.property("bot.version").orElseThrow()
+        def version100 = versionProp
+                .getValue(100)
+                .asString()
+        def version200 = versionProp
+                .getValue(200)
+                .asString()
+        def version300 = versionProp
+                .getValue(300)
+                .asString("2.3")
 
-        PropertyGroup nameProperty = deserializer.register("bot.name", "William")
-        assertEquals "Alfred", nameProperty.getValue(100).stringValue()
-        assertEquals "William", nameProperty.getValue(200).stringValue()
-        assertEquals "William", nameProperty.getDefaultValue().stringValue()
-        assertEquals "Name", nameProperty.getDisplayName()
-        assertEquals "These are names", nameProperty.getDescription()
+        def nameProp = settings.property("bot.name").orElseThrow()
+        def name100 = nameProp
+                .getValue(100)
+                .asString()
+        def name200 = nameProp
+                .getValue(200)
+                .asString()
+        def name300 = nameProp
+                .getValue(300)
+                .asString("jack")
 
-        PropertyGroup emojiProperty = deserializer.register("bot.emoji", "\uD83C\uDF61")
-        assertEquals "\uD83D\uDD12", emojiProperty.getValue(100).stringValue()
-        assertEquals "\uD83C\uDF61", emojiProperty.getValue(200).stringValue()
-        assertEquals "\uD83C\uDF61", emojiProperty.getDefaultValue().stringValue()
-        assertEquals "Emoji", emojiProperty.getDisplayName()
-        assertEquals "These are emojis", emojiProperty.getDescription()
-    }
+        def counterProp = settings.property("bot.counter").orElseThrow()
+        def counter100 = counterProp
+                .getValue(100)
+                .asInt()
+        def counter200 = counterProp
+                .getValue(200)
+                .asInt()
+        def counter300 = counterProp
+                .getValue(300)
+                .asInt(400 as String)
 
-    @After
-    void cleanup() {
-        file.delete()
+        assertEquals "6.2", version100
+        assertEquals "5.2", version200
+        assertEquals "2.3", version300
+
+        assertEquals "rufus", name100
+        assertEquals "william", name200
+        assertEquals "jack", name300
+
+        assertEquals 200, counter100
+        assertEquals 500, counter200
+        assertEquals 400, counter300
     }
 }
