@@ -3,6 +3,8 @@ package org.comroid.javacord.util.model.command;
 import java.util.Optional;
 import java.util.function.Function;
 
+import org.comroid.javacord.util.server.properties.Property;
+
 import org.jetbrains.annotations.NotNull;
 
 public interface SelfCommandChannelable<Self extends SelfCommandChannelable> {
@@ -17,7 +19,7 @@ public interface SelfCommandChannelable<Self extends SelfCommandChannelable> {
     }
 
     // Extensions
-    default Self withCommandChannelProvider(@NotNull PropertyGroup commandChannelPropertyGroup) {
+    default Self withCommandChannelProvider(@NotNull Property commandChannelPropertyGroup) {
         return withCommandChannelProvider(commandChannelPropertyGroup.function(Long.class));
     }
 }
