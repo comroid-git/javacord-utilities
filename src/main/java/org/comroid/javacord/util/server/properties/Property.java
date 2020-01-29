@@ -40,6 +40,10 @@ public final class Property implements Nameable {
     private final ValueContainer defaultValue;
     private final PropertySerializer propertySerializer;
 
+    public <T> Function<Long, T> function(Class<T> targetType) {
+        return serverId -> targetType.cast(getValue(serverId).getRaw());
+    }
+
     Property rebuild(Builder builder) {
         return new Property(
                 parent,

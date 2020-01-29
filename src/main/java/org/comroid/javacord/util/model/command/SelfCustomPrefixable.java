@@ -3,6 +3,8 @@ package org.comroid.javacord.util.model.command;
 import java.util.Optional;
 import java.util.function.Function;
 
+import org.comroid.javacord.util.server.properties.Property;
+
 import org.jetbrains.annotations.NotNull;
 
 public interface SelfCustomPrefixable<Self extends SelfCustomPrefixable> {
@@ -17,7 +19,7 @@ public interface SelfCustomPrefixable<Self extends SelfCustomPrefixable> {
     }
 
     // Extensions
-    default Self withCustomPrefixProvider(@NotNull PropertyGroup customPrefixPropertyGroup) {
+    default Self withCustomPrefixProvider(@NotNull Property customPrefixPropertyGroup) {
         return withCustomPrefixProvider(customPrefixPropertyGroup.function(String.class));
     }
 }
