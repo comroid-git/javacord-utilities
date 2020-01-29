@@ -2,6 +2,8 @@ package org.comroid.javacord.util.model.container;
 
 import java.util.Objects;
 
+import org.comroid.javacord.util.server.properties.Property;
+
 import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("ConstantConditions")
@@ -65,7 +67,7 @@ public class ValueContainer implements ContainerAccessor {
                 .butRather(this::fallbackString)
                 .butRather(fallback.length == 0 ? null : String.join("", fallback))
                 .butRather(this::stringValue)
-                .get());
+                .get(str -> str.matches(Property.DEFAULT_PATTERNS.get(Boolean.class)), false));
     }
 
     @Override
@@ -74,7 +76,7 @@ public class ValueContainer implements ContainerAccessor {
                 .butRather(this::fallbackString)
                 .butRather(fallback.length == 0 ? null : String.join("", fallback))
                 .butRather(this::stringValue)
-                .get());
+                .get(str -> str.matches(Property.DEFAULT_PATTERNS.get(Integer.class)), false));
     }
 
     @Override
@@ -83,7 +85,7 @@ public class ValueContainer implements ContainerAccessor {
                 .butRather(this::fallbackString)
                 .butRather(fallback.length == 0 ? null : String.join("", fallback))
                 .butRather(this::stringValue)
-                .get());
+                .get(str -> str.matches(Property.DEFAULT_PATTERNS.get(Long.class)), false));
     }
 
     @Override
@@ -92,7 +94,7 @@ public class ValueContainer implements ContainerAccessor {
                 .butRather(this::fallbackString)
                 .butRather(fallback.length == 0 ? null : String.join("", fallback))
                 .butRather(this::stringValue)
-                .get());
+                .get(str -> str.matches(Property.DEFAULT_PATTERNS.get(Float.class)), false));
     }
 
     @Override
@@ -101,7 +103,7 @@ public class ValueContainer implements ContainerAccessor {
                 .butRather(this::fallbackString)
                 .butRather(fallback.length == 0 ? null : String.join("", fallback))
                 .butRather(this::stringValue)
-                .get());
+                .get(str -> str.matches(Property.DEFAULT_PATTERNS.get(Double.class)), false));
     }
 
     public void setRaw(Object raw) {

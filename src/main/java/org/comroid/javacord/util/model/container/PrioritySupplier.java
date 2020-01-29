@@ -3,6 +3,7 @@ package org.comroid.javacord.util.model.container;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Contract;
@@ -38,6 +39,11 @@ public final class PrioritySupplier<T> implements Supplier<T> {
 
     @Contract("true -> _; false -> !null")
     public @Nullable T get(boolean nullable) {
+        return get(null, nullable);
+    }
+
+    @Contract("_, true -> _; _, false -> !null")
+    public @Nullable T get(@Nullable Predicate<T> filter, boolean nullable) {
         final List<Supplier<T>> suppliers = new ArrayList<>(this.suppliers);
         Collections.reverse(suppliers);
 
@@ -47,7 +53,7 @@ public final class PrioritySupplier<T> implements Supplier<T> {
             try {
                 yield = supplier.get();
 
-                if (yield == null && !nullable)
+                if ((yield == null && !nullable) | (filter != null && !filter.test(yield)))
                     continue;
 
                 break;
