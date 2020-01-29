@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -62,6 +63,12 @@ public final class GuildSettings implements Closeable {
         if (!file.exists() || (file.exists() && file.delete()))
             tmpFile.renameTo(file);
         else throw new IOException("Could not delete previous file!");
+    }
+
+    public Optional<Property> property(String name) {
+        return properties(name)
+                .filter(prop -> prop.getName().equals(name))
+                .findAny();
     }
 
     public Stream<Property> properties(String thatStartWith) {
