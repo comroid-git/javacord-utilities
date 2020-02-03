@@ -26,6 +26,7 @@ import org.comroid.javacord.util.CommonUtil;
 import org.comroid.javacord.util.model.command.SelfBotOwnerIgnorable;
 import org.comroid.javacord.util.model.command.SelfCommandChannelable;
 import org.comroid.javacord.util.model.command.SelfCustomPrefixable;
+import org.comroid.javacord.util.model.command.SelfFuzzyComparable;
 import org.comroid.javacord.util.model.command.SelfMultiCommandRegisterable;
 import org.comroid.javacord.util.model.command.SelfUnknownCommandRespondable;
 import org.comroid.javacord.util.ui.embed.DefaultEmbedFactory;
@@ -58,6 +59,7 @@ import org.javacord.api.event.message.MessageEvent;
 import org.javacord.core.util.logging.LoggerUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Range;
 
 import static java.lang.System.arraycopy;
 import static java.lang.reflect.Modifier.isStatic;
@@ -68,6 +70,7 @@ public final class CommandHandler implements
         SelfCommandChannelable<CommandHandler>,
         SelfCustomPrefixable<CommandHandler>,
         SelfBotOwnerIgnorable<CommandHandler>,
+        SelfFuzzyComparable<CommandHandler>,
         SelfUnknownCommandRespondable<CommandHandler> {
     private static final Logger logger = LoggerUtil.getLogger(CommandHandler.class);
     static final String NO_GROUP = "@NoGroup#";
@@ -85,6 +88,7 @@ public final class CommandHandler implements
     private long[] serverBlacklist;
     private boolean ignoreBotOwnerPermissions;
     private boolean respondToUnknownCommand;
+    private @Nullable Function<Long, Integer> fuzzyMatchingThresholdFunction;
 
     public CommandHandler(DiscordApi api) {
         this(api, false);
@@ -326,6 +330,18 @@ public final class CommandHandler implements
     @Override
     public boolean doesRespondToUnknownCommands() {
         return respondToUnknownCommand;
+    }
+
+    @Override
+    public CommandHandler withFuzzyMatchingThreshold(@Nullable Function<Long, Integer> fuzzyMatchingThresholdFunction) {
+        this.fuzzyMatchingThresholdFunction = fuzzyMatchingThresholdFunction;
+        
+        return this;
+    }
+
+    @Override
+    public Optional<? extends Function<Long, Integer>> getFuzzyMatchingThreshold() {
+        return Optional.ofNullable(fuzzyMatchingThresholdFunction);
     }
 
     private void extractCommandRep(@Nullable Object invocationTarget, Method... methods) {
