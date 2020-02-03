@@ -37,6 +37,8 @@ import org.comroid.javacord.util.ui.messages.paging.PagedEmbed;
 import org.comroid.javacord.util.ui.messages.paging.PagedMessage;
 import org.comroid.javacord.util.ui.reactions.InfoReaction;
 
+import me.xdrop.fuzzywuzzy.FuzzySearch;
+import me.xdrop.fuzzywuzzy.model.ExtractedResult;
 import org.apache.logging.log4j.Logger;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.DiscordEntity;
@@ -59,7 +61,6 @@ import org.javacord.api.event.message.MessageEvent;
 import org.javacord.core.util.logging.LoggerUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.Range;
 
 import static java.lang.System.arraycopy;
 import static java.lang.reflect.Modifier.isStatic;
@@ -335,7 +336,7 @@ public final class CommandHandler implements
     @Override
     public CommandHandler withFuzzyMatchingThreshold(@Nullable Function<Long, Integer> fuzzyMatchingThresholdFunction) {
         this.fuzzyMatchingThresholdFunction = fuzzyMatchingThresholdFunction;
-        
+
         return this;
     }
 
@@ -478,27 +479,21 @@ public final class CommandHandler implements
         CommandRepresentation cmd;
         String[] split = splitContent(content);
         final String[] commandName = new String[1];
+        
         String[] args;
+        Optional<Server> serverOptional = commandParams.getServer();
         if (usedPrefix.matches("^(.*\\s.*)+$")) {
-            cmd = commands.entrySet()
-                    .stream()
-                    .filter(entry -> entry.getKey()
-                            .toLowerCase()
-                            .equals((commandName[0] = split[1]).substring(usedPrefix.length()).toLowerCase()))
-                    .findFirst()
-                    .map(Map.Entry::getValue)
-                    .orElse(null);
+            final String cmdQuery = (commandName[0] = split[1]).substring(usedPrefix.length()).toLowerCase();
+
+            cmd = findCommand(serverOptional.orElse(null), cmdQuery);
+
             args = new String[split.length - 2];
             arraycopy(split, 2, args, 0, args.length);
         } else {
-            cmd = commands.entrySet()
-                    .stream()
-                    .filter(entry -> entry.getKey()
-                            .toLowerCase()
-                            .equals((commandName[0] = split[0]).substring(usedPrefix.length()).toLowerCase()))
-                    .findFirst()
-                    .map(Map.Entry::getValue)
-                    .orElse(null);
+            final String cmdQuery = (commandName[0] = split[0]).substring(usedPrefix.length()).toLowerCase();
+
+            cmd = findCommand(serverOptional.orElse(null), cmdQuery);
+
             args = new String[split.length - 1];
             arraycopy(split, 1, args, 0, args.length);
         }
@@ -571,6 +566,32 @@ public final class CommandHandler implements
                 .getExecutorService()
                 .submit(() -> doInvoke(cmd, commandParams, channel, message));
         else doInvoke(cmd, commandParams, channel, message);
+    }
+
+    private @Nullable CommandRepresentation findCommand(@Nullable Server server, String cmdQuery) {
+        CommandRepresentation yield = null;
+        
+        if (fuzzyMatchingThresholdFunction != null && server != null) {
+            final List<ExtractedResult> extractedResults = FuzzySearch.extractTop(
+                    cmdQuery,
+                    commands.keySet(),
+                    fuzzyMatchingThresholdFunction.apply(server.getId())
+            );
+            
+            if (extractedResults.size() == 1) 
+                yield = commands.get(extractedResults.get(0).getString());
+        } else {
+            yield = commands.entrySet()
+                    .stream()
+                    .filter(entry -> entry.getKey()
+                            .toLowerCase()
+                            .equals(cmdQuery))
+                    .findFirst()
+                    .map(Map.Entry::getValue)
+                    .orElse(null);
+        }
+        
+        return yield;
     }
 
     private @Nullable String extractUsedPrefix(final Message message) {
