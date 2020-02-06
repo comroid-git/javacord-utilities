@@ -36,7 +36,7 @@ publishing {
 
     publications {
         mavenJava(MavenPublication) {
-            artifactId = artifactName + '-' + project.name
+            artifactId = rootProject.name
             from components.java
 
             artifact sourcesJar
