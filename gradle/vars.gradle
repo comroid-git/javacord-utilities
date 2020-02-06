@@ -5,10 +5,17 @@ ext {
     userbase = 'comroid-git'
     projectDescription = 'Helpful structures for Javacord'
 
-    snapshot = project.version.endsWith("-SNAPSHOT")
+    exportedProjects = rootProject.subprojects.collect { it.name }
 
-    spaceUsername = getenv("SPACE_USERNAME")
-    spacePassword = getenv("SPACE_PASSWORD")
+    snapshot = project.version.endsWith('-SNAPSHOT')
+
+    spaceUsername = getenv('SPACE_USERNAME')
+    spacePassword = getenv('SPACE_PASSWORD')
+
+    sonatypeUsername = getenv('SONATYPE_USERNAME')
+    sonatypePassword = getenv('SONATYPE_PASSWORD')
 }
 
-ext."signing.gnupg.passphrase" = getenv("gpgKeyPassword")
+ext.'signing.gnupg.passphrase' = getenv('GPG_PASSPHRASE')
+ext.'signing.gnupg.keyName' = getenv('GPG_KEYNAME')
+ext.'signing.gnupg.useLegacyGpg' = true
