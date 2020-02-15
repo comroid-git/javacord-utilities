@@ -26,6 +26,7 @@ import org.comroid.javacord.util.CommonUtil;
 import org.comroid.javacord.util.model.command.SelfBotOwnerIgnorable;
 import org.comroid.javacord.util.model.command.SelfCommandChannelable;
 import org.comroid.javacord.util.model.command.SelfCustomPrefixable;
+import org.comroid.javacord.util.model.command.SelfFuzzyComparable;
 import org.comroid.javacord.util.model.command.SelfMultiCommandRegisterable;
 import org.comroid.javacord.util.model.command.SelfUnknownCommandRespondable;
 import org.comroid.javacord.util.ui.embed.DefaultEmbedFactory;
@@ -36,6 +37,8 @@ import org.comroid.javacord.util.ui.messages.paging.PagedEmbed;
 import org.comroid.javacord.util.ui.messages.paging.PagedMessage;
 import org.comroid.javacord.util.ui.reactions.InfoReaction;
 
+import me.xdrop.fuzzywuzzy.FuzzySearch;
+import me.xdrop.fuzzywuzzy.model.ExtractedResult;
 import org.apache.logging.log4j.Logger;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.DiscordEntity;
@@ -68,6 +71,7 @@ public final class CommandHandler implements
         SelfCommandChannelable<CommandHandler>,
         SelfCustomPrefixable<CommandHandler>,
         SelfBotOwnerIgnorable<CommandHandler>,
+        SelfFuzzyComparable<CommandHandler>,
         SelfUnknownCommandRespondable<CommandHandler> {
     private static final Logger logger = LoggerUtil.getLogger(CommandHandler.class);
     static final String NO_GROUP = "@NoGroup#";
@@ -85,6 +89,7 @@ public final class CommandHandler implements
     private long[] serverBlacklist;
     private boolean ignoreBotOwnerPermissions;
     private boolean respondToUnknownCommand;
+    private @Nullable Function<Long, Integer> fuzzyMatchingThresholdFunction;
 
     public CommandHandler(DiscordApi api) {
         this(api, false);
@@ -328,6 +333,18 @@ public final class CommandHandler implements
         return respondToUnknownCommand;
     }
 
+    @Override
+    public CommandHandler withFuzzyMatchingThreshold(@Nullable Function<Long, Integer> fuzzyMatchingThresholdFunction) {
+        this.fuzzyMatchingThresholdFunction = fuzzyMatchingThresholdFunction;
+
+        return this;
+    }
+
+    @Override
+    public Optional<? extends Function<Long, Integer>> getFuzzyMatchingThreshold() {
+        return Optional.ofNullable(fuzzyMatchingThresholdFunction);
+    }
+
     private void extractCommandRep(@Nullable Object invocationTarget, Method... methods) {
         for (Method method : methods) {
             Command cmd = method.getAnnotation(Command.class);
@@ -462,27 +479,21 @@ public final class CommandHandler implements
         CommandRepresentation cmd;
         String[] split = splitContent(content);
         final String[] commandName = new String[1];
+        
         String[] args;
+        Optional<Server> serverOptional = commandParams.getServer();
         if (usedPrefix.matches("^(.*\\s.*)+$")) {
-            cmd = commands.entrySet()
-                    .stream()
-                    .filter(entry -> entry.getKey()
-                            .toLowerCase()
-                            .equals((commandName[0] = split[1]).substring(usedPrefix.length()).toLowerCase()))
-                    .findFirst()
-                    .map(Map.Entry::getValue)
-                    .orElse(null);
+            final String cmdQuery = (commandName[0] = split[1]).substring(usedPrefix.length()).toLowerCase();
+
+            cmd = findCommand(serverOptional.orElse(null), cmdQuery);
+
             args = new String[split.length - 2];
             arraycopy(split, 2, args, 0, args.length);
         } else {
-            cmd = commands.entrySet()
-                    .stream()
-                    .filter(entry -> entry.getKey()
-                            .toLowerCase()
-                            .equals((commandName[0] = split[0]).substring(usedPrefix.length()).toLowerCase()))
-                    .findFirst()
-                    .map(Map.Entry::getValue)
-                    .orElse(null);
+            final String cmdQuery = (commandName[0] = split[0]).substring(usedPrefix.length()).toLowerCase();
+
+            cmd = findCommand(serverOptional.orElse(null), cmdQuery);
+
             args = new String[split.length - 1];
             arraycopy(split, 1, args, 0, args.length);
         }
@@ -555,6 +566,32 @@ public final class CommandHandler implements
                 .getExecutorService()
                 .submit(() -> doInvoke(cmd, commandParams, channel, message));
         else doInvoke(cmd, commandParams, channel, message);
+    }
+
+    private @Nullable CommandRepresentation findCommand(@Nullable Server server, String cmdQuery) {
+        CommandRepresentation yield = null;
+        
+        if (fuzzyMatchingThresholdFunction != null && server != null) {
+            final List<ExtractedResult> extractedResults = FuzzySearch.extractTop(
+                    cmdQuery,
+                    commands.keySet(),
+                    fuzzyMatchingThresholdFunction.apply(server.getId())
+            );
+            
+            if (extractedResults.size() == 1) 
+                yield = commands.get(extractedResults.get(0).getString());
+        } else {
+            yield = commands.entrySet()
+                    .stream()
+                    .filter(entry -> entry.getKey()
+                            .toLowerCase()
+                            .equals(cmdQuery))
+                    .findFirst()
+                    .map(Map.Entry::getValue)
+                    .orElse(null);
+        }
+        
+        return yield;
     }
 
     private @Nullable String extractUsedPrefix(final Message message) {
