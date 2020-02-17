@@ -65,7 +65,7 @@ dependencies {
     compileOnly 'org.javacord:javacord-core:3.0.5'
     compileOnly 'com.fasterxml.jackson.core:jackson-databind:2.10.1'
 
-    compileOnly 'org.jetbrains:annotations:18.0.0'
+    compileOnly 'org.jetbrains:annotations:19.0.0'
 
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.easymock:easymock:4.1'
