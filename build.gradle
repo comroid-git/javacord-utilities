@@ -71,7 +71,7 @@ dependencies {
     testImplementation 'org.easymock:easymock:4.1'
     testImplementation 'org.javacord:javacord:3.0.4'
 
-    testCompileOnly 'org.codehaus.groovy:groovy:3.0.0-rc-2'
+    testCompileOnly 'org.codehaus.groovy:groovy:3.0.2'
 }
 
 sourceSets {
