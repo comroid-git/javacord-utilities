@@ -11,6 +11,8 @@ task teamcityPublish(dependsOn: 'publish') {
 
 publishing {
     repositories {
+        mavenLocal()
+        
         maven {
             name = 'Space'
             url = 'https://maven.jetbrains.space/comroid/repo'
