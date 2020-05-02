@@ -1,0 +1,13 @@
+org.comroid.javacord.util
+org.comroid.javacord.util.commands
+org.comroid.javacord.util.commands.eval
+org.comroid.javacord.util.commands.eval.model
+org.comroid.javacord.util.model
+org.comroid.javacord.util.model.command
+org.comroid.javacord.util.model.container
+org.comroid.javacord.util.server.properties
+org.comroid.javacord.util.ui.embed
+org.comroid.javacord.util.ui.messages
+org.comroid.javacord.util.ui.messages.categorizing
+org.comroid.javacord.util.ui.messages.paging
+org.comroid.javacord.util.ui.reactions

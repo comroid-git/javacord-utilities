@@ -35,117 +35,11 @@ import org.javacord.api.event.message.MessageEditEvent;
  * The return value of such a command method is used as the response to the actual command.
  * The response is deleted when the command message is deleted.
  * Command methods can return one of the following:
- * <table>
- * <tr>
- * <th>{@link String}</th>
- * </tr>
- * <tr>
- * <td>{@link EmbedBuilder}</td>
- * </tr>
- * <tr>
- * <td>{@link MessageBuilder}</td>
- * </tr>
- * <tr>
- * <td>{@link InformationMessage}</td>
- * </tr>
- * <tr>
- * <td>{@link PagedEmbed}</td>
- * </tr>
- * <tr>
- * <td>{@link PagedMessage}</td>
- * </tr>
- * <tr>
- * <td>{@link RefreshableMessage}</td>
- * </tr>
- * <tr>
- * <td>{@link InfoReaction}</td>
- * </tr>
- * </table>
  * Anything not listed here will be converted to a string using {@link String#valueOf(Object)}.
  * <p>
  * A command method can have different types of parameters, any of which will be set to their respective value:
- * <table summary="A command method can have different types of parameters, any of which will be set to their
- * respective
- * value.">
- * <tr>
- * <th>Class<br></th>
- * <th>Respective value<br></th>
- * <th>Notes</th>
- * </tr>
- * <tr>
- * <td>{@link CommandRepresentation}</td>
- * <td>The representation of the command that was used.</td>
- * <td></td>
- * </tr>
- * <tr>
- * <td>{@link DiscordApi}</td>
- * <td>The API that caught the command message's event.</td>
- * <td></td>
- * </tr>
- * <tr>
- * <td>{@link MessageCreateEvent}<br></td>
- * <td>The MessageCreateEvent that triggered the command.</td>
- * <td>{@code null} if the command was triggered by a {@link MessageEditEvent}.</td>
- * </tr>
- * <tr>
- * <td>{@link MessageEditEvent}<br></td>
- * <td>The MessageEditEvent that triggered the command.</td>
- * <td>{@code null} if the command was triggered by a {@link MessageCreateEvent}.</td>
- * </tr>
- * <tr>
- * <td>{@link Server}</td>
- * <td>The server that the command was sent in.</td>
- * <td>{@code null} if the command was sent in a {@link PrivateChannel}.</td>
- * </tr>
- * <tr>
- * <td>{@link Boolean}<br></td>
- * <td>Whether the command was sent in a private chat.</td>
- * <td></td>
- * </tr>
- * <tr>
- * <td>{@link TextChannel}</td>
- * <td>The {@link TextChannel} that the command was sent in.</td>
- * <td></td>
- * </tr>
- * <tr>
- * <td>{@link ServerTextChannel}</td>
- * <td>The ServerTextChannel that the command was sent in.</td>
- * <td>{@code null} if the command was sent in a {@link PrivateChannel}.</td>
- * </tr>
- * <tr>
- * <td>{@link PrivateChannel}<br></td>
- * <td>The PrivateChannel that the command was sent in.</td>
- * <td>{@code null} if the command was sent in a {@link ServerTextChannel}.</td>
- * </tr>
- * <tr>
- * <td>{@link Message}</td>
- * <td>The command message.</td>
- * <td></td>
- * </tr>
- * <tr>
- * <td>{@link User}</td>
- * <td>The user that authored the command message.</td>
- * <td>{@code null} if there is no {@link User}. See {@link MessageEditEvent#getMessageAuthor()} for more
- * information.</td>
- * </tr>
- * <tr>
- * <td>{@link MessageAuthor}</td>
- * <td>The author of the command message.</td>
- * <td>{@code null} if there is no {@link MessageAuthor}. See {@link MessageEditEvent#getMessageAuthor()} for more
- * information.</td>
- * </tr>
- * <tr>
- * <td>{@code String[]}</td>
- * <td>The arguments of the command.</td>
- * <td></td>
- * </tr>
- * <tr>
- * <td>{@link Command.Parameters}</td>
- * <td>A parameter object that carries all command parameters.</td>
- * <td></td>
- * </tr>
- * </table>
- * Any type that is not listed here will get {@code null} as a parameter.
+ *
+ * Any type that is not listed here will receive {@code null} as a parameter.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
