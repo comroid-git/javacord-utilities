@@ -1,33 +1,8 @@
 package org.comroid.javacord.util.commands;
 
-import java.awt.Color;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import org.apache.logging.log4j.Logger;
 import org.comroid.javacord.util.CommonUtil;
-import org.comroid.javacord.util.model.command.SelfBotOwnerIgnorable;
-import org.comroid.javacord.util.model.command.SelfCommandChannelable;
-import org.comroid.javacord.util.model.command.SelfCustomPrefixable;
-import org.comroid.javacord.util.model.command.SelfMultiCommandRegisterable;
-import org.comroid.javacord.util.model.command.SelfUnknownCommandRespondable;
+import org.comroid.javacord.util.model.command.*;
 import org.comroid.javacord.util.ui.embed.DefaultEmbedFactory;
 import org.comroid.javacord.util.ui.messages.InformationMessage;
 import org.comroid.javacord.util.ui.messages.RefreshableMessage;
@@ -35,15 +10,9 @@ import org.comroid.javacord.util.ui.messages.categorizing.CategorizedEmbed;
 import org.comroid.javacord.util.ui.messages.paging.PagedEmbed;
 import org.comroid.javacord.util.ui.messages.paging.PagedMessage;
 import org.comroid.javacord.util.ui.reactions.InfoReaction;
-
-import org.apache.logging.log4j.Logger;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.DiscordEntity;
-import org.javacord.api.entity.channel.Channel;
-import org.javacord.api.entity.channel.PrivateChannel;
-import org.javacord.api.entity.channel.ServerChannel;
-import org.javacord.api.entity.channel.ServerTextChannel;
-import org.javacord.api.entity.channel.TextChannel;
+import org.javacord.api.entity.channel.*;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageAuthor;
 import org.javacord.api.entity.message.MessageBuilder;
@@ -59,6 +28,20 @@ import org.javacord.core.util.logging.LoggerUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.awt.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.List;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import static java.lang.System.arraycopy;
 import static java.lang.reflect.Modifier.isStatic;
 import static org.javacord.api.util.logging.ExceptionLogger.get;
@@ -69,9 +52,8 @@ public final class CommandHandler implements
         SelfCustomPrefixable<CommandHandler>,
         SelfBotOwnerIgnorable<CommandHandler>,
         SelfUnknownCommandRespondable<CommandHandler> {
-    private static final Logger logger = LoggerUtil.getLogger(CommandHandler.class);
     static final String NO_GROUP = "@NoGroup#";
-
+    private static final Logger logger = LoggerUtil.getLogger(CommandHandler.class);
     private final DiscordApi api;
     private final Map<String, CommandRepresentation> commands = new ConcurrentHashMap<>();
     private final Map<Long, long[]> responseMap = new ConcurrentHashMap<>();
@@ -85,6 +67,28 @@ public final class CommandHandler implements
     private long[] serverBlacklist;
     private boolean ignoreBotOwnerPermissions;
     private boolean respondToUnknownCommand;
+
+    public Set<CommandRepresentation> getCommands() {
+        return new HashSet<>(commands.values());
+    }
+
+    public long[] getServerBlacklist() {
+        return serverBlacklist;
+    }
+
+    public void setServerBlacklist(long... serverIds) {
+        this.serverBlacklist = serverIds;
+    }
+
+    @Override
+    public Optional<Function<Long, Long>> getCommandChannelProvider() {
+        return Optional.ofNullable(commandChannelProvider);
+    }
+
+    @Override
+    public Optional<Function<Long, String>> getCustomPrefixProvider() {
+        return Optional.ofNullable(customPrefixProvider);
+    }
 
     public CommandHandler(DiscordApi api) {
         this(api, false);
@@ -192,21 +196,9 @@ public final class CommandHandler implements
         return this;
     }
 
-    public Set<CommandRepresentation> getCommands() {
-        return new HashSet<>(commands.values());
-    }
-
     public void useDefaultHelp(@Nullable Supplier<EmbedBuilder> embedSupplier) {
         this.embedSupplier = (embedSupplier == null ? DefaultEmbedFactory.INSTANCE : embedSupplier);
         registerCommands(this);
-    }
-
-    public long[] getServerBlacklist() {
-        return serverBlacklist;
-    }
-
-    public void setServerBlacklist(long... serverIds) {
-        this.serverBlacklist = serverIds;
     }
 
     @CommandGroup(name = "Basic Commands", description = "All commands for basic interaction with the bot")
@@ -293,27 +285,19 @@ public final class CommandHandler implements
     }
 
     @Override
-    public Optional<Function<Long, Long>> getCommandChannelProvider() {
-        return Optional.ofNullable(commandChannelProvider);
-    }
-
-    @Override
     public CommandHandler withCustomPrefixProvider(@NotNull Function<Long, String> customPrefixProvider) {
         this.customPrefixProvider = customPrefixProvider;
         return this;
     }
 
     @Override
-    public Optional<Function<Long, String>> getCustomPrefixProvider() {
-        return Optional.ofNullable(customPrefixProvider);
-    }
-
-    @Override public CommandHandler ignoreBotOwnerPermissions(boolean status) {
+    public CommandHandler ignoreBotOwnerPermissions(boolean status) {
         this.ignoreBotOwnerPermissions = status;
         return this;
     }
 
-    @Override public boolean doesIgnoreBotOwnerPermissions() {
+    @Override
+    public boolean doesIgnoreBotOwnerPermissions() {
         return ignoreBotOwnerPermissions;
     }
 
@@ -688,23 +672,43 @@ public final class CommandHandler implements
         }
 
         if (reply != null) {
-            CompletableFuture<Message> msgFut = null;
+            CompletableFuture<Message> msgFut;
 
-            if (reply instanceof EmbedBuilder) msgFut = channel.sendMessage((EmbedBuilder) reply);
-            else if (reply instanceof MessageBuilder) msgFut = ((MessageBuilder) reply).send(channel);
-            else if (reply instanceof InformationMessage) ((InformationMessage) reply).refresh();
-            else if (reply instanceof PagedEmbed) msgFut = ((PagedEmbed) reply).build();
-            else if (reply instanceof PagedMessage) ((PagedMessage) reply).refresh();
-            else if (reply instanceof RefreshableMessage) ((RefreshableMessage) reply).refresh();
-            else if (reply instanceof CategorizedEmbed) msgFut = ((CategorizedEmbed) reply).build();
-            else if (reply instanceof InfoReaction) ((InfoReaction) reply).build();
-            else if (commandRep.convertStringResultsToEmbed && reply instanceof String)
-                msgFut = channel.sendMessage(DefaultEmbedFactory.create().setDescription((String) reply));
-            else msgFut = channel.sendMessage(String.valueOf(reply));
+            if (reply instanceof CompletableFuture)
+                msgFut = unwrapReply(commandRep, channel, (CompletableFuture<?>) reply);
+            else msgFut = executeReply(commandRep, channel, reply);
 
             if (msgFut != null)
                 applyResponseDeletion(message.getId(), msgFut.exceptionally(get()));
         }
+    }
+
+    private CompletableFuture<Message> executeReply(CommandRepresentation commandRep, TextChannel channel, Object reply) {
+        if (reply instanceof EmbedBuilder)
+            return channel.sendMessage((EmbedBuilder) reply);
+        else if (reply instanceof MessageBuilder)
+            return ((MessageBuilder) reply).send(channel);
+        else if (reply instanceof InformationMessage)
+            ((InformationMessage) reply).refresh();
+        else if (reply instanceof PagedEmbed)
+            return ((PagedEmbed) reply).build();
+        else if (reply instanceof PagedMessage)
+            ((PagedMessage) reply).refresh();
+        else if (reply instanceof RefreshableMessage)
+            ((RefreshableMessage) reply).refresh();
+        else if (reply instanceof CategorizedEmbed)
+            return ((CategorizedEmbed) reply).build();
+        else if (reply instanceof InfoReaction)
+            ((InfoReaction) reply).build();
+        else if (commandRep.convertStringResultsToEmbed && reply instanceof String)
+            return channel.sendMessage(DefaultEmbedFactory.create().setDescription((String) reply));
+        else return channel.sendMessage(String.valueOf(reply));
+
+        return CompletableFuture.completedFuture(null);
+    }
+
+    private CompletableFuture<Message> unwrapReply(CommandRepresentation commandRep, TextChannel channel, CompletableFuture<?> reply) {
+        return reply.thenCompose(anything -> executeReply(commandRep, channel, anything));
     }
 
     private Object invoke(Method method, Params param, @Nullable Object invocationTarget)
@@ -758,33 +762,17 @@ public final class CommandHandler implements
 
     private class Params implements Command.Parameters {
         private final DiscordApi discord;
-        @Nullable private final MessageCreateEvent createEvent;
-        @Nullable private final MessageEditEvent editEvent;
-        @Nullable private final Server server;
+        @Nullable
+        private final MessageCreateEvent createEvent;
+        @Nullable
+        private final MessageEditEvent editEvent;
+        @Nullable
+        private final Server server;
         private final TextChannel textChannel;
         private final Message message;
         private final MessageAuthor author;
         private CommandRepresentation command;
         private String[] args;
-
-        private Params(
-                DiscordApi discord,
-                @Nullable MessageCreateEvent createEvent,
-                @Nullable MessageEditEvent editEvent,
-                @Nullable Server server,
-                TextChannel textChannel,
-                Message message,
-                @Nullable MessageAuthor author
-        ) {
-            this.command = command;
-            this.discord = discord;
-            this.createEvent = createEvent;
-            this.editEvent = editEvent;
-            this.server = server;
-            this.textChannel = textChannel;
-            this.message = message;
-            this.author = author;
-        }
 
         @Override
         public CommandRepresentation getCommand() {
@@ -829,6 +817,25 @@ public final class CommandHandler implements
         @Override
         public String[] getArguments() {
             return args;
+        }
+
+        private Params(
+                DiscordApi discord,
+                @Nullable MessageCreateEvent createEvent,
+                @Nullable MessageEditEvent editEvent,
+                @Nullable Server server,
+                TextChannel textChannel,
+                Message message,
+                @Nullable MessageAuthor author
+        ) {
+            this.command = command;
+            this.discord = discord;
+            this.createEvent = createEvent;
+            this.editEvent = editEvent;
+            this.server = server;
+            this.textChannel = textChannel;
+            this.message = message;
+            this.author = author;
         }
     }
 }
