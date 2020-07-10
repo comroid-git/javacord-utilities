@@ -8,8 +8,6 @@ apply plugin: 'java-library'
 group 'org.comroid'
 version '1.5.2-SNAPSHOT'
 
-System.out.println("##teamcity[buildNumber '$version']")
-
 apply from: 'gradle/vars.gradle'
 
 sourceCompatibility = targetCompatibility = 1.8
