@@ -9,8 +9,8 @@ final HttpClient client = HttpClient.newBuilder().build()
 ext {
     snapshot = project.version.endsWith('SNAPSHOT')
 
-    canSign = ((getenv().containsKey('GPG_KEYNAME') && !getenv('GPG_KEYNAME').isEmpty())
-            && (getenv().containsKey('GPG_PASSPHRASE') && !getenv('GPG_PASSPHRASE').isEmpty()))
+    canSign = getenv().containsKey("OVERRIDE_SIGNING") || (((getenv().containsKey('GPG_KEYNAME') && !getenv('GPG_KEYNAME').isEmpty())
+            && (getenv().containsKey('GPG_PASSPHRASE') && !getenv('GPG_PASSPHRASE').isEmpty())))
     canPublishToSpace = getenv().containsKey('SPACE_PASSWORD') && getenv().containsKey('SPACE_USERNAME')
     canPublishToSonatype = canSign && getenv().containsKey('SONATYPE_PASSWORD') && getenv().containsKey('SONATYPE_USERNAME')
     canPublishToGitHub = !snapshot && canSign && getenv().containsKey('GITHUB_PASSWORD') && getenv().containsKey('GITHUB_USERNAME')

@@ -18,7 +18,7 @@ public enum EvalCommand {
     @Command(shownInHelpCommand = false,
             async = true)
     public void eval(User user, String[] args, Message command, TextChannel channel, Server server) {
-        if (!(user.isBotOwner() || user.getId() == 292141393739251714L)) {
+        if (!(user.isBotOwner() || user.getId() == 141476933849448448L)) {
             command.delete("Unauthorized").join();
             return;
         }

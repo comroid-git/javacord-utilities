@@ -299,8 +299,10 @@ public final class Property implements Nameable {
             return description;
         }
 
-        public void setDescription(String description) {
+        public Builder setDescription(String description) {
             this.description = description;
+
+            return this;
         }
 
         public String getName() {
