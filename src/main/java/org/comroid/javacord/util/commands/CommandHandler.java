@@ -489,19 +489,16 @@ public final class CommandHandler implements
         else if (!message.isPrivateMessage() && !cmd.enableServerChat)
             problems.add("This command can only be run in a private channel!");
 
-        PermissionType[] perms = new PermissionType[cmd.requiredDiscordPermissions.length];
-        perms[0] = PermissionType.ADMINISTRATOR;
-        System.arraycopy(cmd.requiredDiscordPermissions, 0, perms, 1, cmd.requiredDiscordPermissions.length - 1);
         if (!(ignoreBotOwnerPermissions && message.getAuthor().isBotOwner())
                 && !message.getUserAuthor()
                 .map(usr -> message.getChannel()
                         .asServerTextChannel()
-                        .map(stc -> stc.hasAnyPermission(usr, perms))
+                        .map(stc -> stc.hasAnyPermission(usr, cmd.requiredDiscordPermissions))
                         .orElse(true))
                 .orElse(false))
-            problems.add("You are missing " + (perms.length == 2
-                    ? "the required permission: " + perms[1].name() + "!"
-                    : "one of the required permissions: " + Arrays.toString(perms)));
+            problems.add("You are missing " + (cmd.requiredDiscordPermissions.length == 1
+                    ? "the required permission: " + cmd.requiredDiscordPermissions[0].name() + "!"
+                    : "one of the required permissions: " + Arrays.toString(cmd.requiredDiscordPermissions)));
 
         int reqArgs = cmd.minimumArguments;
         if (commandParams.args.length < reqArgs) problems.add("This command requires at least "
