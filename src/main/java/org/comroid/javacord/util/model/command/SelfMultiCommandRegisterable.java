@@ -1,15 +1,15 @@
 package org.comroid.javacord.util.model.command;
 
-import java.util.Collection;
-
 import org.comroid.javacord.util.commands.CommandRepresentation;
 
+import java.util.Collection;
+
 public interface SelfMultiCommandRegisterable<Self extends SelfMultiCommandRegisterable> {
+    Collection<CommandRepresentation> getCommands();
+
     Self registerCommandTarget(Object target);
 
     Self unregisterCommandTarget(Object target);
-
-    Collection<CommandRepresentation> getCommands();
 
     // Extensions
     @SuppressWarnings("unchecked")

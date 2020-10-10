@@ -1,9 +1,9 @@
 package org.comroid.javacord.util.commands;
 
-import java.lang.reflect.Method;
-
 import org.javacord.api.entity.permission.PermissionType;
 import org.jetbrains.annotations.Nullable;
+
+import java.lang.reflect.Method;
 
 public final class CommandRepresentation {
     public final Method method;
@@ -24,10 +24,13 @@ public final class CommandRepresentation {
     public final boolean convertStringResultsToEmbed;
     public final boolean useTypingIndicator;
     public final boolean async;
-    public @Nullable final String groupName;
-    public @Nullable final String groupDescription;
+    public @Nullable
+    final String groupName;
+    public @Nullable
+    final String groupDescription;
     public final int groupOrdinal;
-    public @Nullable final Object invocationTarget;
+    public @Nullable
+    final Object invocationTarget;
 
     CommandRepresentation(
             Method method,

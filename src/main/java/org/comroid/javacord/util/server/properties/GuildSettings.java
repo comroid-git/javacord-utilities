@@ -1,5 +1,21 @@
 package org.comroid.javacord.util.server.properties;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import org.apache.logging.log4j.Logger;
+import org.comroid.javacord.util.commands.Command;
+import org.comroid.javacord.util.commands.CommandGroup;
+import org.comroid.javacord.util.ui.embed.DefaultEmbedFactory;
+import org.comroid.javacord.util.ui.messages.paging.PagedEmbed;
+import org.javacord.api.entity.channel.ServerTextChannel;
+import org.javacord.api.entity.message.embed.EmbedBuilder;
+import org.javacord.api.entity.permission.PermissionType;
+import org.javacord.api.entity.server.Server;
+import org.javacord.api.entity.user.User;
+import org.javacord.core.util.logging.LoggerUtil;
+
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -13,23 +29,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import org.comroid.javacord.util.commands.Command;
-import org.comroid.javacord.util.commands.CommandGroup;
-import org.comroid.javacord.util.ui.embed.DefaultEmbedFactory;
-import org.comroid.javacord.util.ui.messages.paging.PagedEmbed;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import org.apache.logging.log4j.Logger;
-import org.javacord.api.entity.channel.ServerTextChannel;
-import org.javacord.api.entity.message.embed.EmbedBuilder;
-import org.javacord.api.entity.permission.PermissionType;
-import org.javacord.api.entity.server.Server;
-import org.javacord.api.entity.user.User;
-import org.javacord.core.util.logging.LoggerUtil;
 
 public final class GuildSettings implements Closeable {
     public static final Logger logger = LoggerUtil.getLogger(GuildSettings.class);
@@ -55,6 +54,19 @@ public final class GuildSettings implements Closeable {
             final Property property = Property.from(this, propertyData);
 
             this.properties.put(property.getName(), property);
+        }
+    }
+
+    public static GuildSettings using(File file) throws IOException {
+        JsonNode data = file.exists() ? new ObjectMapper().readTree(file) : JsonNodeFactory.instance.arrayNode();
+
+        // if data is still null, set it to an empty array
+        if (data == null) data = JsonNodeFactory.instance.arrayNode();
+
+        try {
+            return new GuildSettings(file, data);
+        } catch (NoSuchMethodException | ClassNotFoundException e) {
+            throw new IOException("An exception occurred while deserializing", e);
         }
     }
 
@@ -195,18 +207,5 @@ public final class GuildSettings implements Closeable {
         properties.forEach((key, property) -> data.add(property.serialize()));
 
         return data;
-    }
-
-    public static GuildSettings using(File file) throws IOException {
-        JsonNode data = file.exists() ? new ObjectMapper().readTree(file) : JsonNodeFactory.instance.arrayNode();
-
-        // if data is still null, set it to an empty array
-        if (data == null) data = JsonNodeFactory.instance.arrayNode();
-
-        try {
-            return new GuildSettings(file, data);
-        } catch (NoSuchMethodException | ClassNotFoundException e) {
-            throw new IOException("An exception occurred while deserializing", e);
-        }
     }
 }

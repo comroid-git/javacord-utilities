@@ -1,13 +1,13 @@
 package org.comroid.javacord.util.model.container;
 
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.Nullable;
 
 public final class PrioritySupplier<T> implements Supplier<T> {
     private final List<Supplier<T>> suppliers = new ArrayList<>(1);

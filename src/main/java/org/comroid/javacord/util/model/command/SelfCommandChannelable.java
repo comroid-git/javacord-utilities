@@ -1,16 +1,15 @@
 package org.comroid.javacord.util.model.command;
 
+import org.comroid.javacord.util.server.properties.Property;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Optional;
 import java.util.function.Function;
 
-import org.comroid.javacord.util.server.properties.Property;
-
-import org.jetbrains.annotations.NotNull;
-
 public interface SelfCommandChannelable<Self extends SelfCommandChannelable> {
-    Self withCommandChannelProvider(@NotNull Function<Long, Long> commandChannelProvider);
-
     Optional<Function<Long, Long>> getCommandChannelProvider();
+
+    Self withCommandChannelProvider(@NotNull Function<Long, Long> commandChannelProvider);
 
     @SuppressWarnings({"ConstantConditions", "unchecked"})
     default Self removeCommandChannelProvider() {

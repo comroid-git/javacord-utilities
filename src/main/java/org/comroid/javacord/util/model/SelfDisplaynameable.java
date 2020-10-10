@@ -1,14 +1,14 @@
 package org.comroid.javacord.util.model;
 
-import java.util.Optional;
-
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Optional;
+
 public interface SelfDisplaynameable<Self extends SelfDisplaynameable> {
+    Optional<String> getDisplayName();
+
     @SuppressWarnings("NullableProblems")
     Self withDisplayName(@NotNull String name);
-
-    Optional<String> getDisplayName();
 
     @SuppressWarnings("ConstantConditions")
     default Self removeDisplayName() {

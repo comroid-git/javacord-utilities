@@ -1,18 +1,14 @@
 package org.comroid.javacord.util.ui.messages.paging;
 
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Supplier;
-
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.Messageable;
 import org.javacord.api.event.message.reaction.SingleReactionEvent;
+
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 public class PagedMessage {
     private final static ConcurrentHashMap<Messageable, PagedMessage> selfMap = new ConcurrentHashMap<>();
@@ -27,6 +23,23 @@ public class PagedMessage {
     private List<String> pages = new ArrayList<>();
     private int page;
 
+    private String getPageContent() {
+        return new StringBuilder()
+                .append(pages.get(page))
+                .append("\n\n")
+                .append("`Page ")
+                .append(page + 1)
+                .append(" of ")
+                .append(pages.size())
+                .append(" | ")
+                .append("Last Refresh: ")
+                .append(new SimpleDateFormat("HH:mm:ss").format(new Timestamp(System.currentTimeMillis())))
+                .append(" [")
+                .append(Calendar.getInstance().getTimeZone().getDisplayName())
+                .append("]`")
+                .toString();
+    }
+
     private PagedMessage(Messageable inParent, Supplier<String> head, Supplier<String> body) {
         this.parent = inParent;
         this.head = head;
@@ -35,6 +48,32 @@ public class PagedMessage {
         this.page = 0;
 
         resend();
+    }
+
+    public final static PagedMessage get(Messageable forParent, Supplier<String> defaultHead, Supplier<String> defaultBody) {
+        if (selfMap.containsKey(forParent)) {
+            PagedMessage val = selfMap.get(forParent);
+            val.resend();
+
+            return val;
+        } else {
+            return selfMap.put(forParent,
+                    new PagedMessage(
+                            forParent,
+                            defaultHead,
+                            defaultBody
+                    )
+            );
+        }
+    }
+
+    public final static Optional<PagedMessage> get(Messageable forParent) {
+        if (selfMap.containsKey(forParent)) {
+            PagedMessage val = selfMap.get(forParent);
+            val.resend();
+
+            return Optional.of(val);
+        } else return Optional.empty();
     }
 
     public void refresh() {
@@ -90,23 +129,6 @@ public class PagedMessage {
         }
     }
 
-    private String getPageContent() {
-        return new StringBuilder()
-                .append(pages.get(page))
-                .append("\n\n")
-                .append("`Page ")
-                .append(page + 1)
-                .append(" of ")
-                .append(pages.size())
-                .append(" | ")
-                .append("Last Refresh: ")
-                .append(new SimpleDateFormat("HH:mm:ss").format(new Timestamp(System.currentTimeMillis())))
-                .append(" [")
-                .append(Calendar.getInstance().getTimeZone().getDisplayName())
-                .append("]`")
-                .toString();
-    }
-
     private void refreshPages() {
         String completeHead = head.get();
         String completeBody = body.get();
@@ -131,31 +153,5 @@ public class PagedMessage {
                 }
             }
         }
-    }
-
-    public final static PagedMessage get(Messageable forParent, Supplier<String> defaultHead, Supplier<String> defaultBody) {
-        if (selfMap.containsKey(forParent)) {
-            PagedMessage val = selfMap.get(forParent);
-            val.resend();
-
-            return val;
-        } else {
-            return selfMap.put(forParent,
-                    new PagedMessage(
-                            forParent,
-                            defaultHead,
-                            defaultBody
-                    )
-            );
-        }
-    }
-
-    public final static Optional<PagedMessage> get(Messageable forParent) {
-        if (selfMap.containsKey(forParent)) {
-            PagedMessage val = selfMap.get(forParent);
-            val.resend();
-
-            return Optional.of(val);
-        } else return Optional.empty();
     }
 }

@@ -1,15 +1,6 @@
 package org.comroid.javacord.util.ui.messages.categorizing;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
-
 import org.comroid.javacord.util.ui.embed.DefaultEmbedFactory;
-
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.Messageable;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
@@ -19,6 +10,14 @@ import org.javacord.api.event.message.reaction.ReactionRemoveEvent;
 import org.javacord.api.event.message.reaction.SingleReactionEvent;
 import org.javacord.api.listener.message.reaction.ReactionAddListener;
 import org.javacord.api.listener.message.reaction.ReactionRemoveListener;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public class CategorizedEmbed {
     public static final String BACK_TO_MENU_EMOJI = "◀";
@@ -31,56 +30,8 @@ public class CategorizedEmbed {
 
     private int state;
 
-    public CategorizedEmbed(Messageable messageable) {
-        this(messageable, DefaultEmbedFactory.INSTANCE);
-    }
-
-    public CategorizedEmbed(Messageable messageable, Supplier<EmbedBuilder> baseEmbedSupplier) {
-        this.messageable = messageable;
-        this.baseEmbedSupplier = baseEmbedSupplier;
-
-        sentMessage = new AtomicReference<>();
-        categories = new ArrayList<>();
-        listener = new Listener();
-
-        state = -1;
-    }
-
-    public EmbedCategory addCategory(String categoryName, String categoryDescription) {
-        EmbedCategory category = new EmbedCategory(categoryName, categoryDescription);
-        categories.add(category);
-        return category;
-    }
-
     public List<EmbedCategory> getCategories() {
         return Collections.unmodifiableList(categories);
-    }
-
-    public boolean removeIf(Predicate<EmbedCategory> filter) {
-        return categories.removeIf(filter);
-    }
-
-    public CompletableFuture<Message> build() {
-        return messageable.sendMessage(getMenuEmbed())
-                .thenApply(msg -> {
-                    sentMessage.set(msg);
-                    msg.addMessageAttachableListener(listener);
-                    for (String reaction : getCategoryReactions()) msg.addReaction(reaction);
-                    return msg;
-                });
-    }
-
-    private EmbedBuilder getCategoryEmbed(int no) {
-        EmbedCategory category = categories.get(no);
-        EmbedBuilder embed = baseEmbedSupplier.get();
-
-        embed.setAuthor(category.getName())
-                .setDescription(category.getDescription())
-                .setFooter("Click the " + BACK_TO_MENU_EMOJI + " reaction to go back to the menu!");
-        for (EmbedField field : category.getFields())
-            embed.addField(field.getName(), field.getValue(), field.isInline());
-
-        return embed;
     }
 
     private EmbedBuilder getMenuEmbed() {
@@ -180,6 +131,54 @@ public class CategorizedEmbed {
         }
 
         return yield;
+    }
+
+    public CategorizedEmbed(Messageable messageable) {
+        this(messageable, DefaultEmbedFactory.INSTANCE);
+    }
+
+    public CategorizedEmbed(Messageable messageable, Supplier<EmbedBuilder> baseEmbedSupplier) {
+        this.messageable = messageable;
+        this.baseEmbedSupplier = baseEmbedSupplier;
+
+        sentMessage = new AtomicReference<>();
+        categories = new ArrayList<>();
+        listener = new Listener();
+
+        state = -1;
+    }
+
+    public EmbedCategory addCategory(String categoryName, String categoryDescription) {
+        EmbedCategory category = new EmbedCategory(categoryName, categoryDescription);
+        categories.add(category);
+        return category;
+    }
+
+    public boolean removeIf(Predicate<EmbedCategory> filter) {
+        return categories.removeIf(filter);
+    }
+
+    public CompletableFuture<Message> build() {
+        return messageable.sendMessage(getMenuEmbed())
+                .thenApply(msg -> {
+                    sentMessage.set(msg);
+                    msg.addMessageAttachableListener(listener);
+                    for (String reaction : getCategoryReactions()) msg.addReaction(reaction);
+                    return msg;
+                });
+    }
+
+    private EmbedBuilder getCategoryEmbed(int no) {
+        EmbedCategory category = categories.get(no);
+        EmbedBuilder embed = baseEmbedSupplier.get();
+
+        embed.setAuthor(category.getName())
+                .setDescription(category.getDescription())
+                .setFooter("Click the " + BACK_TO_MENU_EMOJI + " reaction to go back to the menu!");
+        for (EmbedField field : category.getFields())
+            embed.addField(field.getName(), field.getValue(), field.isInline());
+
+        return embed;
     }
 
     private class Listener implements ReactionAddListener, ReactionRemoveListener {

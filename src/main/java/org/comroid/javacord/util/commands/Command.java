@@ -1,33 +1,25 @@
 package org.comroid.javacord.util.commands;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.util.List;
-import java.util.Optional;
-
 import org.comroid.javacord.util.ui.embed.DefaultEmbedFactory;
-import org.comroid.javacord.util.ui.messages.InformationMessage;
-import org.comroid.javacord.util.ui.messages.RefreshableMessage;
-import org.comroid.javacord.util.ui.messages.paging.PagedEmbed;
-import org.comroid.javacord.util.ui.messages.paging.PagedMessage;
-import org.comroid.javacord.util.ui.reactions.InfoReaction;
-
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.channel.PrivateChannel;
 import org.javacord.api.entity.channel.ServerTextChannel;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageAuthor;
-import org.javacord.api.entity.message.MessageBuilder;
-import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.permission.PermissionType;
 import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.event.message.MessageEditEvent;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Marks a method as a command.
@@ -38,7 +30,7 @@ import org.javacord.api.event.message.MessageEditEvent;
  * Anything not listed here will be converted to a string using {@link String#valueOf(Object)}.
  * <p>
  * A command method can have different types of parameters, any of which will be set to their respective value:
- *
+ * <p>
  * Any type that is not listed here will receive {@code null} as a parameter.
  */
 @Retention(RetentionPolicy.RUNTIME)

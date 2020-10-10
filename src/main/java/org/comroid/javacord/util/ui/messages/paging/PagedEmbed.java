@@ -1,5 +1,13 @@
 package org.comroid.javacord.util.ui.messages.paging;
 
+import org.comroid.javacord.util.ui.embed.DefaultEmbedFactory;
+import org.comroid.javacord.util.ui.embed.EmbedFieldRepresentative;
+import org.javacord.api.entity.message.Message;
+import org.javacord.api.entity.message.Messageable;
+import org.javacord.api.entity.message.embed.EmbedBuilder;
+import org.javacord.api.event.message.reaction.SingleReactionEvent;
+import org.javacord.api.util.logging.ExceptionLogger;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -7,15 +15,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
-
-import org.comroid.javacord.util.ui.embed.DefaultEmbedFactory;
-import org.comroid.javacord.util.ui.embed.EmbedFieldRepresentative;
-
-import org.javacord.api.entity.message.Message;
-import org.javacord.api.entity.message.Messageable;
-import org.javacord.api.entity.message.embed.EmbedBuilder;
-import org.javacord.api.event.message.reaction.SingleReactionEvent;
-import org.javacord.api.util.logging.ExceptionLogger;
 
 public class PagedEmbed {
     private final Messageable messageable;
@@ -25,6 +24,14 @@ public class PagedEmbed {
     private List<Field> fields = new ArrayList<>();
     private int page;
     private AtomicReference<Message> sentMessage = new AtomicReference<>();
+
+    public EmbedBuilder getRawEmbed() {
+        return embedsupplier.get();
+    }
+
+    public Supplier<EmbedBuilder> getEmbedsupplier() {
+        return embedsupplier;
+    }
 
     /**
      * Creates a new PagedEmbed object.
@@ -51,7 +58,6 @@ public class PagedEmbed {
      *
      * @param title The title of the field.
      * @param text  The text of the field.
-     *
      * @return The new, modified PagedEmbed object.
      */
     public PagedEmbed addField(String title, String text) {
@@ -64,7 +70,6 @@ public class PagedEmbed {
      * @param title  The title of the field.
      * @param text   The text of the field.
      * @param inline If the field should be inline.
-     *
      * @return The new, modified PageEmbed object.
      */
     public PagedEmbed addField(String title, String text, boolean inline) {
@@ -113,14 +118,6 @@ public class PagedEmbed {
         }).exceptionally(ExceptionLogger.get());
 
         return future;
-    }
-
-    public EmbedBuilder getRawEmbed() {
-        return embedsupplier.get();
-    }
-
-    public Supplier<EmbedBuilder> getEmbedsupplier() {
-        return embedsupplier;
     }
 
     /**
@@ -207,14 +204,19 @@ public class PagedEmbed {
         });
     }
 
+    public static class Variables {
+        public static int FIELD_MAX_CHARS = 1024;
+        public static int MAX_CHARS_PER_PAGE = 4500;
+        public static int MAX_FIELDS_PER_PAGE = 8;
+        public static String PREV_PAGE_EMOJI = "⬅";
+        public static String NEXT_PAGE_EMOJI = "➡";
+
+    }
+
     /**
      * This subclass represents an embed field for the PagedEmbed.
      */
     class Field extends EmbedFieldRepresentative {
-        public Field(String title, String text, boolean inline) {
-            super(title, text, inline);
-        }
-
         /**
          * Returns the total characters of the field.
          *
@@ -223,14 +225,9 @@ public class PagedEmbed {
         int getTotalChars() {
             return name.length() + value.length();
         }
-    }
 
-    public static class Variables {
-        public static int FIELD_MAX_CHARS = 1024;
-        public static int MAX_CHARS_PER_PAGE = 4500;
-        public static int MAX_FIELDS_PER_PAGE = 8;
-        public static String PREV_PAGE_EMOJI = "⬅";
-        public static String NEXT_PAGE_EMOJI = "➡";
-
+        public Field(String title, String text, boolean inline) {
+            super(title, text, inline);
+        }
     }
 }

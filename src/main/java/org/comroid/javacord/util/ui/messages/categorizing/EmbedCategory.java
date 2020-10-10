@@ -1,17 +1,29 @@
 package org.comroid.javacord.util.ui.messages.categorizing;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.comroid.javacord.util.ui.embed.EmbedFieldRepresentative;
-
 import org.javacord.api.entity.Nameable;
 import org.javacord.api.entity.message.embed.EmbedField;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class EmbedCategory implements Nameable {
     private final String name;
     private final String description;
     private final List<EmbedField> fields;
+
+    public List<EmbedField> getFields() {
+        return fields;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
 
     public EmbedCategory(String name, String description) {
         this.name = name;
@@ -27,18 +39,5 @@ public class EmbedCategory implements Nameable {
     public EmbedCategory addField(String name, String value, boolean inline) {
         fields.add(new EmbedFieldRepresentative(name, value, inline));
         return this;
-    }
-
-    public List<EmbedField> getFields() {
-        return fields;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    public String getDescription() {
-        return description;
     }
 }

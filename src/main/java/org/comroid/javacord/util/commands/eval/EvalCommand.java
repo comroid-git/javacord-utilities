@@ -5,7 +5,6 @@ import org.comroid.javacord.util.commands.CommandGroup;
 import org.comroid.javacord.util.commands.eval.model.BindingFactory;
 import org.comroid.javacord.util.commands.eval.model.EvalFactory;
 import org.comroid.javacord.util.commands.eval.model.EvalViewer;
-
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.server.Server;

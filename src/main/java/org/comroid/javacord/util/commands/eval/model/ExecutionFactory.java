@@ -138,18 +138,18 @@ public class ExecutionFactory {
         private String originalCode;
         private boolean verbose;
 
-        public Execution(StringBuilder code, String originalCode, boolean verbose) {
-            this.code = code;
-            this.originalCode = originalCode;
-            this.verbose = verbose;
-        }
-
         public boolean isVerbose() {
             return this.verbose;
         }
 
         public String getOriginalCode() {
             return originalCode;
+        }
+
+        public Execution(StringBuilder code, String originalCode, boolean verbose) {
+            this.code = code;
+            this.originalCode = originalCode;
+            this.verbose = verbose;
         }
 
         @Override

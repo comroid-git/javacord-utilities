@@ -1,15 +1,28 @@
 package org.comroid.javacord.util.model.container;
 
-import java.util.Objects;
-
 import org.comroid.javacord.util.server.properties.Property;
-
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 @SuppressWarnings("ConstantConditions")
 public class ValueContainer implements ContainerAccessor {
     private final String fallbackString;
     private Object value;
+
+    @Override
+    public boolean isNull() {
+        return getRaw() == null;
+    }
+
+    @Override
+    public Object getRaw() {
+        return value;
+    }
+
+    public void setRaw(Object raw) {
+        this.value = raw;
+    }
 
     public ValueContainer(String fallbackString) {
         this(fallbackString, null);
@@ -30,16 +43,6 @@ public class ValueContainer implements ContainerAccessor {
     @Override
     public String toString() {
         return String.format("ValueContainer[%s]", value);
-    }
-
-    @Override
-    public boolean isNull() {
-        return getRaw() == null;
-    }
-
-    @Override
-    public Object getRaw() {
-        return value;
     }
 
     @Override
@@ -104,9 +107,5 @@ public class ValueContainer implements ContainerAccessor {
                 .butRather(fallback.length == 0 ? null : String.join("", fallback))
                 .butRather(this::stringValue)
                 .get(str -> str.matches(Property.DEFAULT_PATTERNS.get(Double.class)), false));
-    }
-
-    public void setRaw(Object raw) {
-        this.value = raw;
     }
 }

@@ -1,18 +1,13 @@
 package org.comroid.javacord.util;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Stream;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 public class CommonUtil {
     /**
@@ -25,7 +20,6 @@ public class CommonUtil {
      * @param criteriaExtractor A function to modify each entry of the list to fit the search criteria.
      * @param <A>               The type of the items in the list.
      * @param <B>               The type of the criteria to search for.
-     *
      * @return An Optional that may contain the found item.
      */
     public static <A, B> Optional<A> findComplex(List<A> list, B criteria, Function<A, B> criteriaExtractor) {
@@ -45,7 +39,6 @@ public class CommonUtil {
      * @param every How many items to contain in each sublist.
      * @param of    The source list.
      * @param <T>   The type of the lists.
-     *
      * @return A list of lists which contain the wanted subsets based on {@code every}.
      */
     public static <T> List<List<T>> everyOfList(int every, List<T> of) {

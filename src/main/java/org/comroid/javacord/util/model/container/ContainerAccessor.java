@@ -2,7 +2,8 @@ package org.comroid.javacord.util.model.container;
 
 import org.jetbrains.annotations.NotNull;
 
-@SuppressWarnings("ConstantConditions") public
+@SuppressWarnings("ConstantConditions")
+public
 interface ContainerAccessor {
     boolean isNull();
 

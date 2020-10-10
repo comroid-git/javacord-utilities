@@ -1,5 +1,15 @@
 package org.comroid.javacord.util.server.properties;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.comroid.javacord.util.model.container.ContainerAccessor;
+import org.comroid.javacord.util.model.container.ValueContainer;
+import org.intellij.lang.annotations.Language;
+import org.javacord.api.entity.Nameable;
+import org.javacord.api.entity.server.Server;
+import org.jetbrains.annotations.Nullable;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -14,19 +24,9 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
-import org.comroid.javacord.util.model.container.ContainerAccessor;
-import org.comroid.javacord.util.model.container.ValueContainer;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.intellij.lang.annotations.Language;
-import org.javacord.api.entity.Nameable;
-import org.javacord.api.entity.server.Server;
-import org.jetbrains.annotations.Nullable;
-
 public final class Property implements Nameable {
-    public static final @Language("RegExp") String ANY_STRING = "(?s).*";
+    public static final @Language("RegExp")
+    String ANY_STRING = "(?s).*";
     public static final Map<Class<?>, String> DEFAULT_PATTERNS = new ConcurrentHashMap<Class<?>, String>() {{
         put(String.class, ANY_STRING);
         put(Integer.class, "\\d+");
@@ -45,25 +45,12 @@ public final class Property implements Nameable {
     private final PropertySerializer propertySerializer;
     private @Nullable String description;
 
-    Property(GuildSettings parent, String name, Class<?> type, Pattern pattern, ValueContainer defaultValue, PropertySerializer propertySerializer) {
-        this.parent = parent;
-        this.name = name;
-        this.type = type;
-        this.pattern = pattern;
-        this.defaultValue = defaultValue;
-        this.propertySerializer = propertySerializer;
-    }
-
     public Optional<String> getDescription() {
         return Optional.ofNullable(description);
     }
 
     public void setDescription(@Nullable String description) {
         this.description = description;
-    }
-
-    public <T> Function<Long, T> function(Class<T> targetType) {
-        return serverId -> targetType.cast(getValue(serverId).getRaw());
     }
 
     @Override
@@ -81,6 +68,47 @@ public final class Property implements Nameable {
 
     public ContainerAccessor getDefaultValue() {
         return defaultValue;
+    }
+
+    Property(GuildSettings parent, String name, Class<?> type, Pattern pattern, ValueContainer defaultValue, PropertySerializer propertySerializer) {
+        this.parent = parent;
+        this.name = name;
+        this.type = type;
+        this.pattern = pattern;
+        this.defaultValue = defaultValue;
+        this.propertySerializer = propertySerializer;
+    }
+
+    static Property from(GuildSettings parent, JsonNode data) throws ClassNotFoundException, NoSuchMethodException {
+        final String name = data.get("name").asText();
+        final Class<?> type = Class.forName(data.get("type").asText());
+        final Pattern pattern = Pattern.compile(data.get("pattern").asText());
+        final PropertySerializer propertySerializer = new PropertySerializer(data.get("serialization"));
+        final String defaultStringValue = data.get("defaultValue").asText();
+        final ValueContainer defaultValue = propertySerializer.containerDeserializer.apply(defaultStringValue, defaultStringValue);
+
+        final Property property = new Property(parent, name, type, pattern, defaultValue, propertySerializer);
+        propertySerializer.parent = property;
+
+        Optional.ofNullable(data.path("description").asText(null)).ifPresent(property::setDescription);
+
+        if (data.has("values")) {
+            final JsonNode values = data.get("values");
+            final Iterator<String> serverIds = values.fieldNames();
+
+            serverIds.forEachRemaining(id -> {
+                final String stringValue = values.get(id).asText();
+                final ValueContainer container = propertySerializer.containerDeserializer.apply(defaultStringValue, stringValue);
+
+                property.values.put(Long.parseLong(id), container);
+            });
+        }
+
+        return property;
+    }
+
+    public <T> Function<Long, T> function(Class<T> targetType) {
+        return serverId -> targetType.cast(getValue(serverId).getRaw());
     }
 
     public ContainerAccessor getValue(Server server) {
@@ -121,40 +149,14 @@ public final class Property implements Nameable {
         return propertySerializer.serialize();
     }
 
-    static Property from(GuildSettings parent, JsonNode data) throws ClassNotFoundException, NoSuchMethodException {
-        final String name = data.get("name").asText();
-        final Class<?> type = Class.forName(data.get("type").asText());
-        final Pattern pattern = Pattern.compile(data.get("pattern").asText());
-        final PropertySerializer propertySerializer = new PropertySerializer(data.get("serialization"));
-        final String defaultStringValue = data.get("defaultValue").asText();
-        final ValueContainer defaultValue = propertySerializer.containerDeserializer.apply(defaultStringValue, defaultStringValue);
-
-        final Property property = new Property(parent, name, type, pattern, defaultValue, propertySerializer);
-        propertySerializer.parent = property;
-
-        Optional.ofNullable(data.path("description").asText(null)).ifPresent(property::setDescription);
-
-        if (data.has("values")) {
-            final JsonNode values = data.get("values");
-            final Iterator<String> serverIds = values.fieldNames();
-
-            serverIds.forEachRemaining(id -> {
-                final String stringValue = values.get(id).asText();
-                final ValueContainer container = propertySerializer.containerDeserializer.apply(defaultStringValue, stringValue);
-
-                property.values.put(Long.parseLong(id), container);
-            });
-        }
-
-        return property;
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface Serializer {
     }
 
     @Target(ElementType.METHOD)
-    @Retention(RetentionPolicy.RUNTIME) @interface Serializer {
-    }
-
-    @Target(ElementType.METHOD)
-    @Retention(RetentionPolicy.RUNTIME) @interface Deserializer {
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface Deserializer {
     }
 
     private static class PropertySerializer {
@@ -214,24 +216,6 @@ public final class Property implements Nameable {
             }
         }
 
-        @SuppressWarnings("deprecation")
-        public final JsonNode serialize() {
-            final ObjectNode data = JsonNodeFactory.instance.objectNode();
-
-            data.put("name", parent.name);
-            parent.getDescription().ifPresent(str -> data.put("description", str));
-            data.put("type", parent.type.getName());
-            data.put("pattern", parent.pattern.pattern());
-
-            data.put("serialization", serializerData(parent.type));
-            data.put("defaultValue", containerSerializer.apply(parent.defaultValue));
-
-            final ObjectNode values = data.putObject("values");
-            parent.values.forEach((serverId, container) -> values.put(String.valueOf(serverId), containerSerializer.apply(container)));
-
-            return data;
-        }
-
         public static PropertySerializer ofNative(Class<?> type) {
             class Local {
                 private final Class<?> klass = type;
@@ -281,6 +265,24 @@ public final class Property implements Nameable {
                     && String.class.isAssignableFrom(parameterTypes[0])
                     && Object.class.isAssignableFrom(parameterTypes[1]);
         }
+
+        @SuppressWarnings("deprecation")
+        public final JsonNode serialize() {
+            final ObjectNode data = JsonNodeFactory.instance.objectNode();
+
+            data.put("name", parent.name);
+            parent.getDescription().ifPresent(str -> data.put("description", str));
+            data.put("type", parent.type.getName());
+            data.put("pattern", parent.pattern.pattern());
+
+            data.put("serialization", serializerData(parent.type));
+            data.put("defaultValue", containerSerializer.apply(parent.defaultValue));
+
+            final ObjectNode values = data.putObject("values");
+            parent.values.forEach((serverId, container) -> values.put(String.valueOf(serverId), containerSerializer.apply(container)));
+
+            return data;
+        }
     }
 
     public static class Builder {
@@ -290,10 +292,6 @@ public final class Property implements Nameable {
         private Class<?> type;
         private String pattern;
         private ValueContainer defaultValue;
-
-        Builder(GuildSettings parent) {
-            this.parent = parent;
-        }
 
         public String getDescription() {
             return description;
@@ -343,6 +341,10 @@ public final class Property implements Nameable {
             this.defaultValue = new ValueContainer(defaultValue, defaultValue);
 
             return this;
+        }
+
+        Builder(GuildSettings parent) {
+            this.parent = parent;
         }
 
         Property build() throws NoSuchMethodException, ClassNotFoundException {

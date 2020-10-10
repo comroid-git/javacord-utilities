@@ -1,18 +1,17 @@
 package org.comroid.javacord.util.ui.messages;
 
-import java.util.ArrayList;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReference;
-
 import org.comroid.javacord.util.CommonUtil;
 import org.comroid.javacord.util.ui.embed.EmbedFieldRepresentative;
-
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.Messageable;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.util.logging.ExceptionLogger;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 @SuppressWarnings("WeakerAccess")
 public class InformationMessage {
@@ -26,6 +25,11 @@ public class InformationMessage {
         this.messageable = messageable;
 
         selfMap.putIfAbsent(messageable, this);
+    }
+
+    @SuppressWarnings("FinalStaticMethod")
+    public final static InformationMessage get(Messageable messageable) {
+        return selfMap.getOrDefault(messageable, new InformationMessage(messageable));
     }
 
     public InformationMessage addField(String name, String title, String text) {
@@ -111,18 +115,8 @@ public class InformationMessage {
         }
     }
 
-    @SuppressWarnings("FinalStaticMethod")
-    public final static InformationMessage get(Messageable messageable) {
-        return selfMap.getOrDefault(messageable, new InformationMessage(messageable));
-    }
-
     class InformationField extends EmbedFieldRepresentative {
         private String descr;
-
-        InformationField(String descr, String name, String value, boolean inline) {
-            super(name, value, inline);
-            this.descr = descr;
-        }
 
         void setName(String name) {
             super.name = name;
@@ -134,6 +128,11 @@ public class InformationMessage {
 
         void setInline(boolean inline) {
             super.inline = inline;
+        }
+
+        InformationField(String descr, String name, String value, boolean inline) {
+            super(name, value, inline);
+            this.descr = descr;
         }
     }
 }
